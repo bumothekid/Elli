@@ -1,50 +1,95 @@
 import nextcord
 from nextcord.ext import commands
+from json import load, dump
 from requests import get
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
-class welcome(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+class Welcome(commands.Cog):
+    def __init__(self, client):
+        self.client = client
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        
-        embed = nextcord.Embed(
-            description=f"{member} rara",
-            colour=nextcord.Colour.dark_blue())
+        with open("data/welcome.json", encoding="utf-8") as f:
+            welcome_data = load(f)
 
-        await self.bot.get_channel(957421116262072370).send(embed=embed)
+        if welcome_data.get(str(member.guild.id)):
+            welcome = Image.open("assets/welcome/default.jpg")
+            avatar = Image.open(BytesIO(get(member.avatar.url).content)).resize((275, 275))
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.content.startswith("ddd"):
-
-            # gettet das welcome-image und den user-avatar
-            welcome = Image.open("assets/welcome/welcome.jpg")
-            avatar = Image.open(BytesIO(get(message.author.avatar.url).content)).resize((75, 75))
-
-            # bringt den user-avatar in die runde form
             mask = Image.new("L", avatar.size)
-            ImageDraw.Draw(mask).ellipse((0, 0, 75, 75), fill=255)
+            ImageDraw.Draw(mask).ellipse((0, 0, 275, 275), fill=255)
 
-            # packt text auf das welcome-image
-            ImageDraw.Draw(welcome).text((20, 20), f"WASSER!\n{message.author.name}",
-            font=ImageFont.truetype("Arial.ttf", size=25), align="center" , stroke_width=4, stroke_fill="black")
+            ImageDraw.Draw(welcome).text((40, 80), f"Willkommen\n{member.name}",
+                                         font=ImageFont.truetype("arial.ttf", size=100),
+                                         align="center", stroke_width=4, stroke_fill="black")
 
-            # klatscht den avatar drauf und speichert das ganze
-            welcome.paste(avatar, (160, 10), mask)
-            welcome.save("assets/welcome/welcome_done.jpg")
+            welcome.paste(avatar, (660, 60), mask)
+            welcome.save("assets/welcome/done.jpg")
 
             embed = nextcord.Embed(
-                title=f"{message.author} IST WASSER!",
-                colour=nextcord.Colour.dark_blue())
+                title=":dizzy: Ein neues Mitglied erscheint!",
+                color=0x6850be)
 
-            embed.set_image(url="attachment://welcome_done.jpg")
+            embed.set_footer(text=f"{member} | {member.id}")
+            embed.set_image(url="attachment://done.jpg")
 
-            await self.bot.get_channel(957421116262072370).send(embed=embed, 
-            file=nextcord.File("assets/welcome/welcome_done.jpg"))
+            channel = self.client.get_channel(welcome_data[str(member.guild.id)]["channel_id"])
+            await channel.send(embed=embed, file=nextcord.File("assets/welcome/done.jpg"))
 
-def setup(bot):
-    bot.add_cog(welcome(bot))
+    @commands.command(aliases=["welcomeset"])
+    @commands.has_guild_permissions(administrator=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def setwelcome(self, ctx, channel: nextcord.abc.GuildChannel):
+        with open("data/welcome.json", encoding="utf-8") as f:
+            welcome_data = load(f)
+
+        if not welcome_data.get(str(ctx.guild.id)):
+            welcome_data[str(ctx.guild.id)] = {}
+            welcome_data[str(ctx.guild.id)]["channel_id"] = channel.id
+
+            with open("data/welcome.json", "w") as f:
+                dump(welcome_data, f, indent=4)
+
+            embed = nextcord.Embed(
+                description=f"Der Willkommenskanal wurde erfolgreich in {channel.mention} gesetzt!",
+                color=nextcord.Color.dark_green())
+
+            await ctx.reply(embed=embed, mention_author=False)
+
+        else:
+            embed = nextcord.Embed(
+                description="Bitte entferne erst den aktuellen Willkommenskanal!",
+                color=nextcord.Color.red())
+
+            await ctx.reply(embed=embed, mention_author=False)
+
+    @commands.command(aliases=["welcomeremove"])
+    @commands.has_guild_permissions(administrator=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def removewelcome(self, ctx):
+        with open("data/welcome.json", encoding="utf-8") as f:
+            welcome_data = load(f)
+
+        if welcome_data.get(str(ctx.guild.id)):
+            del welcome_data[str(ctx.guild.id)]
+
+            with open("data/welcome.json", "w") as f:
+                dump(welcome_data, f, indent=4)
+
+            embed = nextcord.Embed(
+                description=f"Der Willkommenskanal wurde erfolgreich zurückgesetzt!",
+                color=nextcord.Color.dark_green())
+
+            await ctx.reply(embed=embed, mention_author=False)
+
+        else:
+            embed = nextcord.Embed(
+                description="Momentan ist kein Willkommenskanal gesetzt!",
+                color=nextcord.Color.red())
+
+            await ctx.reply(embed=embed, mention_author=False)
+
+def setup(client):
+    client.add_cog(Welcome(client))
