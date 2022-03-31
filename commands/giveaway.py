@@ -15,7 +15,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     async def _giveaway(self, ctx):
         embed = nextcord.Embed(
-            description="**🎉 Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <messageid> <winner>`\n> `!giveaway end <#channel> <messageid>`",
+            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -59,13 +59,11 @@ class giveaways(Cog):
 
                 match i:
                     case 0:
+                        await userAnwser.delete()
                         try:
                             channelid = re.findall(r"[0-9]+", userAnwser.content)[0]
-                            await userAnwser.delete()
                             anwser = self.bot.get_channel(int(channelid))
                         except:
-                            await userAnwser.delete()
-
                             embed = nextcord.Embed(
                                 description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
                                 color=nextcord.Color.blurple()
@@ -74,6 +72,7 @@ class giveaways(Cog):
                             await message.edit(embed=embed)
                             continue
                     case 1:
+                        await userAnwser.delete() 
                         timeRegex = re.compile(r'(?:(\d{1,5})(h|s|m|d))+?')
                         timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
@@ -83,8 +82,6 @@ class giveaways(Cog):
                         anwser = 0
 
                         if not matches:
-                            await userAnwser.delete()
-
                             embed = nextcord.Embed(
                                 description=question + f"\n\n> Ungültige Zeitangabe", #\n> **Zeitangaben beispiel:** `1d 5h 20m`",
                                 color=nextcord.Color.blurple()
@@ -95,9 +92,7 @@ class giveaways(Cog):
                         for key, value in matches:
                             try:
                                 anwser += timeDict[value] * float(key)
-                                await userAnwser.delete()
                             except KeyError:
-                                await userAnwser.delete()
                                 embed = nextcord.Embed(
                                     description=question + f"\n\n> `{value} ist ein ungültiger Zeitschlüssel`\n> `< s | m | h | d> sind gültige Zeitschlüssel`",
                                     color=nextcord.Color.blurple()
@@ -106,8 +101,6 @@ class giveaways(Cog):
                                 await message.edit(embed=embed)
                                 continue
                             except ValueError:
-                                await userAnwser.delete()
-
                                 embed = nextcord.Embed(
                                     description=question + f"\n\n> `{key} ist keine ganze Zahl`",
                                     color=nextcord.Color.blurple()
@@ -118,17 +111,16 @@ class giveaways(Cog):
                         
                         anwser = round(anwser)
                     case 2:
-                        if userAnwser.content == '':
-                            await userAnwser.delete()
+                        await userAnwser.delete()
 
+                        if userAnwser.content == '':
                             anwser = "Nichts!"
                         else:
-                            await userAnwser.delete()
                             anwser = userAnwser.content
                     case 3:
-                        if not userAnwser.content.isdigit():
-                            await userAnwser.delete()
+                        await userAnwser.delete()
 
+                        if not userAnwser.content.isdigit():
                             embed = nextcord.Embed(
                                 description=question + f"\n\n> Die anzahl an gewinnern muss eine ganze Zahl sein",
                                 color=nextcord.Color.blurple()
@@ -147,7 +139,7 @@ class giveaways(Cog):
         unix = int(mktime((now + timedelta(seconds=anwsers[1])).timetuple()))
         embed = nextcord.Embed(
             title=anwsers[2],
-            description=f"Reagiere mit `🎉` um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            description=f"Reagiere mit <a:giveaway:958492679749140510> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=anwsers[1])
         )
@@ -155,28 +147,37 @@ class giveaways(Cog):
 
         message = await anwsers[0].send(embed=embed)
 
-        await message.add_reaction("🎉")
-
-        embed = nextcord.Embed(
-            description=f"**🎉 Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
-
         db = sqlite3.connect("database.db")
         c = db.cursor()
         c.execute("INSERT INTO giveaways(guild_id, channel_id, message_id, start, duration, prize, winner, hoster_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", [ctx.guild.id, anwsers[0].id, message.id, time_(), anwsers[1], anwsers[2], anwsers[3], ctx.author.id])
         db.commit()
-        
-    @_giveaway.command(name="quick", aliases=["quick-start"])
-    @commands.has_permissions(manage_guild=True)
-    async def _quick(self, ctx, channel: nextcord.TextChannel, winner: int, *, time: str):
+        c.close()
+        db.close()
+
+        emote = self.bot.get_emoji(958492679749140510)
+
+        await message.add_reaction(emote)
+
         embed = nextcord.Embed(
-            description=f"**🎉 Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Gewinner:** {winner}\n> **Bis:** {time}",
+            description=f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>",
             color=nextcord.Color.dark_green()
         )
+
         await ctx.reply(embed=embed)
+        
+    # @_giveaway.command(name="quick", aliases=["quick-start"])
+    # @commands.has_permissions(manage_guild=True)
+    # async def _quick(self, ctx, channel: nextcord.TextChannel, winner: int, *, time: str):
+    #     embed = nextcord.Embed(
+    #         description=f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Gewinner:** {winner}\n> **Bis:** {time}",
+    #         color=nextcord.Color.dark_green()
+    #     )
+    #     await ctx.reply(embed=embed)
+
+    @_giveaway.command(name="drop")
+    @commands.has_permissions(manage_guild=True)
+    async def _drop(self, ctx, channel: nextcord.TextChannel, *, prize):
+        print("abc")
 
     @Cog.listener()
     async def on_ready(self):
@@ -184,15 +185,19 @@ class giveaways(Cog):
         c = db.cursor()
         for i in self.bot.guilds:
             c.execute(f"SELECT message_id FROM giveaways WHERE guild_id='{i.id}'")
-            running = c.fetchone()
-            if running is not None:
-                await self.giveawayTimer(guild_id=i.id, message_id=running[0])
+
+            if running := c.fetchall():
+                db.close()
+                for giveaway in running:
+                    await self.giveawayTimer(guild_id=i.id, message_id=giveaway[0])
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.emoji == "🎉":
+        emote = self.bot.get_emoji(958492679749140510)
+        if payload.emoji == emote:
             guild = self.bot.get_guild(payload.guild_id)
             if payload.member == guild.me:
+                await asyncio.sleep(5)
                 db = sqlite3.connect("database.db")
                 c = db.cursor()
                 c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{payload.guild_id}' AND message_id = '{payload.message_id}'")
@@ -200,18 +205,43 @@ class giveaways(Cog):
                 if exists is not None:
                     await self.giveawayTimer(guild_id=payload.guild_id, message_id=payload.message_id)
 
+    @Cog.listener()
+    async def on_message_delete(self, message):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id='{message.guild.id}' AND message_id = '{message.id}'")
+        exists = c.fetchone()
+
+        if exists is not None:
+            c.execute(f"DELETE FROM giveaways WHERE guild_id='{message.guild.id}' AND message_id='{message.id}'")
+            db.commit()
+
+    @Cog.listener()
+    async def on_guild_remove(self, guild):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT message_id FROM giveaways WHERE guild_id='{guild.id}'")
+        
+        if giveaways := c.fetchall():
+            for giveaway in giveaways:
+                c.execute(f"DELETE FROM giveaways WHERE guild_id='{guild.id}' AND message_id = '{giveaway[0]}'")
+            db.commit()
+
     async def giveawayTimer(self, guild_id, message_id):
         db = sqlite3.connect("database.db")
         c = db.cursor()
 
         while True:
+            print("b")
             now = time_()
             c.execute(f"SELECT start, duration FROM giveaways WHERE guild_id='{guild_id}' AND message_id='{message_id}'")
             time = c.fetchone()
+            if time is None:
+                return
             if round(now - time[0]) >= time[1]:
                 break
-            await asyncio.sleep(60)
-        
+            await asyncio.sleep(30)
+
         c.execute(f"SELECT channel_id, winner, hoster_id, prize, start, duration FROM giveaways WHERE guild_id='{guild_id}' AND message_id='{message_id}'")
         giveaway = c.fetchone()
 
@@ -232,13 +262,16 @@ class giveaways(Cog):
             if host in entries:
                 entries.pop(entries.index(host))
 
+            backupEntries = entries.copy()
+
             for _ in range(winner_amount):
                 if not entries:
                     break
                 winner = random.choice(entries)
-                winner_list.append(winner)
+                winner_list.append(winner.mention)
 
                 entries.pop(entries.index(winner))
+
             if not winner_list:
                 embed = nextcord.Embed(
                     title=giveaway[3],
@@ -254,27 +287,28 @@ class giveaways(Cog):
                     description="Es konnte kein Gewinner entschieden werden",
                     color=nextcord.Color.dark_red()
                 )
-            else:
-                winners = ', '.join(winner_list)
-
-                embed = nextcord.Embed(
-                    title=giveaway[3],
-                    description=f"Gewinner: {winners}\n\n> Endete: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {host.mention}",
-                    color=host.color,
-                    timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
-                )
-                embed.set_footer(text=f"{giveaway[1]} Gewinner | Endete")
-
-                await message.edit(embed=embed)
+                return await channel.send(embed=embed)
                 
-                if len(winner_list) > 1:
-                    string = f"Herzlichen Glückwunsch, {winners} haben {giveaway[3]} gewonnen\n> `{len(entries)}` gültige Teilnehmer"
-                else:
-                    string = f"Herzlichen Glückwunsch, {winners} hat {giveaway[3]} gewonnen\n> `{len(entries)}` gültige Teilnehmer"
-                embed = nextcord.Embed(
-                    description=string,
-                    color=host.color
-                )
+            winners = ', '.join(winner_list)
+
+            embed = nextcord.Embed(
+                title=giveaway[3],
+                description=f"Gewinner: {winners}\n\n> Endete: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {host.mention}",
+                color=host.color,
+                timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
+            )
+            embed.set_footer(text=f"{giveaway[1]} Gewinner | Endete")
+
+            await message.edit(embed=embed)
+            
+            if len(winner_list) > 1:
+                string = f"Herzlichen Glückwunsch, {winners} haben {giveaway[3]} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+            else:
+                string = f"Herzlichen Glückwunsch, {winners} hat {giveaway[3]} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+            embed = nextcord.Embed(
+                description=string,
+                color=host.color
+            )
             await channel.send(embed=embed)
 
             c.execute(f"DELETE FROM giveaways WHERE guild_id='{guild_id}' AND message_id='{message_id}'")
