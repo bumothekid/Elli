@@ -164,6 +164,35 @@ class giveaways(Cog):
         )
 
         await ctx.reply(embed=embed)
+
+    @_giveaway.command(name="end", aliases=["stop"])
+    @commands.has_permissions(manage_guild=True)
+    async def _end(self, ctx, message: nextcord.Message):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}'")
+        giveaway = c.fetchone()
+
+        if giveaway is None:
+            embed = nextcord.Embed(
+                description="Es wurde kein aktives Gewinnspiel mit dieser nachrichten ID gefunden",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        embed = nextcord.Embed(
+            description="**<a:giveaway:958492679749140510> Das Giveaway wird in kürze beendet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>",
+        )
+
+        await ctx.reply(embed=embed)
+        
+        c.execute(f"UPDATE giveaways SET duration = '0' WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}'")
+        db.commit()
+
+    # @_giveaway.command(name="reroll")
+    # @commands.has_permissions(manage_guild=True)
+    # async def _rerroll(self, ctx, message: nextcord.Message):
         
     # @_giveaway.command(name="quick", aliases=["quick-start"])
     # @commands.has_permissions(manage_guild=True)
@@ -184,7 +213,7 @@ class giveaways(Cog):
         db = sqlite3.connect("database.db")
         c = db.cursor()
         for i in self.bot.guilds:
-            c.execute(f"SELECT message_id FROM giveaways WHERE guild_id='{i.id}'")
+            c.execute(f"SELECT message_id, channel_id FROM giveaways WHERE guild_id='{i.id}'")
 
             if running := c.fetchall():
                 db.close()
@@ -232,7 +261,6 @@ class giveaways(Cog):
         c = db.cursor()
 
         while True:
-            print("b")
             now = time_()
             c.execute(f"SELECT start, duration FROM giveaways WHERE guild_id='{guild_id}' AND message_id='{message_id}'")
             time = c.fetchone()
