@@ -22,7 +22,7 @@ class reactionrole(Cog):
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
-    async def _create(self, ctx, channel: nextcord.TextChannel, message: int, reaction: str, role: nextcord.Role):
+    async def _create(self, ctx, channel: nextcord.TextChannel, message, reaction: str, role: nextcord.Role):
         db = sqlite3.connect("database.db")
         c = db.cursor()
         c.execute(f"SELECT * FROM reactionroles WHERE guild_id = '{ctx.guild.id}' AND message_id = '{ctx.message.id}' AND reaction = '{reaction}'")
@@ -35,10 +35,18 @@ class reactionrole(Cog):
             if emote is None:
                 raise commands.EmojiNotFound(argument=reaction)
 
-            message = await self.bot.get_channel(channel.id).fetch_message(message)
+            try:
+                message = await self.bot.get_channel(channel.id).fetch_message(message)
+            except:
+                raise commands.MessageNotFound(argument=message)
+
             await message.add_reaction(emote)
         else:
-            message = await self.bot.get_channel(channel.id).fetch_message(message)
+            try:
+                message = await self.bot.get_channel(channel.id).fetch_message(message)
+            except:
+                raise commands.MessageNotFound(argument=message)
+
             try:
                 await message.add_reaction(reaction)
             except:
@@ -65,7 +73,7 @@ class reactionrole(Cog):
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
-    async def _delete(self, ctx, channel: nextcord.TextChannel, message: int, reaction: str):
+    async def _delete(self, ctx, channel: nextcord.TextChannel, message, reaction: str):
         db = sqlite3.connect("database.db")
         c = db.cursor()
         c.execute(f"SELECT * FROM reactionroles WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message}' AND reaction = '{reaction}'")
@@ -78,8 +86,12 @@ class reactionrole(Cog):
             )
 
             return await ctx.reply(embed=embed)
-
-        message = await self.bot.get_channel(channel.id).fetch_message(message)
+        
+        try:
+            message = await self.bot.get_channel(channel.id).fetch_message(message)
+        except:
+            raise commands.MessageNotFound(argument=message)
+            
         role = ctx.guild.get_role(int(exists[4]))
 
         if "<:" in reaction:
