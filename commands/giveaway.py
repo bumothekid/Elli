@@ -288,13 +288,18 @@ class giveaways(Cog):
 
         if not giveaways:
             embed = nextcord.Embed(
-                description="Es wurden keine Giveaways gefunden",
+                description="Es wurden keine aktiven Giveaways gefunden",
                 color=nextcord.Color.dark_red()
             )
 
             return await ctx.reply(embed=embed)
 
-        all_list = ""
+        # all_list = ""
+        embed = nextcord.Embed(
+            description="**<a:giveaway:958492679749140510> Aktive Giveaways**",
+            color=nextcord.Color.blurple()
+        )
+
         for giveaway in giveaways:
             giveaway_channel_link = f"[`📎`Link](https://discord.com/channels/{ctx.guild.id}/{giveaway[1]}/)"
             giveaway_message_link = f"[`📎`Link](https://discord.com/channels/{ctx.guild.id}/{giveaway[1]}/{giveaway[2]}/)"
@@ -305,12 +310,14 @@ class giveaways(Cog):
             start = datetime.fromtimestamp(giveaway[3])
             unix = int(mktime((start + timedelta(seconds=giveaway[4])).timetuple()))
 
-            all_list += f"__**{giveaway_price}**__\nChannel: {giveaway_channel_link}\nNachricht: {giveaway_message_link}\nHoster: {giveaway_hoster.mention}\nGewinner: {giveaway_winner}\nBis: <t:{unix}:f>\n\n"
+            # all_list += f"__**{giveaway_price}**__\nChannel: {giveaway_channel_link}\nNachricht: {giveaway_message_link}\nHoster: {giveaway_hoster.mention}\nGewinner: {giveaway_winner}\nBis: <t:{unix}:f>\n\n"
+
+            embed.add_field(name=f"**{giveaway_price}**\n\n", value=f"> **Channel:** {giveaway_channel_link}\n> **Nachricht:** {giveaway_message_link}\n> **Hoster:** {giveaway_hoster.mention}\n> **Gewinner:** {giveaway_winner}\n> **Bis:** <t:{unix}:f>", inline=True)
         
-        embed = nextcord.Embed(
-            description="**<a:giveaway:958492679749140510> Alle Giveaways**\n\n" + all_list,
-            color=nextcord.Color.blurple()
-        )
+        # embed = nextcord.Embed(
+        #     description="**<a:giveaway:958492679749140510> Alle Giveaways**\n\n" + all_list,
+        #     color=nextcord.Color.blurple()
+        # )
 
         await ctx.reply(embed=embed)
 
@@ -438,7 +445,12 @@ class giveaways(Cog):
                     description="Es konnte kein Gewinner entschieden werden",
                     color=nextcord.Color.dark_red()
                 )
-                return await channel.send(embed=embed)
+
+                await channel.send(embed=embed)
+
+                c.execute(f"DELETE FROM giveaways WHERE guild_id='{guild_id}' AND message_id='{message_id}'")
+                db.commit()
+                return
 
             winners = ', '.join(winner_list)
 
