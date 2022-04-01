@@ -15,7 +15,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     async def _giveaway(self, ctx):
         embed = nextcord.Embed(
-            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <zeit in minuten> <winner> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
+            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -59,11 +59,8 @@ class giveaways(Cog):
                 message = await ctx.reply(embed=embed)
 
             while True:
-                def check(m):
-                    return lambda m: m.author == ctx.author and m.channel == ctx.channel
-
                 try:
-                    userAnwser = await self.bot.wait_for("message", timeout=120, check=check)
+                    userAnwser = await self.bot.wait_for("message", timeout=120, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
                     if message is not None:
                         await message.delete()
@@ -282,6 +279,69 @@ class giveaways(Cog):
         )
 
         await ctx.reply(embed=embed)
+
+    @_giveaway.command(name="drop")
+    @commands.has_permissions(manage_guild=True)
+    async def _drop(self, ctx, channel: nextcord.TextChannel, *, prize):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}'")
+        giveaways = c.fetchall()
+
+        if len(giveaways) >= 9:
+            embed = nextcord.Embed(
+                description="Du kannst nur **9** Giveaways gleichzeitig starten",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        if len(prize) > 150:
+            embed = nextcord.Embed(
+                description="Der Preis darf aus maximal 150 Zeichen bestehen",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        embed = nextcord.Embed(
+            title=prize,
+            description=f"Reagiere mit <a:giveaway:958492679749140510>, um den Drop einzusammeln \n\n> Host: {ctx.author.mention}",
+            color=ctx.author.color,
+            timestamp=datetime.now()
+        )
+        embed.set_footer(text=f"Drop von {ctx.author.name}")
+
+        message = await channel.send(embed=embed)
+
+        emote = self.bot.get_emoji(958492679749140510)
+
+        await message.add_reaction(emote)
+
+        try:
+            reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u.bot == False and r.message.id == message.id and r.emoji == emote, timeout=300)
+        except asyncio.TimeoutError:
+            embed = nextcord.Embed(
+                description="**<a:giveaway:958492679749140510> Drop wurde abgebrochen**\n\n> Drop nach 5 Minuten abgelaufen",
+                color=nextcord.Color.dark_red()
+            )
+            await channel.send(embed=embed)
+            return
+
+        embed = nextcord.Embed(
+            title=prize,
+            description=f"**<a:giveaway:958492679749140510> Drop erhalten**\n\n> **Gewinner:** {user.mention}\n> **Preis:** {prize}",
+            color=ctx.author.color
+        )
+
+        await message.edit(embed=embed)
+
+        embed = nextcord.Embed(
+            description=f"Herzlichen Glückwunsch, {user.mention} hat den Drop eingesammelt und {prize} gewonnen\n> Es waren `{sum(member.status!=nextcord.Status.offline and not member.bot for member in ctx.guild.members)}` andere User online",
+            color=ctx.author.color
+        )
+
+        await channel.send(embed=embed)
         
 
     @_giveaway.command(name="end", aliases=["stop"])
