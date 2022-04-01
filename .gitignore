@@ -1,0 +1,5 @@
+database.db
+
+*/.idea/shelf/
+*/.idea/workspace.xml/
+*/commands/__pycache__/
