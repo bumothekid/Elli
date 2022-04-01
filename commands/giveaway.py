@@ -65,10 +65,13 @@ class giveaways(Cog):
                 try:
                     userAnwser = await self.bot.wait_for("message", timeout=120, check=check)
                 except asyncio.TimeoutError:
+                    if message is not None:
+                        await message.delete()
                     embed = nextcord.Embed(
                         description="Du hast mehr als 2 Minuten gebraucht um zu antworten\n\nDer Giveaway startvorgang wurde abgebrochen",
                         color=nextcord.Color.dark_red()
                     )
+
                     return await ctx.reply(embed=embed)
 
                 match i:
@@ -97,7 +100,7 @@ class giveaways(Cog):
 
                         if not matches:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> Ungültige Zeitangabe",
+                                description=question + f"\n\n> `Ungültige Zeitangabe`",
                                 color=nextcord.Color.blurple()
                             )
 
@@ -129,6 +132,14 @@ class giveaways(Cog):
 
                         if userAnwser.content == '':
                             anwser = "Nichts!"
+                        elif len(userAnwser.content) > 150:
+                            embed = nextcord.Embed(
+                                description=question + f"\n\n> `Der Preis darf aus maximal 150 Zeichen bestehen`",
+                                color=nextcord.Color.blurple()
+                            )
+
+                            await message.edit(embed=embed)
+                            continue
                         else:
                             anwser = userAnwser.content
                     case 3:
@@ -136,7 +147,7 @@ class giveaways(Cog):
 
                         if not userAnwser.content.isdigit():
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> Die anzahl an gewinnern muss eine ganze Zahl sein",
+                                description=question + f"\n\n> `Die anzahl an gewinnern muss eine ganze Zahl sein`",
                                 color=nextcord.Color.blurple()
                             )
 
@@ -145,7 +156,7 @@ class giveaways(Cog):
 
                         elif int(userAnwser.content) >= 100:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> Die anzahl an Gewinnern darf nicht größer als **100** sein",
+                                description=question + f"\n\n> `Die anzahl an Gewinnern darf nicht größer als 100 sein`",
                                 color=nextcord.Color.blurple()
                             )
 
@@ -201,7 +212,15 @@ class giveaways(Cog):
                 color=nextcord.Color.dark_red()
             )
 
-            return ctx.reply(embed=embed)
+            return await ctx.reply(embed=embed)
+
+        if len(prize) > 150:
+            embed = nextcord.Embed(
+                description="Der Preis darf aus maximal 150 Zeichen bestehen",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
 
         if not minutes.isdigit():
             embed = nextcord.Embed(
