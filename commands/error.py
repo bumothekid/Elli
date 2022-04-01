@@ -58,7 +58,10 @@ class errorhandler(Cog):
             return
         elif isinstance(error, commands.MessageNotFound):
             embed = await errorLogging("**Ich konnte diese Nachricht nicht finden.**")
-            await interaction.reply(embed=embed)
+            try:
+                await interaction.reply(embed=embed)
+            except:
+                return
             return
         else:
             await interaction.reply("**Es ist ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
