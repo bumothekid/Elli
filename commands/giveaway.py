@@ -190,9 +190,91 @@ class giveaways(Cog):
         c.execute(f"UPDATE giveaways SET duration = '0' WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}'")
         db.commit()
 
-    # @_giveaway.command(name="reroll")
-    # @commands.has_permissions(manage_guild=True)
-    # async def _rerroll(self, ctx, message: nextcord.Message):
+    @_giveaway.command(name="reroll")
+    @commands.has_permissions(manage_guild=True)
+    async def _rerroll(self, ctx, channel: nextcord.TextChannel, message, winners):
+        try:
+            message = await channel.fetch_message(message)
+        except:
+            raise commands.MessageNotFound(argument=message)
+
+        if not winners.isdigit():
+            embed = nextcord.Embed(
+                description="**Die anzahl an gewinnern muss eine ganze Zahl sein**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}'")
+        giveaway = c.fetchone()
+
+        if giveaway is not None:
+            embed = nextcord.Embed(
+                description="**Das Giveaway ist noch am laufen**\n**Du kannst mit `!giveaway end <messageid>` das Gewinnspiel beenden**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        emote = self.bot.get_emoji(958492679749140510)
+        is_giveaway = any(reaction.emoji == emote for reaction in message.reactions)
+
+        if not is_giveaway:
+            embed = nextcord.Embed(
+                description="**Diese Nachricht ist kein Giveaway**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        guild = self.bot.get_guild(ctx.guild.id)
+        winner_list = []
+
+        entries = list(await message.reactions[0].users().flatten())
+        entries.pop(entries.index(guild.me))
+
+        hosterid = re.findall(r"[0-9]+", message.embeds[0].description)[-1]
+        hoster = guild.get_member(int(hosterid))
+        
+        if hoster in entries:
+            entries.pop(entries.index(hoster))
+
+        backupEntries = entries.copy()
+
+        for _ in range(int(winners)):
+            if not entries:
+                break
+            winner = random.choice(entries)
+            winner_list.append(winner.mention)
+
+            entries.pop(entries.index(winner))
+
+        if not winner_list:
+            embed = nextcord.Embed(
+                description="Es konnte kein Gewinner entschieden werden",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        winners = ', '.join(winner_list)
+
+        if len(winner_list) > 1:
+            string = f"Herzlichen Glückwunsch, {winners} haben {message.embeds[0].title} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+        else:
+            string = f"Herzlichen Glückwunsch, {winners} hat {message.embeds[0].title} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+        embed = nextcord.Embed(
+            description=string,
+            color=ctx.author.color
+        )
+        await ctx.reply(embed=embed)
+
+        
+        
+        
         
     # @_giveaway.command(name="quick", aliases=["quick-start"])
     # @commands.has_permissions(manage_guild=True)
@@ -285,7 +367,7 @@ class giveaways(Cog):
             unix = int(mktime((datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])).timetuple()))
 
 
-            entries = [u for u in await message.reactions[0].users().flatten()]
+            entries = list(await message.reactions[0].users().flatten())
             entries.pop(entries.index(guild.me))
             if host in entries:
                 entries.pop(entries.index(host))
@@ -316,7 +398,7 @@ class giveaways(Cog):
                     color=nextcord.Color.dark_red()
                 )
                 return await channel.send(embed=embed)
-                
+
             winners = ', '.join(winner_list)
 
             embed = nextcord.Embed(
@@ -328,7 +410,7 @@ class giveaways(Cog):
             embed.set_footer(text=f"{giveaway[1]} Gewinner | Endete")
 
             await message.edit(embed=embed)
-            
+
             if len(winner_list) > 1:
                 string = f"Herzlichen Glückwunsch, {winners} haben {giveaway[3]} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
             else:
