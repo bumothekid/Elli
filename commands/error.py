@@ -6,7 +6,6 @@ from nextcord.ext.commands import Cog
 class errorhandler(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.loggingChannel = self.bot.get_channel(957444324080115762)
 
     @Cog.listener()
     async def on_command_error(self, interaction, error):
@@ -18,6 +17,9 @@ class errorhandler(Cog):
         raised whenever a command encounters an error while running
         :return: The return value of a command is being passed to the reply method of the interaction.
         """
+
+        loggingChannel = self.bot.get_channel(957444324080115762)
+
         if isinstance(error, commands.CommandNotFound):
             embed = await errorLogging(text="**Dieser Command existiert nicht oder ist gerade deaktiviert**")
             await interaction.reply(embed=embed)
@@ -51,17 +53,17 @@ class errorhandler(Cog):
             await interaction.reply(embed=embed)
             return
         elif isinstance(error, commands.RoleNotFound):
-            embed = await errorLogging("**Ich konnte diesdiese Rolle nicht finden.**")
+            embed = await errorLogging("**Ich konnte diese Rolle nicht finden.**")
             await interaction.reply(embed=embed)
             return
         elif isinstance(error, commands.MessageNotFound):
-            embed = await errorLogging("**Ich konnte diesdiese Nachricht nicht finden.**")
+            embed = await errorLogging("**Ich konnte diese Nachricht nicht finden.**")
             await interaction.reply(embed=embed)
             return
         else:
             await interaction.reply("**Es ist ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
             embed = await criticalErrorLogging(interaction=interaction, text=error)
-            await self.loggingChannel.send(embed=embed)
+            await loggingChannel.send(embed=embed)
             return
 
             
