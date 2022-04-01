@@ -15,7 +15,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     async def _giveaway(self, ctx):
         embed = nextcord.Embed(
-            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
+            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <zeit in minuten> <winner> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -23,6 +23,20 @@ class giveaways(Cog):
     @_giveaway.command(name="create", aliases=["start"])
     @commands.has_permissions(manage_guild=True)
     async def _create(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}'")
+        giveaways = c.fetchall()
+
+        if len(giveaways) >= 9:
+            embed = nextcord.Embed(
+                description="Du kannst nur **9** Giveaways gleichzeitig erstellen",
+                color=nextcord.Color.red()
+            )
+
+            await ctx.reply(embed=embed)
+            return db.close()
+
         questions = [
             f"Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> In welchem Channel soll das Giveaway stattfinden?\n> **Beispiel:** {ctx.channel.mention}",
             "Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> Wie lange soll das Giveaway gehen? `<m | h | d>`\n> **Beispiel:** `1d 5h 30m`",
@@ -129,6 +143,7 @@ class giveaways(Cog):
                             await message.edit(embed=embed)
                             continue
                         anwser = int(userAnwser.content)
+                        await message.delete()
 
 
                             
@@ -147,8 +162,6 @@ class giveaways(Cog):
 
         message = await anwsers[0].send(embed=embed)
 
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
         c.execute("INSERT INTO giveaways(guild_id, channel_id, message_id, start, duration, prize, winner, hoster_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", [ctx.guild.id, anwsers[0].id, message.id, time_(), anwsers[1], anwsers[2], anwsers[3], ctx.author.id])
         db.commit()
         c.close()
@@ -294,7 +307,6 @@ class giveaways(Cog):
 
             return await ctx.reply(embed=embed)
 
-        # all_list = ""
         embed = nextcord.Embed(
             description="**<a:giveaway:958492679749140510> Aktive Giveaways**",
             color=nextcord.Color.blurple()
@@ -310,33 +322,9 @@ class giveaways(Cog):
             start = datetime.fromtimestamp(giveaway[3])
             unix = int(mktime((start + timedelta(seconds=giveaway[4])).timetuple()))
 
-            # all_list += f"__**{giveaway_price}**__\nChannel: {giveaway_channel_link}\nNachricht: {giveaway_message_link}\nHoster: {giveaway_hoster.mention}\nGewinner: {giveaway_winner}\nBis: <t:{unix}:f>\n\n"
-
             embed.add_field(name=f"**{giveaway_price}**\n\n", value=f"> **Channel:** {giveaway_channel_link}\n> **Nachricht:** {giveaway_message_link}\n> **Hoster:** {giveaway_hoster.mention}\n> **Gewinner:** {giveaway_winner}\n> **Bis:** <t:{unix}:f>", inline=True)
-        
-        # embed = nextcord.Embed(
-        #     description="**<a:giveaway:958492679749140510> Alle Giveaways**\n\n" + all_list,
-        #     color=nextcord.Color.blurple()
-        # )
 
         await ctx.reply(embed=embed)
-
-        
-        
-        
-    # @_giveaway.command(name="quick", aliases=["quick-start"])
-    # @commands.has_permissions(manage_guild=True)
-    # async def _quick(self, ctx, channel: nextcord.TextChannel, winner: int, *, time: str):
-    #     embed = nextcord.Embed(
-    #         description=f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Gewinner:** {winner}\n> **Bis:** {time}",
-    #         color=nextcord.Color.dark_green()
-    #     )
-    #     await ctx.reply(embed=embed)
-
-    @_giveaway.command(name="drop")
-    @commands.has_permissions(manage_guild=True)
-    async def _drop(self, ctx, channel: nextcord.TextChannel, *, prize):
-        print("abc")
 
     @Cog.listener()
     async def on_ready(self):
