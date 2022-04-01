@@ -30,8 +30,8 @@ class giveaways(Cog):
 
         if len(giveaways) >= 9:
             embed = nextcord.Embed(
-                description="Du kannst nur **9** Giveaways gleichzeitig erstellen",
-                color=nextcord.Color.red()
+                description="Du kannst nur **9** Giveaways gleichzeitig starten",
+                color=nextcord.Color.dark_red()
             )
 
             await ctx.reply(embed=embed)
@@ -97,7 +97,7 @@ class giveaways(Cog):
 
                         if not matches:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> Ungültige Zeitangabe", #\n> **Zeitangaben beispiel:** `1d 5h 20m`",
+                                description=question + f"\n\n> Ungültige Zeitangabe",
                                 color=nextcord.Color.blurple()
                             )
 
@@ -142,6 +142,15 @@ class giveaways(Cog):
 
                             await message.edit(embed=embed)
                             continue
+
+                        elif int(userAnwser.content) >= 100:
+                            embed = nextcord.Embed(
+                                description=question + f"\n\n> Die anzahl an Gewinnern darf nicht größer als **100** sein",
+                                color=nextcord.Color.blurple()
+                            )
+
+                            await message.edit(embed=embed)
+                            continue
                         anwser = int(userAnwser.content)
                         await message.delete()
 
@@ -177,6 +186,84 @@ class giveaways(Cog):
         )
 
         await ctx.reply(embed=embed)
+
+    @_giveaway.command(name="quick", aliases=["q", "quickstart"])
+    @commands.has_permissions(manage_guild=True)
+    async def _quick(self, ctx, channel: nextcord.TextChannel, minutes, winner, *, prize):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}'")
+        giveaways = c.fetchall()
+
+        if len(giveaways) >= 9:
+            embed = nextcord.Embed(
+                description="Du kannst nur **9** Giveaways gleichzeitig starten",
+                color=nextcord.Color.dark_red()
+            )
+
+            return ctx.reply(embed=embed)
+
+        if not minutes.isdigit():
+            embed = nextcord.Embed(
+                description="Die Zeitangabe muss in minuten angegeben sein",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+        
+        if not winner.isdigit():
+            embed = nextcord.Embed(
+                description="Die Anzahl an Gewinnern muss eine ganze Zahl sein",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+        
+        elif int(winner) >= 100:
+            embed = nextcord.Embed(
+                description="Die anzahl an Gewinnern darf nicht größer als **100** sein",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        if prize == "":
+            embed = nextcord.Embed(
+                description="Du musst einen Gewinn angeben",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        seconds = int(minutes) * 60
+        now = datetime.now()
+        unix = int(mktime((now + timedelta(seconds=seconds)).timetuple()))
+        embed = nextcord.Embed(
+            title=prize,
+            description=f"Reagiere mit <a:giveaway:958492679749140510> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            color=ctx.author.color,
+            timestamp=now + timedelta(seconds=seconds)
+        )
+        embed.set_footer(text=f"{winner} Gewinner | Endet")
+
+        message = await channel.send(embed=embed)
+
+        c.execute("INSERT INTO giveaways(guild_id, channel_id, message_id, start, duration, prize, winner, hoster_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", [ctx.guild.id, channel.id, message.id, time_(), seconds, prize, winner, ctx.author.id])
+        db.commit()
+        c.close()
+        db.close()
+
+        emote = self.bot.get_emoji(958492679749140510)
+
+        await message.add_reaction(emote)
+
+        embed = nextcord.Embed(
+            description=f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {winner}\n> **Bis:** <t:{unix}:f>",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+        
 
     @_giveaway.command(name="end", aliases=["stop"])
     @commands.has_permissions(manage_guild=True)
