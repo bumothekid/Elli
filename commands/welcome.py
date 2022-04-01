@@ -17,7 +17,7 @@ class Welcome(commands.Cog):
         
         db = sqlite3.connect("database.db")
         c = db.cursor()
-        c.execute(f"SELECT channel_id FROM welcome WHERE guild_id = '{member.guild_id}'")
+        c.execute(f"SELECT channel_id FROM welcome WHERE guild_id = '{member.guild.id}'")
         channel_id = c.fetchone()
 
         # if welcome_data.get(str(member.guild.id)):
