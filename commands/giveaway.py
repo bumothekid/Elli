@@ -15,7 +15,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     async def _giveaway(self, ctx):
         embed = nextcord.Embed(
-            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`",
+            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <winner> <time>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -167,7 +167,12 @@ class giveaways(Cog):
 
     @_giveaway.command(name="end", aliases=["stop"])
     @commands.has_permissions(manage_guild=True)
-    async def _end(self, ctx, message: nextcord.Message):
+    async def _end(self, ctx, channel: nextcord.TextChannel, message):
+        try:
+            message = await channel.fetch_message(message)
+        except:
+            raise commands.MessageNotFound(argument=message)
+
         db = sqlite3.connect("database.db")
         c = db.cursor()
         c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}'")
@@ -272,7 +277,43 @@ class giveaways(Cog):
         )
         await ctx.reply(embed=embed)
 
+    
+    @_giveaway.command(name="list", aliases=["show"])
+    @commands.has_permissions(manage_guild=True)
+    async def _list(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM giveaways WHERE guild_id = '{ctx.guild.id}'")
+        giveaways = c.fetchall()
+
+        if not giveaways:
+            embed = nextcord.Embed(
+                description="Es wurden keine Giveaways gefunden",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        all_list = ""
+        for giveaway in giveaways:
+            giveaway_channel_link = f"[`📎`Link](https://discord.com/channels/{ctx.guild.id}/{giveaway[1]}/)"
+            giveaway_message_link = f"[`📎`Link](https://discord.com/channels/{ctx.guild.id}/{giveaway[1]}/{giveaway[2]}/)"
+            giveaway_price = giveaway[5]
+            giveaway_winner = giveaway[6]
+            giveaway_hoster = ctx.guild.get_member(int(giveaway[7]))
+
+            start = datetime.fromtimestamp(giveaway[3])
+            unix = int(mktime((start + timedelta(seconds=giveaway[4])).timetuple()))
+
+            all_list += f"__**{giveaway_price}**__\nChannel: {giveaway_channel_link}\nNachricht: {giveaway_message_link}\nHoster: {giveaway_hoster.mention}\nGewinner: {giveaway_winner}\nBis: <t:{unix}:f>\n\n"
         
+        embed = nextcord.Embed(
+            description="**<a:giveaway:958492679749140510> Alle Giveaways**\n\n" + all_list,
+            color=nextcord.Color.blurple()
+        )
+
+        await ctx.reply(embed=embed)
+
         
         
         
