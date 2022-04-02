@@ -217,5 +217,202 @@ class ticket(Cog):
 
         await ctx.reply(embed=embed)
 
+    @Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.member.bot:
+            return
+
+        emote = self.bot.get_emoji(959885507557470239)
+        if payload.emoji not in [emote] and payload.emoji.name not in ["🔒", "🔓", "❌"]:
+            return
+
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute(f"SELECT * FROM tickets WHERE guild_id = {payload.guild_id} AND message_id = {payload.message_id}")
+        ticket = c.fetchone()
+
+        c.execute(f"SELECT * FROM open_tickets WHERE guild_id = {payload.guild_id} AND channel_id = {payload.channel_id} AND message_id = {payload.message_id}")
+        open_ticket = c.fetchone()
+
+        if ticket is None and open_ticket is None:
+            return
+        
+        c.execute(f"SELECT channel_id FROM ticket_logs WHERE guild_id = {payload.guild_id}")
+        log = c.fetchone()
+
+        guild = self.bot.get_guild(payload.guild_id)
+        channel = guild.get_channel(payload.channel_id)
+        category = channel.category
+        message = await channel.fetch_message(payload.message_id)
+
+        if payload.emoji == emote:
+            if open_ticket is not None:
+                await message.remove_reaction(emote, payload.member)
+
+                embed = nextcord.Embed(
+                    description=f"**Du hast bereits ein Ticket auf {guild.name} geöffnet**",
+                    color=nextcord.Color.dark_red()
+                )
+
+                try:
+                    dm = await payload.member.create_dm()
+                    return await dm.send(embed=embed)
+                except:
+                    return
+
+            role = guild.get_role(ticket[3])
+            await message.remove_reaction(emote, payload.member)
+
+            ticket = await guild.create_text_channel(name=f"ticket-{payload.member.name}", category=category, reason=f"Ticket von {payload.member.name} erstellt")
+
+            oldPerms = nextcord.PermissionOverwrite(read_messages=None, send_messages=None, add_reactions=None)
+            memberPerms = nextcord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, embed_links=True, attach_files=True, read_message_history=True)
+            supportPerms = nextcord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, embed_links=True, attach_files=True, read_message_history=True, manage_permissions=True)
+            everyonePerms = nextcord.PermissionOverwrite(read_messages=False, send_messages=False, add_reactions=False)
+
+            for perm in ticket.overwrites:
+                await ticket.set_permissions(perm, overwrite=oldPerms)
+            await ticket.set_permissions(payload.member, overwrite=memberPerms)
+            await ticket.set_permissions(role, overwrite=supportPerms)
+            await ticket.set_permissions(guild.default_role, overwrite=everyonePerms)
+
+            embed = nextcord.Embed(
+                description=f"Hey {payload.member.mention}, es wird dir bald geholfen.\n\n**Ticket von {payload.member.name}#{payload.member.discriminator}**",
+                color=nextcord.Color.blurple()
+            )
+
+            message = await ticket.send(f"{payload.member.mention} | {role.mention}", embed=embed)
+            await message.add_reaction("🔒")
+
+            c.execute("INSERT INTO open_tickets(guild_id, channel_id, message_id, role_id, user_id) VALUES (?, ?, ?, ?, ?)", [payload.guild_id, ticket.id, message.id, role.id, payload.member.id])
+            db.commit()
+
+            if log is None:
+                return
+
+            logging = guild.get_channel(log[0])
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket erstellt**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{ticket.id}/{message.id})\n> **User:** {payload.member.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_green()
+            )
+
+            await logging.send(embed=embed)
+
+        elif payload.emoji.name == "🔒":
+            user = guild.get_member(open_ticket[4])
+            role = guild.get_role(open_ticket[3])
+
+            await message.remove_reaction("🔒", payload.member)
+
+            memberPerms = nextcord.PermissionOverwrite(read_messages=True, send_messages=False, add_reactions=True, embed_links=None, attach_files=None, read_message_history=True)
+
+            await channel.set_permissions(user, overwrite=memberPerms)
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_green()
+            )
+
+            message = await channel.send(embed=embed)
+            await message.add_reaction("🔓")
+            await message.add_reaction("❌")
+
+            c.execute(f"UPDATE open_tickets SET message_id = {message.id} WHERE guild_id = {payload.guild_id} AND user_id = {payload.member.id}")
+            db.commit()
+
+            if log is None:
+                return
+
+            logging = guild.get_channel(log[0])
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.blurple()
+            )
+
+            await logging.send(embed=embed)
+
+        elif payload.emoji.name == "🔓":
+            user = guild.get_member(open_ticket[4])
+            role = guild.get_role(open_ticket[3])
+
+            await message.remove_reaction("🔓", payload.member)
+
+            memberPerms = nextcord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, embed_links=True, attach_files=True, read_message_history=True)
+
+            await channel.set_permissions(user, overwrite=memberPerms)
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_green()
+            )
+
+            message = await channel.send(embed=embed)
+
+            first_message = (await channel.history(limit=1, oldest_first=True).flatten())[0]
+
+            c.execute(f"UPDATE open_tickets SET message_id = {first_message.id} WHERE guild_id = {payload.guild_id} AND user_id = {payload.member.id}")
+            db.commit()
+
+            if log is None:
+                return
+
+            logging = guild.get_channel(log[0])
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_green()
+            )
+
+            await logging.send(embed=embed)
+        elif payload.emoji.name == "❌":
+            user = guild.get_member(open_ticket[4])
+            role = guild.get_role(open_ticket[3])
+
+            await message.remove_reaction("❌", payload.member)
+
+            if role not in payload.member.roles:
+                embed = nextcord.Embed(
+                    description=f"{payload.member.mention}, du hast keine Berechtigungen um dieses Ticket zu schließen\n\n> Du benötigst die Rolle {role.mention}",
+                    color=nextcord.Color.dark_red()
+                )
+
+                return await channel.send(embed=embed)
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_red()
+            )
+
+            await channel.send(embed=embed)
+
+            c.execute(f"DELETE FROM open_tickets WHERE guild_id = {payload.guild_id} AND user_id = {payload.member.id}")
+            db.commit()
+
+            if log is None:
+                return
+
+            logging = guild.get_channel(log[0])
+
+            transcript = await chat_exporter.export(channel)
+            transcript_file = nextcord.File(io.BytesIO(transcript.encode()), filename="transcript.html")
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                color=nextcord.Color.dark_red()
+            )
+
+            await logging.send(embed=embed, file=transcript_file)
+
+            await channel.delete()
+
+            
+
+
+
+        
+
 def setup(bot):
     bot.add_cog(ticket(bot))
