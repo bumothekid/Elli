@@ -2,6 +2,7 @@
 import nextcord
 import sqlite3
 import re
+from time import time
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import NotOwner
 from os import listdir
@@ -18,7 +19,8 @@ extensions = [
     'commands.developer',
     'commands.welcome',
     'commands.reactionrole',
-    'commands.giveaway'
+    'commands.giveaway',
+    'commands.bot'
 ]
 
 # On Ready
@@ -27,6 +29,10 @@ async def on_ready():
     """
     When the bot is ready, print some stuff
     """
+    db = sqlite3.connect("database.db")
+    c = db.cursor()
+    c.execute(f"UPDATE cursy SET uptime = '{time()}'")
+    db.commit()
     print('═════◢◤◈◥◣═════')
     print('Bot ist Online.')
     print(bot.user.name)
