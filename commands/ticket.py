@@ -190,7 +190,32 @@ class ticket(Cog):
 
         await ctx.reply(embed=embed)
     
+    @_log.command(name="delete", aliases=["remove"])
+    @commands.has_permissions(manage_guild=True)
+    async def _delete(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
 
+        c.execute("SELECT channel_id FROM ticket_logs WHERE guild_id = ?", [ctx.guild.id])
+        log = c.fetchone()
+
+        if log is None:
+            embed = nextcord.Embed(
+                description="**Es ist kein Ticket Logging gesetzt**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        c.execute("DELETE FROM ticket_logs WHERE guild_id = ?", [ctx.guild.id])
+        db.commit()
+
+        embed = nextcord.Embed(
+            description="**<:Ticket:959885507557470239> Log Channel gelöscht**",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
 
 def setup(bot):
     bot.add_cog(ticket(bot))
