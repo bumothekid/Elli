@@ -20,6 +20,7 @@ extensions = [
     'commands.welcome',
     'commands.reactionrole',
     'commands.giveaway',
+    'commands.tempchannel',
     'commands.bot'
 ]
 
