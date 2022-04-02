@@ -54,7 +54,7 @@ class reactionrole(Cog):
 
         if exists is not None: 
             embed = nextcord.Embed(
-                description="Du hast bereits eine Reactionrole mit diesem Emote bei dieser Nachricht",
+                description="**Du hast bereits eine Reactionrole mit diesem Emote bei dieser Nachricht**",
                 color=nextcord.Color.dark_red()
             )
 
@@ -81,7 +81,7 @@ class reactionrole(Cog):
 
         if exists is None:
             embed = nextcord.Embed(
-                description="Du hast keine Reactionrole mit diesem Emote bei dieser Nachricht",
+                description="**Du hast keine Reactionrole mit diesem Emote bei dieser Nachricht**",
                 color=nextcord.Color.dark_red()
             )
 
