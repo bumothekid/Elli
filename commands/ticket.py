@@ -89,6 +89,38 @@ class ticket(Cog):
 
         await ctx.reply(embed=embed)
     
+    @_ticket.command(name="delete", aliases=["remove"])
+    @commands.has_permissions(manage_guild=True)
+    async def _delete(self, ctx, channel: nextcord.TextChannel, message_id):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM tickets WHERE guild_id = ? AND channel_id = ? AND message_id = ?", (ctx.guild.id, channel.id, message_id))
+        dbticket = c.fetchone()
+
+        if dbticket is None:
+            embed = nextcord.Embed(
+                description="**Dieses Ticket existiert nicht**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        ticket = await channel.fetch_message(message_id)
+        await ticket.delete()
+
+        c.execute("DELETE FROM tickets WHERE guild_id = ? AND channel_id = ? AND message_id = ?", (ctx.guild.id, channel.id, message_id))
+        db.commit()
+
+        role = ctx.guild.get_role(dbticket[3])
+
+        embed = nextcord.Embed(
+            description=f"**<:Ticket:959885507557470239> Ticket gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Support Rolle:** {role.mention}\n> **Text:** {dbticket[4]}",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+    
 
 
 def setup(bot):
