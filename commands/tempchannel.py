@@ -102,6 +102,27 @@ class tempchannel(Cog):
         await ctx.reply(embed=embed)
 
     @Cog.listener()
+    async def on_ready(self):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute("SELECT channel_id FROM open_tempchannels")
+        open_tempchannels = c.fetchall()
+
+        for tempchannel in open_tempchannels:
+            channel = self.bot.get_channel(tempchannel[0])
+
+            if not channel:
+                c.execute(f"DELETE FROM open_tempchannels WHERE channel_id = '{tempchannel[0]}'")
+                continue
+
+            if len(channel.members) == 0:
+                await channel.delete()
+
+                c.execute(f"DELETE FROM open_tempchannels WHERE channel_id = '{tempchannel[0]}'")
+        
+        db.commit()
+
+    @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         # sourcery skip: merge-nested-ifs, remove-redundant-fstring
         db = sqlite3.connect("database.db")
