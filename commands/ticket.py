@@ -153,6 +153,42 @@ class ticket(Cog):
             i += 1
 
         await ctx.reply(embed=embed)
+
+    @_ticket.group(name="log", invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    async def _log(self, ctx):
+        embed = nextcord.Embed(description="**Es fehlt ein benötigtes Argument.**", color=nextcord.Color.dark_red())
+        await ctx.reply(embed=embed)
+
+    @_log.command(name="set", aliases=["add"])
+    @commands.has_permissions(manage_guild=True)
+    async def _set(self, ctx, channel: nextcord.TextChannel):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT channel_id FROM ticket_logs WHERE guild_id = ?", [ctx.guild.id])
+        log = c.fetchone()
+
+        if log is not None:
+            c.execute(f"UPDATE ticket_logs SET channel_id = {channel.id} WHERE guild_id = {ctx.guild.id}")
+            db.commit()
+
+            embed = nextcord.Embed(
+                description=f"**<:Ticket:959885507557470239> Log Channel aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)",
+                color=nextcord.Color.dark_green()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        c.execute("INSERT INTO ticket_logs (guild_id, channel_id) VALUES (?, ?)", [ctx.guild.id, channel.id])
+        db.commit()
+
+        embed = nextcord.Embed(
+            description=f"**<:Ticket:959885507557470239> Log Channel gesetzt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
     
 
 
