@@ -49,31 +49,31 @@ class tempchannel(Cog):
 
         await ctx.reply(embed=embed)
 
-    # @_tempchannel.command(name="remove", aliases=['delete', 'del'])
-    # @commands.has_permissions(manage_guild=True)
-    # async def _remove(self, ctx):
-    #     db = sqlite3.connect("database.db")
-    #     c = db.cursor()
-    #     c.execute(f"SELECT * FROM tempchannel WHERE guild_id = '{ctx.guild.id}'")
-    #     tempchannel = c.fetchone()
+    @_tempchannel.command(name="remove", aliases=['delete', 'del'])
+    @commands.has_permissions(manage_guild=True)
+    async def _remove(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM tempchannel WHERE guild_id = '{ctx.guild.id}'")
+        tempchannel = c.fetchone()
 
-    #     if tempchannel is None:
-    #         embed = nextcord.Embed(
-    #             description="** `⏳`Tempchannel nicht gefunden**",
-    #             color=nextcord.Color.dark_red()
-    #         )
+        if tempchannel is None:
+            embed = nextcord.Embed(
+                description="**Es existiert noch kein Tempchannel auf diesem Server**",
+                color=nextcord.Color.dark_red()
+            )
 
-    #         return await ctx.reply(embed=embed)
+            return await ctx.reply(embed=embed)
 
-    #     c.execute(f"DELETE FROM tempchannel WHERE guild_id = '{ctx.guild.id}'")
-    #     db.commit()
+        c.execute(f"UPDATE tempchannel SET channel_id=NULL WHERE guild_id = '{ctx.guild.id}'")
+        db.commit()
 
-    #     embed = nextcord.Embed(
-    #         description=f"** `⏳`Tempchannel gelöscht**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{tempchannel[2]}`",
-    #         color=nextcord.Color.dark_green()
-    #     )
+        embed = nextcord.Embed(
+            description=f"** `⏳`Tempchannel gelöscht**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{tempchannel[2]}`",
+            color=nextcord.Color.dark_green()
+        )
 
-    #     await ctx.reply(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 
