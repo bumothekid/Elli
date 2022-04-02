@@ -467,7 +467,7 @@ class giveaways(Cog):
 
         if not giveaways:
             embed = nextcord.Embed(
-                description="Es wurden keine aktiven Giveaways gefunden",
+                description="**Es wurden keine aktiven Giveaways gefunden**",
                 color=nextcord.Color.dark_red()
             )
 
