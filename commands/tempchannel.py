@@ -10,7 +10,7 @@ class tempchannel(Cog):
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
     async def _tempchannel(self, ctx):
         embed = nextcord.Embed(
-            description="** `⏳`Tempchannel Commands**\n\n> `!tempchannel set <channel>`\n> `!tempchannel remove <channel>`\n> `!tempchannel name <name> `\n> `!tempchannel list`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
+            description="** `⏳`Tempchannel Commands**\n\n> `!tempchannel set <channel>`\n> `!tempchannel remove <channel>`\n> `!tempchannel name <name> `\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -100,8 +100,43 @@ class tempchannel(Cog):
         )
 
         await ctx.reply(embed=embed)
-        
 
+    @Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        # sourcery skip: merge-nested-ifs, remove-redundant-fstring
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM open_tempchannels WHERE guild_id = '{member.guild.id}'")
+        tempchannels = c.fetchall()
+
+        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{member.guild.id}'")
+        tempchannel = c.fetchone()
+
+        if tempchannels:
+            if before.channel:
+                if before.channel.id in [tempchannel[1] for tempchannel in tempchannels]:
+                    if len(before.channel.members) == 0:
+                        c.execute(f"DELETE FROM open_tempchannels WHERE guild_id = '{member.guild.id}' AND channel_id = '{before.channel.id}'")
+                        db.commit()
+
+                        await before.channel.delete(reason="Tempchannel leer")
+
+        if tempchannel is not None:
+            if after.channel:
+                if after.channel.id == tempchannel[1]:
+                    memberPermissions = nextcord.PermissionOverwrite(manage_permissions=True, move_members=True, manage_channels=True)
+
+                    name = tempchannel[2].format(user=member.name, anzahl=len(tempchannels) + 1)
+
+                    tempchannel = await after.channel.clone(name=name, reason="Tempchannel erstellen")
+
+                    await tempchannel.set_permissions(member, overwrite=memberPermissions)
+                    await tempchannel.set_permissions(member.guild.default_role, overwrite=nextcord.PermissionOverwrite(speak=True))
+
+                    await member.move_to(tempchannel)
+
+                    c.execute(f"INSERT INTO open_tempchannels(guild_id, channel_id, host_id, name) VALUES(?, ?, ?, ?)", [member.guild.id, tempchannel.id, member.id, tempchannel.name])
+                    db.commit()
 
 
 def setup(bot):
