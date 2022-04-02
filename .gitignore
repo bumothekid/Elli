@@ -1,4 +1,5 @@
 *database.db
 *CursyBot.code-workspace
+*.DS_Store
 
 *commands/__pycache__
