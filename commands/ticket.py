@@ -53,6 +53,41 @@ class ticket(Cog):
         )
 
         await ctx.send(embed=embed)
+
+    @_ticket.command(name="update", aliases=["edit"])
+    @commands.has_permissions(manage_guild=True)
+    async def _update(self, ctx, channel: nextcord.TextChannel, message_id, role: nextcord.Role, *, text):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM tickets WHERE guild_id = ? AND channel_id = ? AND message_id = ?", (ctx.guild.id, channel.id, message_id))
+        ticket = c.fetchone()
+
+        if ticket is None:
+            embed = nextcord.Embed(
+                description="**Dieses Ticket existiert nicht**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        embed = nextcord.Embed(
+            description="**<:Ticket:959885507557470239> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
+            color=nextcord.Color.blurple()
+        )
+
+        ticket = await channel.fetch_message(message_id)
+        await ticket.edit(embed=embed)
+
+        c.execute("UPDATE tickets SET text = ? AND role_id = ? WHERE guild_id = ? AND channel_id = ? AND message_id = ?", (text, role.id, ctx.guild.id, channel.id, message_id))
+        db.commit()
+
+        embed = nextcord.Embed(
+            description=f"** <:Ticket:959885507557470239> Ticket aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{ticket.id}/)\n> **Support Rolle:** {role.mention}",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
     
 
 
