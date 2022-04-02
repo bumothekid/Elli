@@ -1,5 +1,4 @@
 database.db
 
-*/.idea/shelf/
-*/.idea/workspace.xml/
-*/commands/__pycache__/
+*/.idea
+*/commands/__pycache__
