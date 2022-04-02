@@ -10,7 +10,7 @@ class tempchannel(Cog):
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
     async def _tempchannel(self, ctx):
         embed = nextcord.Embed(
-            description="** `⏳`Tempchannel Commands**\n\n> `!tempchannel set <channel>`\n> `!tempchannel remove <channel>`\n> `!tempchannel name <name>`\n> `!tempchannel list`",
+            description="** `⏳`Tempchannel Commands**\n\n> `!tempchannel set <channel>`\n> `!tempchannel remove <channel>`\n> `!tempchannel name <name> `\n> `!tempchannel list`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -75,6 +75,32 @@ class tempchannel(Cog):
 
         await ctx.reply(embed=embed)
 
+    @_tempchannel.command(name="name", aliases=['setname'])
+    @commands.has_permissions(manage_guild=True)
+    async def _name(self, ctx, *, name):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
+        tempchannel = c.fetchone()
+
+        if tempchannel is None or tempchannel[1] is None:
+            embed = nextcord.Embed(
+                description="**Es existiert noch kein Tempchannel auf diesem Server**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        c.execute(f"UPDATE tempchannels SET name = '{name}' WHERE guild_id = '{ctx.guild.id}'")
+        db.commit()
+
+        embed = nextcord.Embed(
+            description=f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{name}`",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+        
 
 
 
