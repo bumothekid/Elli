@@ -12,7 +12,7 @@ class ticket(Cog):
     @commands.group(name="ticket", aliases=["ticketsystem"], invoke_without_command=True)
     async def _ticket(self, ctx):
         embed = nextcord.Embed(
-            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `!ticket create <#channel> <@rolle> <text>`\n> `!ticket update <#channel> <messageid> <@rolle> <text>`\n> `!ticket delete <#channel> <messageid>`\n> `!ticket log set <#channel>`\n> `!ticket log remove`\n\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `!ticket create <#channel> <@rolle> <text>`\n> `!ticket update <#channel> <messageid> <@rolle> <text>`\n> `!ticket delete <#channel> <messageid>`\n> `!ticket list`\n> `!ticket log set <#channel>`\n> `!ticket log remove`\n\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
             color=nextcord.Color.blurple()
         )
 
@@ -118,6 +118,39 @@ class ticket(Cog):
             description=f"**<:Ticket:959885507557470239> Ticket gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Support Rolle:** {role.mention}\n> **Text:** {dbticket[4]}",
             color=nextcord.Color.dark_green()
         )
+
+        await ctx.reply(embed=embed)
+
+    @_ticket.command(name="list")
+    @commands.has_permissions(manage_guild=True)
+    async def _list(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM tickets WHERE guild_id = ?", [ctx.guild.id])
+        tickets = c.fetchall()
+
+        if len(tickets) == 0:
+            embed = nextcord.Embed(
+                description="**Es wurden keine Tickets gefunden**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        embed = nextcord.Embed(
+            description="**<:Ticket:959885507557470239> Tickets**\n\n",
+            color=nextcord.Color.blurple()
+        )
+
+        i = 1
+        for ticket in tickets:
+            channel = ctx.guild.get_channel(ticket[1])
+            message = await channel.fetch_message(ticket[2])
+            role = ctx.guild.get_role(ticket[3])
+            
+            embed.add_field(name=f"Ticket {i}", value=f"> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Support Rolle:** {role.mention}", inline=True)
+            i += 1
 
         await ctx.reply(embed=embed)
     
