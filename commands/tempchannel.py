@@ -23,11 +23,11 @@ class tempchannel(Cog):
         
         db = sqlite3.connect("database.db")
         c = db.cursor()
-        c.execute(f"SELECT * FROM tempchannel WHERE guild_id = '{ctx.guild.id}'")
+        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
         tempchannel = c.fetchone()
 
         if tempchannel is not None:
-            c.execute(f"UPDATE tempchannel SET channel_id = '{channel.id}' WHERE guild_id = '{ctx.guild.id}'")
+            c.execute(f"UPDATE tempchannels SET channel_id = '{channel.id}' WHERE guild_id = '{ctx.guild.id}'")
             db.commit()
 
             embed = nextcord.Embed(
@@ -37,7 +37,7 @@ class tempchannel(Cog):
 
             return await ctx.reply(embed=embed)
 
-        c.execute("INSERT INTO tempchannel(guild_id, channel_id, name) VALUES(?, ?, ?)", [ctx.guild.id, channel.id, "⏳ {user}"])
+        c.execute("INSERT INTO tempchannels(guild_id, channel_id, name) VALUES(?, ?, ?)", [ctx.guild.id, channel.id, "⏳ {user}"])
         db.commit()
     
         name = "{user}"
@@ -54,10 +54,10 @@ class tempchannel(Cog):
     async def _remove(self, ctx):
         db = sqlite3.connect("database.db")
         c = db.cursor()
-        c.execute(f"SELECT * FROM tempchannel WHERE guild_id = '{ctx.guild.id}'")
+        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
         tempchannel = c.fetchone()
 
-        if tempchannel is None:
+        if tempchannel is None or tempchannel[1] is None:
             embed = nextcord.Embed(
                 description="**Es existiert noch kein Tempchannel auf diesem Server**",
                 color=nextcord.Color.dark_red()
@@ -65,7 +65,7 @@ class tempchannel(Cog):
 
             return await ctx.reply(embed=embed)
 
-        c.execute(f"UPDATE tempchannel SET channel_id=NULL WHERE guild_id = '{ctx.guild.id}'")
+        c.execute(f"UPDATE tempchannels SET channel_id=NULL WHERE guild_id = '{ctx.guild.id}'")
         db.commit()
 
         embed = nextcord.Embed(
