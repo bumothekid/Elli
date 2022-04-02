@@ -21,6 +21,7 @@ extensions = [
     'commands.reactionrole',
     'commands.giveaway',
     'commands.tempchannel',
+    'commands.ticket',
     'commands.bot'
 ]
 
