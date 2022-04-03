@@ -12,22 +12,11 @@ class ticket(Cog):
     @commands.group(name="ticket", aliases=["ticketsystem"], invoke_without_command=True)
     async def _ticket(self, ctx):
         embed = nextcord.Embed(
-            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `!ticket create <#channel> <@rolle> <text>`\n> `!ticket update <#channel> <messageid> <@rolle> <text>`\n> `!ticket delete <#channel> <messageid>`\n> `!ticket list`\n> `!ticket log set <#channel>`\n> `!ticket log remove`\n\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `!ticket create <#channel> <@rolle> <text>`\n> `!ticket update <#channel> <messageid> <@rolle> <text>`\n> `!ticket delete <#channel> <messageid>`\n> `!ticket message <text>`\n> `!ticket list`\n> `!ticket log set <#channel>`\n> `!ticket log remove`\n\n> Variablen für custom Message: `user_name` `user_discriminator` `user_mention` `ticket_link` `guild_name` `moderation_role`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
             color=nextcord.Color.blurple()
         )
 
         await ctx.send(embed=embed)
-
-    # @_ticket.command(name="transcript", aliases=["script"])
-    # @commands.has_permissions(manage_guild=True)
-    # async def _transcript(self, ctx, channel: nextcord.TextChannel):
-    #     print("transcript")
-    #     transcript = await chat_exporter.export(channel)
-    #     print("transcript")
-    #     transcript_file = nextcord.File(io.BytesIO(transcript.encode()), filename="transcript.html")
-    #     print("transcript")
-
-    #     await ctx.reply(file=transcript_file)
 
     @_ticket.command(name="create", aliases=["new"])
     @commands.has_permissions(manage_guild=True)
@@ -45,6 +34,13 @@ class ticket(Cog):
         await ticket.add_reaction(emote)
 
         c.execute("INSERT INTO tickets(guild_id, channel_id, message_id, role_id, text) VALUES(?, ?, ?, ?, ?)", (ctx.guild.id, channel.id, ticket.id, role.id, text))
+
+        c.execute(f"SELECT * FROM ticket_messages WHERE guild_id = {ctx.guild.id}")
+        messages = c.fetchone()
+
+        if messages is None:
+            c.execute("INSERT INTO ticket_messages(guild_id, text) VALUES(?, ?)", [ctx.guild.id, "Hey {user_name}, es wird dir bald geholfen.\n\n**Ticket von {user_name}#{user_discriminator}**"])
+
         db.commit()
 
         embed = nextcord.Embed(
@@ -116,6 +112,31 @@ class ticket(Cog):
 
         embed = nextcord.Embed(
             description=f"**<:Ticket:959885507557470239> Ticket gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Support Rolle:** {role.mention}\n> **Text:** {dbticket[4]}",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+
+    @_ticket.command(name="message", aliases=["setmessage"])
+    @commands.has_permissions(manage_guild=True)
+    async def _message(self, ctx, *, text):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM ticket_messages WHERE guild_id = ?", (ctx.guild.id,))
+        message = c.fetchone()
+
+        if message is None:
+            c.execute("INSERT INTO ticket_messages(guild_id, text) VALUES(?, ?)", [ctx.guild.id, text])
+        else:
+            c.execute("UPDATE ticket_messages SET text = ? WHERE guild_id = ?", (text, ctx.guild.id))
+
+        db.commit()
+        
+        text = text.replace("\\n", "\n")
+
+        embed = nextcord.Embed(
+            description=f"** <:Ticket:959885507557470239> Nachricht aktualisiert**\n\n> **Nachricht:**\n{text}",
             color=nextcord.Color.dark_green()
         )
 
@@ -230,12 +251,15 @@ class ticket(Cog):
         c = db.cursor()
 
         c.execute(f"SELECT * FROM tickets WHERE guild_id = {payload.guild_id} AND message_id = {payload.message_id}")
-        ticket = c.fetchone()
+        db_ticket = c.fetchone()
 
         c.execute(f"SELECT * FROM open_tickets WHERE guild_id = {payload.guild_id} AND channel_id = {payload.channel_id} AND message_id = {payload.message_id}")
         open_ticket = c.fetchone()
 
-        if ticket is None and open_ticket is None:
+        c.execute(f"SELECT * FROM ticket_messages WHERE guild_id = {payload.guild_id}")
+        ticket_message = c.fetchone()
+
+        if db_ticket is None and open_ticket is None:
             return
         
         c.execute(f"SELECT channel_id FROM ticket_logs WHERE guild_id = {payload.guild_id}")
@@ -261,7 +285,7 @@ class ticket(Cog):
                 except:
                     return
 
-            role = guild.get_role(ticket[3])
+            role = guild.get_role(db_ticket[3])
             await message.remove_reaction(emote, payload.member)
 
             ticket = await guild.create_text_channel(name=f"ticket-{payload.member.name}", category=category, reason=f"Ticket von {payload.member.name} erstellt")
@@ -278,7 +302,7 @@ class ticket(Cog):
             await ticket.set_permissions(guild.default_role, overwrite=everyonePerms)
 
             embed = nextcord.Embed(
-                description=f"Hey {payload.member.mention}, es wird dir bald geholfen.\n\n**Ticket von {payload.member.name}#{payload.member.discriminator}**",
+                description=((ticket_message[1]).replace('\\n', '\n')).format(user_mention=payload.member.mention, user_name=payload.member.name, user_discriminator=payload.member.discriminator, ticket_link=f"[`📎`Link](https://discord.com/channels/{db_ticket[0]}/{db_ticket[1]}/{db_ticket[2]}/)", guild_name=guild.name, moderation_role=role.mention),
                 color=nextcord.Color.blurple()
             )
 
