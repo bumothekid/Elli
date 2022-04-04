@@ -63,8 +63,19 @@ class botInfo(Cog):
 
             c.execute("UPDATE cursy SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
             db.commit()
-            
+
             await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
+
+        @Cog.listener()
+        async def on_guild_join(self, guild):
+            db = sqlite3.connect("database.db")
+            c = db.cursor()
+            c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (guild.id,))
+            prefix = c.fetchone()
+
+            if prefix is None:
+                c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (guild.id, "ao!"))
+                db.commit()
 
 
 def setup(bot):
