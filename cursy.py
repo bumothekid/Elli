@@ -7,8 +7,19 @@ from nextcord.ext import commands
 from nextcord.ext.commands.errors import NotOwner
 from os import listdir
 
+def getPrefixFromDatabase(bot, message):
+    db = sqlite3.connect("database.db")
+    c = db.cursor()
+    c.execute(f"SELECT prefix FROM guilds WHERE guild_id = '{message.guild.id}'")
+    prefix = c.fetchone()
+    if prefix is None:
+        c.execute("INSERT INTO guilds (guild_id, prefix) VALUES (?, ?)", (message.guild.id, "ao!"))
+        db.commit()
+        return "ao!"
+    return prefix
+
 # Bot
-bot = commands.Bot(command_prefix="!", intents=nextcord.Intents.all())
+bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all())
 bot.remove_command("help")
 
 # Extensions
