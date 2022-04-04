@@ -39,43 +39,43 @@ class botInfo(Cog):
         embed.set_footer(text="Cursy Bot | Powered by Nextcord", icon_url="https://avatars.githubusercontent.com/u/89693200?s=280&v=4")
         await ctx.reply(embed=embed)
 
-        @commands.command(name="prefix", aliases=['prefixes'])
-        @commands.has_permissions(manage_guild=True)
-        async def _prefix(self, ctx, prefix):
-            if len(prefix) > 4:
-                await ctx.reply("Prefix nicht länger als 4 zeichen lang.")
-                return
+    @commands.command(name="prefix", aliases=['prefixes'])
+    @commands.has_permissions(manage_guild=True)
+    async def _prefix(self, ctx, prefix):
+        if len(prefix) > 4:
+            await ctx.reply("Prefix nicht länger als 4 zeichen lang.")
+            return
 
-            db = sqlite3.connect("database.db")
-            c = db.cursor()
-            c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (ctx.guild.id,))
-            oldPrefix = c.fetchone()
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (ctx.guild.id,))
+        oldPrefix = c.fetchone()
 
-            if oldPrefix is None:
-                c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (ctx.guild.id, prefix)),
-                db.commit()
-
-                return await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
-
-            if prefix == oldPrefix[0]:
-                await ctx.reply(f"Die prefix darf nicht die selbe wie die alte sein `{oldPrefix[0]}`")
-                return
-
-            c.execute("UPDATE cursy SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
+        if oldPrefix is None:
+            c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (ctx.guild.id, prefix)),
             db.commit()
 
-            await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
+            return await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
 
-        @Cog.listener()
-        async def on_guild_join(self, guild):
-            db = sqlite3.connect("database.db")
-            c = db.cursor()
-            c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (guild.id,))
-            prefix = c.fetchone()
+        if prefix == oldPrefix[0]:
+            await ctx.reply(f"Die prefix darf nicht die selbe wie die alte sein `{oldPrefix[0]}`")
+            return
 
-            if prefix is None:
-                c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (guild.id, "ao!"))
-                db.commit()
+        c.execute("UPDATE cursy SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
+        db.commit()
+
+        await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
+
+    @Cog.listener()
+    async def on_guild_join(self, guild):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+        c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (guild.id,))
+        prefix = c.fetchone()
+
+        if prefix is None:
+            c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (guild.id, "ao!"))
+            db.commit()
 
 
 def setup(bot):
