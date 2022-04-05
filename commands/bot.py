@@ -48,11 +48,11 @@ class botInfo(Cog):
 
         db = sqlite3.connect("database.db")
         c = db.cursor()
-        c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (ctx.guild.id,))
+        c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (ctx.guild.id,))
         oldPrefix = c.fetchone()
 
         if oldPrefix is None:
-            c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (ctx.guild.id, prefix)),
+            c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (ctx.guild.id, prefix)),
             db.commit()
 
             return await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
@@ -61,7 +61,7 @@ class botInfo(Cog):
             await ctx.reply(f"Die prefix darf nicht die selbe wie die alte sein `{oldPrefix[0]}`")
             return
 
-        c.execute("UPDATE cursy SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
+        c.execute("UPDATE guilds SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
         db.commit()
 
         await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
@@ -70,11 +70,11 @@ class botInfo(Cog):
     async def on_guild_join(self, guild):
         db = sqlite3.connect("database.db")
         c = db.cursor()
-        c.execute("SELECT prefix FROM cursy WHERE guild_id = ?", (guild.id,))
+        c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (guild.id,))
         prefix = c.fetchone()
 
         if prefix is None:
-            c.execute("INSERT INTO cursy (guild_id, prefix) VALUES (?)", (guild.id, "ao!"))
+            c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (guild.id, "-"))
             db.commit()
 
 
