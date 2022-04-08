@@ -1,5 +1,6 @@
+import contextlib
 import nextcord
-from .loggingHelper import errorLogging, criticalErrorLogging
+
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 
@@ -9,67 +10,75 @@ class errorhandler(Cog):
 
     @Cog.listener()
     async def on_command_error(self, interaction, error):
-        """
-        This function is called whenever an error occurs while executing a command
-        
-        :param interaction: The interaction object that caused the error
-        :param error: The error that was raised. In this case, it'll be a CommandInvokeError, which is
-        raised whenever a command encounters an error while running
-        :return: The return value of a command is being passed to the reply method of the interaction.
-        """
-
         loggingChannel = self.bot.get_channel(957444324080115762)
 
         if isinstance(error, commands.CommandNotFound):
-            embed = await errorLogging(text="**Dieser Command existiert nicht oder ist gerade deaktiviert**")
-            await interaction.reply(embed=embed)
-            return
+            await errorLogging(interaction, "**Dieser Command existiert nicht oder ist gerade deaktiviert**")
+
         elif isinstance(error, commands.BotMissingPermissions):
-            embed = await errorLogging(text="**Dieser Bot hat nicht genug Berechtigungen.**")
-            await interaction.reply(embed=embed)
-            return
+            await errorLogging(interaction, "**Dieser Bot hat nicht genug Berechtigungen.**")
+
         elif isinstance(error, commands.MissingRequiredArgument):
-            embed = await errorLogging("**Es fehlt ein benötigtes Argument.**")
-            await interaction.reply(embed=embed)
-            return
+            await errorLogging(interaction, "**Es fehlt ein benötigtes Argument.**")
+        
         elif isinstance(error, commands.MissingPermissions):
             missing = [perm.replace('_', ' ').replace('guild', 'server').title() for perm in error.missing_perms]
-            embed = await errorLogging(f"**Du brauchst die {missing} Berechtigung(en), um diesen Command zu nutzen!**")
-            await interaction.reply(embed=embed)
-        elif isinstance(error, commands.NotOwner):
-            embed = await errorLogging("**Nur die Developer können diesen Befehl ausführen.**")
-            await interaction.reply(embed=embed)
-            return
-        elif isinstance(error, commands.UserNotFound):
-            embed = await errorLogging("**Ich konnte diesen User nicht finden.**")
-            await interaction.reply(embed=embed)
-            return
-        elif isinstance(error, commands.ChannelNotFound):
-            embed = await errorLogging("**Ich konnte diesen Channel nicht finden.**")
-            await interaction.reply(embed=embed)
-            return
-        elif isinstance(error, commands.EmojiNotFound):
-            embed = await errorLogging("**Ich konnte dieses Emote nicht finden.**")
-            await interaction.reply(embed=embed)
-            return
-        elif isinstance(error, commands.RoleNotFound):
-            embed = await errorLogging("**Ich konnte diese Rolle nicht finden.**")
-            await interaction.reply(embed=embed)
-            return
-        elif isinstance(error, commands.MessageNotFound):
-            embed = await errorLogging("**Ich konnte diese Nachricht nicht finden.**")
-            try:
-                await interaction.reply(embed=embed)
-            except:
-                return
-            return
-        else:
-            await interaction.reply("**Es ist ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
-            embed = await criticalErrorLogging(interaction=interaction, text=error)
-            await loggingChannel.send(embed=embed)
-            return
-
+            await errorLogging(f"**Du brauchst die {missing} Berechtigung(en), um diesen Command zu nutzen!**")
             
+        elif isinstance(error, commands.NotOwner):
+            await errorLogging(interaction, "**Nur die Developer können diesen Befehl ausführen.**")
+
+        elif isinstance(error, commands.UserNotFound):
+            await errorLogging(interaction, "**Ich konnte diesen User nicht finden.**")
+
+        elif isinstance(error, commands.ChannelNotFound):
+            await errorLogging(interaction, "**Ich konnte diesen Channel nicht finden.**")
+
+        elif isinstance(error, commands.EmojiNotFound):
+            await errorLogging(interaction, "**Ich konnte dieses Emote nicht finden.**")
+
+        elif isinstance(error, commands.RoleNotFound):
+            await errorLogging(interaction, "**Ich konnte diese Rolle nicht finden.**")
+
+        elif isinstance(error, commands.MessageNotFound):
+            await errorLogging(interaction, "**Ich konnte diese Nachricht nicht finden.**")
+
+        else:
+            # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
+            await errorLogging(interaction, "**Es ⚠️ ein kritischer Fehler aufgetreten**")
+            await criticalErrorLogging(interaction, error, loggingChannel)
+
+async def errorLogging(ctx, text):
+    errorEmbed = nextcord.Embed(
+        description=f"> {text}",
+        color=nextcord.Color.red()
+    )
+
+    permissionEmbed = nextcord.Embed(
+        description=f"> **Der Bot hat nicht genug Berechtigungen um in diesen Channel zu schreiben**",
+        color=nextcord.Color.red()
+    )
+
+    try:
+        await ctx.reply(embed=errorEmbed)
+    except:
+        with contextlib.suppress(Exception):
+            await ctx.add_reaction(emoji="⚠️")
+            await ctx.author.create_dm()
+            await ctx.author.dm_channel.send(embed=permissionEmbed)
+
+
+async def criticalErrorLogging(ctx, error, channel):
+    errorEmbed = nextcord.Embed(
+        color=nextcord.Color.red()
+    )
+
+    errorEmbed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
+    errorEmbed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.context}```", inline=False)
+    errorEmbed.add_field(name="<:icon_error_red:962068826311254177> Error", value=f"```python\n{error}```", inline=False)
+
+    await ctx.reply(embed=errorEmbed)         
+
 
 
 def setup(bot):
