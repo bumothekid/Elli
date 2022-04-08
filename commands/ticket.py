@@ -12,7 +12,7 @@ class ticket(Cog):
     @commands.group(name="ticket", aliases=["ticketsystem"], invoke_without_command=True)
     async def _ticket(self, ctx):
         embed = nextcord.Embed(
-            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `!ticket create <#channel> <@rolle> <text>`\n> `!ticket update <#channel> <messageid> <@rolle> <text>`\n> `!ticket delete <#channel> <messageid>`\n> `!ticket message <text>`\n> `!ticket list`\n> `!ticket log set <#channel>`\n> `!ticket log remove`\n\n> Variablen für custom Message: `user_name` `user_discriminator` `user_mention` `ticket_link` `guild_name` `moderation_role`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+            description="**<:Ticket:959885507557470239> Ticket System**\n\n> `-ticket create <#channel> <@rolle> <text>`\n> `-ticket update <#channel> <messageid> <@rolle> <text>`\n> `-ticket delete <#channel> <messageid>`\n> `-ticket message <text>`\n> `-ticket list`\n> `-ticket log set <#channel>`\n> `-ticket log remove`\n\n> Variablen für custom Message: `user_name` `user_discriminator` `user_mention` `ticket_link` `guild_name` `moderation_role`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
             color=nextcord.Color.blurple()
         )
 
