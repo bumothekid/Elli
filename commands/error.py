@@ -45,7 +45,7 @@ class errorhandler(Cog):
 
         else:
             # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
-            await errorLogging(interaction, "**Es ⚠️ ein kritischer Fehler aufgetreten**")
+            await errorLogging(interaction, "**Es ist ein kritischer Fehler aufgetreten ⚠️**")
             await criticalErrorLogging(interaction, error, loggingChannel)
 
 async def errorLogging(ctx, text):
@@ -74,10 +74,10 @@ async def criticalErrorLogging(ctx, error, channel):
     )
 
     errorEmbed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
-    errorEmbed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.context}```", inline=False)
+    errorEmbed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.content}```", inline=False)
     errorEmbed.add_field(name="<:icon_error_red:962068826311254177> Error", value=f"```python\n{error}```", inline=False)
 
-    await ctx.reply(embed=errorEmbed)         
+    await channel.send(embed=errorEmbed)
 
 
 
