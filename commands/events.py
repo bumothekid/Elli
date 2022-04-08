@@ -36,6 +36,32 @@ class eventsCog(Cog):
         channel = self.bot.get_channel(957444324080115762)
         await channel.send(embed=embed)
 
+    @Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):
+            db = sqlite3.connect("database.db")
+            c = db.cursor()
+
+            c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (message.guild.id,))
+            prefix = c.fetchone()
+
+            if prefix is None:
+                c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (message.guild.id, "-"))
+                db.commit()
+
+                prefix = "-"
+            else:
+                prefix = prefix[0]
+
+            embed = nextcord.Embed(
+                description=f"> **Die Prefix für diesen Server ist:** `{prefix}`",
+                color=nextcord.Color.blurple()
+            )
+
+            await message.reply(embed=embed)
     
 
 
