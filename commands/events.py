@@ -23,7 +23,7 @@ class eventsCog(Cog):
             color=nextcord.Color.green()
         )
 
-        channel = self.bot.get_channel(786289557805072424)
+        channel = self.bot.get_channel(957444324080115762)
         await channel.send(embed=embed)
 
     @Cog.listener()
@@ -33,8 +33,10 @@ class eventsCog(Cog):
             color=nextcord.Color.red()
         )
 
-        channel = self.bot.get_channel(786289557805072424)
+        channel = self.bot.get_channel(957444324080115762)
         await channel.send(embed=embed)
+
+    
 
 
 
