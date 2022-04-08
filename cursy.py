@@ -24,6 +24,7 @@ bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intent
 # Extensions
 
 extensions = [
+    'commands.events',
     'commands.help',
     'commands.error',
     'commands.developer',
