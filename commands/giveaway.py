@@ -15,7 +15,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     async def _giveaway(self, ctx):
         embed = nextcord.Embed(
-            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `!giveaway create`\n> `!giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `!giveaway drop <#channel> <preis>`\n> `!giveaway end <#channel> <messageid>`\n> `!giveaway reroll <#channel> <messageid> <winner>`\n> `!giveaway list`",
+            description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
@@ -397,7 +397,7 @@ class giveaways(Cog):
 
         if giveaway is not None:
             embed = nextcord.Embed(
-                description="**Das Giveaway ist noch am laufen**\n**Du kannst mit `!giveaway end <messageid>` das Gewinnspiel beenden**",
+                description="**Das Giveaway ist noch am laufen**\n**Du kannst mit `-giveaway end <messageid>` das Gewinnspiel beenden**",
                 color=nextcord.Color.dark_red()
             )
 
