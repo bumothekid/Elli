@@ -5,7 +5,6 @@ import re
 from time import time
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import NotOwner
-from os import listdir
 
 def getPrefixFromDatabase(bot, message):
     db = sqlite3.connect("database.db")
