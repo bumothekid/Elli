@@ -22,8 +22,8 @@ class deveveloper(Cog):
             raise commands.NotOwner
 
         embed = nextcord.Embed(
-            description="**<:icon_developer:960643728140284004> Developer Commands**\n\n`-dev add <user>` | Füge einen Developer hinzu\n`-dev remove <user>` | Entferne einen Developer\n`-dev show` | Zeigt dir alle Developer\n`-dev version <version>` | Setzt die neue Version\n`-load <file>` | Lädt ein Modul\n`-unload <file>`| Entlädt ein Modul\n`-reload <file>` | Lädt ein Modul neu\n",
-            color=nextcord.Color.green()
+            description="**<:icon_developer:960643728140284004> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n",
+            color=nextcord.Color.blurple()
         )
 
         await ctx.reply(embed=embed)
