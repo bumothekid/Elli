@@ -32,7 +32,7 @@ class botInfo(Cog):
             color=nextcord.Color.blurple()
         )
         embed.set_footer(text="Cursy Bot | Powered by Nextcord", icon_url="https://avatars.githubusercontent.com/u/89693200?s=280&v=4")
-        
+
         await ctx.reply(embed=embed)
 
     @commands.command(name="prefix", aliases=['setprefix'])
@@ -40,8 +40,7 @@ class botInfo(Cog):
     @commands.has_permissions(manage_guild=True)
     async def _prefix(self, ctx, prefix):
         if len(prefix) > 4:
-            await ctx.reply("Prefix nicht länger als 4 zeichen lang.")
-            return
+            return prefixEmbed(ctx, False, "**Die Prefix darf nicht länger als 4 zeichen lang sein**")
 
         db = sqlite3.connect("database.db")
         c = db.cursor()
@@ -52,27 +51,18 @@ class botInfo(Cog):
             c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (ctx.guild.id, prefix)),
             db.commit()
 
-            return await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
+            return prefixEmbed(ctx, True, f"**Prefix wurde erfolgreich gesetzt auf `{prefix}`**")
 
         if prefix == oldPrefix[0]:
-            await ctx.reply(f"Die prefix darf nicht die selbe wie die alte sein `{oldPrefix[0]}`")
-            return
+            return prefixEmbed(ctx, False, f"**Die Prefix darf nicht die selbe wie die alte sein `{oldPrefix[0]}`**")
 
         c.execute("UPDATE guilds SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id))
         db.commit()
 
-        await ctx.reply(f"Prefix wurde erfolgreich gesetzt auf gesetzt `{prefix}`")
+        prefixEmbed(ctx, True, f"**Prefix wurde erfolgreich gesetzt auf `{prefix}`**")
 
-    @Cog.listener()
-    async def on_guild_join(self, guild):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (guild.id,))
-        prefix = c.fetchone()
-
-        if prefix is None:
-            c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (guild.id, "-"))
-            db.commit()
+async def prefixEmbed(ctx, success: bool, text: str):
+    return ctx.reply(embed=nextcord.Embed(description=f"> {text}", color=nextcord.Color.green() if success else nextcord.Color.red()))
 
 
 def setup(bot):
