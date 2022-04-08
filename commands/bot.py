@@ -11,35 +11,32 @@ class botInfo(Cog):
         self.bot = bot
 
     @commands.command(name="botinfo", aliases=['bot', 'info', 'stats'])
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _botinfo(self, ctx):
         db = sqlite3.connect("database.db")
         c = db.cursor()
+
         c.execute("SELECT uptime FROM cursy")
         uptime = c.fetchone()[0]
+
         c.execute("SELECT version FROM cursy")
         version = c.fetchone()[0]
+
         timeUp = time() - float(uptime)
         days = timeUp / 86400
         hours = (timeUp / 3600) % 24
         minutes = (timeUp / 60) % 60
-        seconds = timeUp % 60
+
         embed=nextcord.Embed(
+            description=f"**{self.bot.user.name}'s current Stats**\n\n> **<:icon_globe:960643612872417280> Guilds:** `{len(self.bot.guilds)}`\n> **<:icon_member:960643575366955079> Users:** `{sum(len(s.members) for s in self.bot.guilds)}`\n> **<:icon_server:960643654492491786> Latency:** `{round(self.bot.latency * 1000)}ms`\n\n> **<:icon_clide:960643699279265843> CPU:** `{psutil.cpu_percent()}%`\n> **<:icon_folder:962093232701988925> RAM:** `{round(psutil.virtual_memory().percent)}%`\n> **<:icon_stopwatch:959548515799953488> Uptime:** `{round(days)}d {round(hours)}h {round(minutes)}m`\n\n> **<:icon_developer:960643728140284004> Version:** `{version}`\n> **<:icon_nextcord:960645392075210862> Nextcord:** `{nextcord.__version__}`\n> **<:icon_python:960645429257699398> Python:** `{platform.python_version()}`",
             color=nextcord.Color.blurple()
         )
-        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar)
-        embed.add_field(name="<:Servers:959546817324916796> Server", value=f"`{len(self.bot.guilds)}` Server", inline=True)
-        embed.add_field(name="<:Member:959547196762632212> User", value=f"`{sum(len(s.members) for s in self.bot.guilds)}` User", inline=True)
-        embed.add_field(name="<:Channels:959547002335682600> Channel", value=f"`{sum(1 for g in self.bot.guilds for _ in g.channels)}` Channel", inline=True)
-        embed.add_field(name="<a:Loading:959548386594390036> Latency", value=f"`{round(self.bot.latency * 1000)}`ms")
-        embed.add_field(name="<:Uptime:959548515799953488> Uptime", value=f"`{days:.0f}`d `{hours:.0f}`h `{minutes:.0f}`m")
-        embed.add_field(name="<:Server:959548564231565393> CPU", value=f"`{psutil.cpu_percent()}`%")
-        embed.add_field(name="<:Version:959548722147110942> Version", value=f"`{version}` Version", inline=True)
-        embed.add_field(name="<:Nextcord:959549287870627900> Nextcord", value=f"`{nextcord.__version__}` Version", inline=True)
-        embed.add_field(name="<:python:959534353283678298> Python", value=f"`{platform.python_version()}` Version", inline=True)
         embed.set_footer(text="Cursy Bot | Powered by Nextcord", icon_url="https://avatars.githubusercontent.com/u/89693200?s=280&v=4")
+        
         await ctx.reply(embed=embed)
 
-    @commands.command(name="prefix", aliases=['prefixes'])
+    @commands.command(name="prefix", aliases=['setprefix'])
+    @commands.cooldown(2, 20, commands.BucketType.user)
     @commands.has_permissions(manage_guild=True)
     async def _prefix(self, ctx, prefix):
         if len(prefix) > 4:
