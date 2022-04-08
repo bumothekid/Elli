@@ -18,5 +18,25 @@ class eventsCog(Cog):
             c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (guild.id, "-"))
             db.commit()
 
+        embed = nextcord.Embed(
+            description=f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+            color=nextcord.Color.green()
+        )
+
+        channel = self.bot.get_channel(786289557805072424)
+        await channel.send(embed=embed)
+
+    @Cog.listener()
+    async def on_guild_remove(self, guild):
+        embed = nextcord.Embed(
+            description=f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+            color=nextcord.Color.red()
+        )
+
+        channel = self.bot.get_channel(786289557805072424)
+        await channel.send(embed=embed)
+
+
+
 def setup(bot):
     bot.add_cog(eventsCog(bot))
