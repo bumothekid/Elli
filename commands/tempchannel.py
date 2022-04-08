@@ -10,7 +10,7 @@ class tempchannel(Cog):
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
     async def _tempchannel(self, ctx):
         embed = nextcord.Embed(
-            description="** `⏳`Tempchannel Commands**\n\n> `!tempchannel set <channel>`\n> `!tempchannel remove`\n> `!tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
+            description="** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> `-tempchannel remove`\n> `-tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
             color=nextcord.Color.blurple()
         )
         await ctx.reply(embed=embed)
