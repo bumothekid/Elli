@@ -12,7 +12,7 @@ class reactionrole(Cog):
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
     async def _rr(self, ctx):
         embed = nextcord.Embed(
-            description="**🎭 Reactionrole einrichtung**\n\n> `!rr create <#channel> <messageid> <emote> <@&rolle>`\n> `!rr delete <#channel> <messageid> <emote>`",
+            description="**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`",
             color=nextcord.Color.blurple()
         )
 
