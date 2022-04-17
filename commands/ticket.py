@@ -4,6 +4,7 @@ import chat_exporter
 import io
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from .utils.utils import safeDict
 
 class ticket(Cog):
     def __init__(self, bot):
@@ -300,7 +301,7 @@ class ticket(Cog):
             await ticket.set_permissions(guild.default_role, overwrite=everyonePerms)
 
             embed = nextcord.Embed(
-                description=((ticket_message[1]).replace('\\n', '\n')).format(user_mention=payload.member.mention, user_name=payload.member.name, user_discriminator=payload.member.discriminator, ticket_link=f"[`📎`Link](https://discord.com/channels/{db_ticket[0]}/{db_ticket[1]}/{db_ticket[2]}/)", guild_name=guild.name, moderation_role=role.mention),
+                description=((ticket_message[1]).replace('\\n', '\n')).format_map(safeDict(user_mention=payload.member.mention, user_name=payload.member.name, user_discriminator=payload.member.discriminator, ticket_link=f"[`📎`Link](https://discord.com/channels/{db_ticket[0]}/{db_ticket[1]}/{db_ticket[2]}/)", guild_name=guild.name, moderation_role=role.mention)),
                 color=nextcord.Color.blurple()
             )
 
