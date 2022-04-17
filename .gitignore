@@ -3,3 +3,4 @@
 *.DS_Store
 
 *commands/__pycache__
+*commands/utils/__pycache__
