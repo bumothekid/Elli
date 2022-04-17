@@ -164,14 +164,12 @@ class ticket(Cog):
             color=nextcord.Color.blurple()
         )
 
-        i = 1
-        for ticket in tickets:
+        for i, ticket in enumerate(tickets, 1):
             channel = ctx.guild.get_channel(ticket[1])
             message = await channel.fetch_message(ticket[2])
             role = ctx.guild.get_role(ticket[3])
             
             embed.add_field(name=f"Ticket {i}", value=f"> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Support Rolle:** {role.mention}", inline=True)
-            i += 1
 
         await ctx.reply(embed=embed)
 
@@ -261,7 +259,7 @@ class ticket(Cog):
 
         if db_ticket is None and open_ticket is None:
             return
-        
+
         c.execute(f"SELECT channel_id FROM ticket_logs WHERE guild_id = {payload.guild_id}")
         log = c.fetchone()
 
@@ -282,7 +280,7 @@ class ticket(Cog):
                 try:
                     dm = await payload.member.create_dm()
                     return await dm.send(embed=embed)
-                except:
+                except Exception:
                     return
 
             role = guild.get_role(db_ticket[3])
