@@ -2,7 +2,10 @@ import sqlite3
 import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from nextcord import ui, ButtonStyle
 from .utils.utils import safeDict
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from io import BytesIO
 
 class welcome(Cog):
     def __init__(self, bot):
@@ -12,7 +15,7 @@ class welcome(Cog):
     async def _welcome(self, ctx):
         # TODO: Add pictures commands to overview command
         embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`",
+            description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`",
             color=nextcord.Color.blurple()
         )
 
@@ -111,6 +114,24 @@ class welcome(Cog):
         )
 
         await ctx.reply(embed=embed)
+
+    @_welcome.group(name="picture", aliases=["pic"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    async def _picture(self, ctx):
+        embed = nextcord.Embed(
+            description="**Es fehlt ein benötigtes Argument.**", 
+            color=nextcord.Color.dark_red()
+        )
+
+        await ctx.reply(embed=embed)
+
+    @_picture.command(name="show", aliases=["list"])
+    async def _show(self, ctx):
+        embed = nextcord.Embed(
+            description="**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons",
+            color=nextcord.Color.blurple()
+        )
+        await ctx.reply(embed=embed, view=ButtonView())
     
     @Cog.listener()
     async def on_member_join(self, member):
@@ -130,6 +151,76 @@ class welcome(Cog):
         message = welcome[2].replace("\\n", "\n").format_map(safeDict(user_mention=member.mention, user_name=member.name, user_discriminator=member.discriminator, guild_name=member.guild, guild_membercount=member.guild.member_count))
 
         await channel.send(message)
+
+class ButtonView(ui.View):
+    def __init__(self):
+        super().__init__(timeout=600)
+
+    @ui.button(style=ButtonStyle.primary, label="Bild 1", custom_id="welpic1")
+    async def _picture1(self, button, ctx):
+        # card1 = Image.open("assets/welcome/card1.png")
+        # corner = add_corners(card1, 5)
+        # corner.save("assets/welcome/usr_card1.png")
+
+        card = Image.open("assets/welcome/card1.png")
+        draw = ImageDraw.Draw(card)
+        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
+        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Medium.otf", 46)
+
+        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
+        avatar = Image.open(buffer_avatar).resize((200, 200))
+        avatar = add_corners(avatar, 10)
+        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
+        bg_w, bg_h = card.size
+        offset = (30, (bg_h - 200) // 2)
+        card.paste(avatar, offset, avatar)
+        draw.text((280, 40), "Willkommen!", (255, 255, 255), font=primaryFont)
+        draw.text((280, 120), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
+        card.save("assets/welcome/user_card1.png")
+
+        pic = nextcord.File("assets/welcome/user_card1.png")
+
+        embed = nextcord.Embed(
+            description="**Bild 1**",
+            color=nextcord.Color.blurple()
+        )
+        embed.set_image(url="attachment://user_card1.png")
+
+
+        await ctx.send(embed=embed, file=pic, delete_after=20)
+
+def add_corners(image, radius):
+    circle = Image.new('L', (radius * 2, radius * 2), 0)
+    draw = ImageDraw.Draw(circle)
+    draw.ellipse((0, 0, radius * 2, radius * 2), fill=255)
+    alpha = Image.new('L', image.size, 255)
+    w, h = image.size
+    alpha.paste(circle.crop((0, 0, radius, radius)), (0, 0))
+    alpha.paste(circle.crop((0, radius, radius, radius * 2)), (0, h - radius))
+    alpha.paste(circle.crop((radius, 0, radius * 2, radius)), (w - radius, 0))
+    alpha.paste(circle.crop((radius, radius, radius * 2, radius * 2)), (w - radius, h - radius))
+    image.putalpha(alpha)
+    return image
+
+def dropShadow( image, offset=(5,5), background=0xffffff, shadow=0x444444, 
+                border=8, iterations=3):
+  totalWidth = image.size[0] + abs(offset[0]) + 2*border
+  totalHeight = image.size[1] + abs(offset[1]) + 2*border
+  back = Image.new(image.mode, (totalWidth, totalHeight), background)
+  shadowLeft = border + max(offset[0], 0)
+  shadowTop = border + max(offset[1], 0)
+  back.paste(shadow, [shadowLeft, shadowTop, shadowLeft + image.size[0], 
+    shadowTop + image.size[1]] )
+  n = 0
+  while n < iterations:
+    back = back.filter(ImageFilter.BLUR)
+    n += 1
+
+  imageLeft = border - min(offset[0], 0)
+  imageTop = border - min(offset[1], 0)
+  back.paste(image, (imageLeft, imageTop))
+  
+  return back
 
 def setup(bot):
     bot.add_cog(welcome(bot))
