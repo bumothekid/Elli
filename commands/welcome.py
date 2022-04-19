@@ -3,6 +3,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
+from numpy import e
 from .utils.utils import safeDict
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from io import BytesIO
@@ -13,7 +14,6 @@ class welcome(Cog):
 
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     async def _welcome(self, ctx):
-        # TODO: Add pictures commands to overview command
         embed = nextcord.Embed(
             description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`",
             color=nextcord.Color.blurple()
@@ -37,15 +37,16 @@ class welcome(Cog):
         db = sqlite3.connect("database.db")
         c = db.cursor()
 
-        c.execute("SELECT channel_id FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        channel_id = c.fetchone()
+        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
+        welcome = c.fetchone()
 
-        if channel_id is not None:
+        if welcome is not None:
+            picture = welcome[3] if welcome[3] is not None else "Keins"
             c.execute("UPDATE welcome SET channel_id = ? WHERE guild_id = ?", (channel.id, ctx.guild.id))
             db.commit()
 
             embed = nextcord.Embed(
-                description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!",
+                description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!\n> **Bild:** `{picture}`",
                 color=nextcord.Color.dark_green()
             )
 
@@ -55,7 +56,7 @@ class welcome(Cog):
         db.commit()
 
         embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!",
+            description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!\n> **Bild:** `Keins`",
             color=nextcord.Color.dark_green()
         )
 
@@ -105,11 +106,12 @@ class welcome(Cog):
 
             return await ctx.reply(embed=embed)
 
+        picture = welcome[3] if welcome[3] is not None else "Keins"
         c.execute("UPDATE welcome SET message = ? WHERE guild_id = ?", [message, ctx.guild.id])
         db.commit()
 
         embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}",
+            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** {picture}",
             color=nextcord.Color.dark_green()
         )
 
@@ -124,6 +126,43 @@ class welcome(Cog):
         )
 
         await ctx.reply(embed=embed)
+
+    @_picture.command(name="set", aliases=["add", "update", "select"])
+    @commands.has_permissions(manage_guild=True)
+    async def _set(self, ctx, picture):
+        if picture not in ["1", "2", "3", "4", "5", "6"]:
+            embed = nextcord.Embed(
+                description="**Ungültiges Bild**\n**Gültige Bilder `<1 | 2 | 3 | 4 | 5 | 6>`**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+        
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
+        welcome = c.fetchone()
+
+        if welcome is None:
+            embed = nextcord.Embed(
+                description="**Es ist kein Willkommenskanal gesetzt**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        c.execute("UPDATE welcome SET picture = ? WHERE guild_id = ?", (picture, ctx.guild.id))
+        db.commit()
+
+        embed = nextcord.Embed(
+            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** {picture}",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+
+
 
     @_picture.command(name="show", aliases=["list"])
     async def _show(self, ctx):
