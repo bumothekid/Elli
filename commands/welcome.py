@@ -3,8 +3,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
-from numpy import e
-from .utils.utils import safeDict
+from .utils.utils import safeDict, welcomeImageProcessing
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from io import BytesIO
 
@@ -129,7 +128,7 @@ class welcome(Cog):
 
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
-    async def _set(self, ctx, picture):
+    async def _set2(self, ctx, picture):
         if picture not in ["1", "2", "3", "4", "5", "6"]:
             embed = nextcord.Embed(
                 description="**Ungültiges Bild**\n**Gültige Bilder `<1 | 2 | 3 | 4 | 5 | 6>`**",
@@ -162,9 +161,8 @@ class welcome(Cog):
 
         await ctx.reply(embed=embed)
 
-
-
     @_picture.command(name="show", aliases=["list"])
+    @commands.has_permissions(manage_guild=True)
     async def _show(self, ctx):
         embed = nextcord.Embed(
             description="**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons",
@@ -172,8 +170,11 @@ class welcome(Cog):
         )
         await ctx.reply(embed=embed, view=ButtonView())
     
-    @Cog.listener()
-    async def on_member_join(self, member):
+    # @Cog.listener()
+    # async def on_member_join(self, member):
+    @commands.command(name="join")
+    async def _join(self, ctx):
+        member = ctx.author
         if member.bot:
             return
         
@@ -185,35 +186,27 @@ class welcome(Cog):
 
         if welcome is None or welcome[1] is None:
             return
+
+        card = None
+
+        if welcome[3] is not None:
+            img = await welcomeImageProcessing(member, Image.open(f"assets/welcome/card{welcome[3]}.png"))
+            img.save(f"assets/welcome/user_card{welcome[3]}.png")
+
+            card = nextcord.File(f"assets/welcome/user_card{welcome[3]}.png")
+            print("a")
     
         channel = self.bot.get_channel(welcome[1])
         message = welcome[2].replace("\\n", "\n").format_map(safeDict(user_mention=member.mention, user_name=member.name, user_discriminator=member.discriminator, guild_name=member.guild, guild_membercount=member.guild.member_count))
 
-        await channel.send(message)
-
+        await channel.send(message, file=card)
 class ButtonView(ui.View):
     def __init__(self):
         super().__init__(timeout=600)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 1", custom_id="welpic1")
     async def _picture1(self, _, ctx):
-        card = Image.open("assets/welcome/card1.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card1.png"))
         card.save("assets/welcome/user_card1.png")
         pic = nextcord.File("assets/welcome/user_card1.png")
 
@@ -226,23 +219,7 @@ class ButtonView(ui.View):
     
     @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="welpic2")
     async def _picture2(self, _, ctx):
-        card = Image.open("assets/welcome/card2.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card2.png"))
         card.save("assets/welcome/user_card2.png")
         pic = nextcord.File("assets/welcome/user_card2.png")
 
@@ -255,23 +232,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 3", custom_id="welpic3")
     async def _picture3(self, _, ctx):
-        card = Image.open("assets/welcome/card3.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card3.png"))
         card.save("assets/welcome/user_card3.png")
         pic = nextcord.File("assets/welcome/user_card3.png")
 
@@ -284,23 +245,7 @@ class ButtonView(ui.View):
     
     @ui.button(style=ButtonStyle.primary, label="Bild 4", custom_id="welpic4")
     async def _picture4(self, _, ctx):
-        card = Image.open("assets/welcome/card4.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card4.png"))
         card.save("assets/welcome/user_card4.png")
         pic = nextcord.File("assets/welcome/user_card4.png")
 
@@ -313,23 +258,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 5", custom_id="welpic5")
     async def _picture5(self, _, ctx):
-        card = Image.open("assets/welcome/card5.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card5.png"))
         card.save("assets/welcome/user_card5.png")
         pic = nextcord.File("assets/welcome/user_card5.png")
 
@@ -342,23 +271,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 6", custom_id="welpic6")
     async def _picture6(self, _, ctx):
-        card = Image.open("assets/welcome/card6.png")
-        draw = ImageDraw.Draw(card)
-        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
-
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 8)
-        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-
-        _, bg_h = card.size
-        offset = (20, (bg_h - 225) // 2)
-        card.paste(avatar, offset, avatar)
-
-        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
-
+        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card6.png"))
         card.save("assets/welcome/user_card6.png")
         pic = nextcord.File("assets/welcome/user_card6.png")
 
@@ -368,39 +281,6 @@ class ButtonView(ui.View):
         )
 
         await ctx.send(embed=embed, file=pic)
-
-def add_corners(image, radius, path):
-    circle = Image.new('L', (radius * 2, radius * 2), 0)
-    draw = ImageDraw.Draw(circle)
-    draw.ellipse((0, 0, radius * 2, radius * 2), fill=255)
-    alpha = Image.new('L', image.size, 255)
-    w, h = image.size
-    alpha.paste(circle.crop((0, 0, radius, radius)), (0, 0))
-    alpha.paste(circle.crop((0, radius, radius, radius * 2)), (0, h - radius))
-    alpha.paste(circle.crop((radius, 0, radius * 2, radius)), (w - radius, 0))
-    alpha.paste(circle.crop((radius, radius, radius * 2, radius * 2)), (w - radius, h - radius))
-    image.putalpha(alpha)
-    return image.save(path)
-
-# def dropShadow( image, offset=(5,5), background=0xffffff, shadow=0x444444, 
-#                 border=8, iterations=3):
-#   totalWidth = image.size[0] + abs(offset[0]) + 2*border
-#   totalHeight = image.size[1] + abs(offset[1]) + 2*border
-#   back = Image.new(image.mode, (totalWidth, totalHeight), background)
-#   shadowLeft = border + max(offset[0], 0)
-#   shadowTop = border + max(offset[1], 0)
-#   back.paste(shadow, [shadowLeft, shadowTop, shadowLeft + image.size[0], 
-#     shadowTop + image.size[1]] )
-#   n = 0
-#   while n < iterations:
-#     back = back.filter(ImageFilter.BLUR)
-#     n += 1
-
-#   imageLeft = border - min(offset[0], 0)
-#   imageTop = border - min(offset[1], 0)
-#   back.paste(image, (imageLeft, imageTop))
-
-#   return back
 
 def setup(bot):
     bot.add_cog(welcome(bot))
