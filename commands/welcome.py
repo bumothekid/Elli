@@ -4,8 +4,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
 from .utils.utils import safeDict, welcomeImageProcessing
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
-from io import BytesIO
+from PIL import Image
 
 class welcome(Cog):
     def __init__(self, bot):
@@ -40,22 +39,23 @@ class welcome(Cog):
         welcome = c.fetchone()
 
         if welcome is not None:
+            message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
             picture = welcome[3] if welcome[3] is not None else "Keins"
             c.execute("UPDATE welcome SET channel_id = ? WHERE guild_id = ?", (channel.id, ctx.guild.id))
             db.commit()
 
             embed = nextcord.Embed(
-                description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!\n> **Bild:** `{picture}`",
+                description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`",
                 color=nextcord.Color.dark_green()
             )
 
             return await ctx.reply(embed=embed)
 
-        c.execute("INSERT INTO welcome(guild_id, channel_id, message, picture) VALUES(?,?,?, NULL)", [ctx.guild.id, channel.id, "Willkommen auf guild_name, user_mention!"])
+        c.execute("INSERT INTO welcome(guild_id, channel_id, message, picture) VALUES(?,?,?, NULL)", [ctx.guild.id, channel.id, "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"])
         db.commit()
 
         embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf guild_name, user_mention!\n> **Bild:** `Keins`",
+            description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`",
             color=nextcord.Color.dark_green()
         )
 
@@ -170,11 +170,8 @@ class welcome(Cog):
         )
         await ctx.reply(embed=embed, view=ButtonView())
     
-    # @Cog.listener()
-    # async def on_member_join(self, member):
-    @commands.command(name="join")
-    async def _join(self, ctx):
-        member = ctx.author
+    @Cog.listener()
+    async def on_member_join(self, member):
         if member.bot:
             return
         
@@ -194,7 +191,6 @@ class welcome(Cog):
             img.save(f"assets/welcome/user_card{welcome[3]}.png")
 
             card = nextcord.File(f"assets/welcome/user_card{welcome[3]}.png")
-            print("a")
     
         channel = self.bot.get_channel(welcome[1])
         message = welcome[2].replace("\\n", "\n").format_map(safeDict(user_mention=member.mention, user_name=member.name, user_discriminator=member.discriminator, guild_name=member.guild, guild_membercount=member.guild.member_count))
