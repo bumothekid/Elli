@@ -1,3 +1,4 @@
+import contextlib
 import nextcord
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
@@ -5,6 +6,26 @@ from io import BytesIO
 class safeDict(dict):
     def __missing__(self, key):
         return "{" + key + "}"
+
+async def errorLogging(ctx, text):
+    errorEmbed = nextcord.Embed(
+        description=f"> **{text}**",
+        color=nextcord.Color.red()
+    )
+
+    permissionEmbed = nextcord.Embed(
+        description="> **Der Bot hat nicht genug Berechtigungen um in diesen Channel zu schreiben**",
+        color=nextcord.Color.red()
+        )
+
+
+    try:
+        await ctx.reply(embed=errorEmbed)
+    except Exception:
+        with contextlib.suppress(Exception):
+            await ctx.add_reaction(emoji="⚠️")
+            await ctx.author.create_dm()
+            await ctx.author.dm_channel.send(embed=permissionEmbed)
 
 async def welcomeImageProcessing(ctx, image: Image) -> Image:
     draw = ImageDraw.Draw(image)
