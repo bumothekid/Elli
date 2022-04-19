@@ -160,22 +160,22 @@ class ButtonView(ui.View):
     async def _picture1(self, button, ctx):
         # card1 = Image.open("assets/welcome/card1.png")
         # corner = add_corners(card1, 5)
-        # corner.save("assets/welcome/usr_card1.png")
+        # corner.save("assets/welcome/card1.png")
 
         card = Image.open("assets/welcome/card1.png")
         draw = ImageDraw.Draw(card)
         primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
-        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Medium.otf", 46)
+        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
 
         buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
-        avatar = Image.open(buffer_avatar).resize((200, 200))
+        avatar = Image.open(buffer_avatar).resize((225, 225))
         avatar = add_corners(avatar, 10)
         # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
-        bg_w, bg_h = card.size
-        offset = (30, (bg_h - 200) // 2)
+        _, bg_h = card.size
+        offset = (20, (bg_h - 225) // 2)
         card.paste(avatar, offset, avatar)
-        draw.text((280, 40), "Willkommen!", (255, 255, 255), font=primaryFont)
-        draw.text((280, 120), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
+        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
+        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
         card.save("assets/welcome/user_card1.png")
 
         pic = nextcord.File("assets/welcome/user_card1.png")
@@ -184,10 +184,8 @@ class ButtonView(ui.View):
             description="**Bild 1**",
             color=nextcord.Color.blurple()
         )
-        embed.set_image(url="attachment://user_card1.png")
 
-
-        await ctx.send(embed=embed, file=pic, delete_after=20)
+        await ctx.send(embed=embed, file=pic)
 
 def add_corners(image, radius):
     circle = Image.new('L', (radius * 2, radius * 2), 0)
@@ -202,25 +200,25 @@ def add_corners(image, radius):
     image.putalpha(alpha)
     return image
 
-def dropShadow( image, offset=(5,5), background=0xffffff, shadow=0x444444, 
-                border=8, iterations=3):
-  totalWidth = image.size[0] + abs(offset[0]) + 2*border
-  totalHeight = image.size[1] + abs(offset[1]) + 2*border
-  back = Image.new(image.mode, (totalWidth, totalHeight), background)
-  shadowLeft = border + max(offset[0], 0)
-  shadowTop = border + max(offset[1], 0)
-  back.paste(shadow, [shadowLeft, shadowTop, shadowLeft + image.size[0], 
-    shadowTop + image.size[1]] )
-  n = 0
-  while n < iterations:
-    back = back.filter(ImageFilter.BLUR)
-    n += 1
+# def dropShadow( image, offset=(5,5), background=0xffffff, shadow=0x444444, 
+#                 border=8, iterations=3):
+#   totalWidth = image.size[0] + abs(offset[0]) + 2*border
+#   totalHeight = image.size[1] + abs(offset[1]) + 2*border
+#   back = Image.new(image.mode, (totalWidth, totalHeight), background)
+#   shadowLeft = border + max(offset[0], 0)
+#   shadowTop = border + max(offset[1], 0)
+#   back.paste(shadow, [shadowLeft, shadowTop, shadowLeft + image.size[0], 
+#     shadowTop + image.size[1]] )
+#   n = 0
+#   while n < iterations:
+#     back = back.filter(ImageFilter.BLUR)
+#     n += 1
 
-  imageLeft = border - min(offset[0], 0)
-  imageTop = border - min(offset[1], 0)
-  back.paste(image, (imageLeft, imageTop))
-  
-  return back
+#   imageLeft = border - min(offset[0], 0)
+#   imageTop = border - min(offset[1], 0)
+#   back.paste(image, (imageLeft, imageTop))
+
+#   return back
 
 def setup(bot):
     bot.add_cog(welcome(bot))
