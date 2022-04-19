@@ -157,7 +157,7 @@ class ButtonView(ui.View):
         super().__init__(timeout=600)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 1", custom_id="welpic1")
-    async def _picture1(self, button, ctx):
+    async def _picture1(self, _, ctx):
         # card1 = Image.open("assets/welcome/card1.png")
         # corner = add_corners(card1, 5)
         # corner.save("assets/welcome/card1.png")
@@ -169,7 +169,7 @@ class ButtonView(ui.View):
 
         buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
         avatar = Image.open(buffer_avatar).resize((225, 225))
-        avatar = add_corners(avatar, 10)
+        avatar = add_corners(avatar, 8)
         # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
         _, bg_h = card.size
         offset = (20, (bg_h - 225) // 2)
@@ -182,6 +182,37 @@ class ButtonView(ui.View):
 
         embed = nextcord.Embed(
             description="**Bild 1**",
+            color=nextcord.Color.blurple()
+        )
+
+        await ctx.send(embed=embed, file=pic)
+    
+    @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="welpic2")
+    async def _picture2(self, _, ctx):
+        # card1 = Image.open("assets/welcome/card2.png")
+        # corner = add_corners(card1, 5)
+        # corner.save("assets/welcome/card2.png")
+
+        card = Image.open("assets/welcome/card2.png")
+        draw = ImageDraw.Draw(card)
+        primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
+        secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
+
+        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
+        avatar = Image.open(buffer_avatar).resize((225, 225))
+        avatar = add_corners(avatar, 8)
+        # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
+        _, bg_h = card.size
+        offset = (20, (bg_h - 225) // 2)
+        card.paste(avatar, offset, avatar)
+        draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
+        draw.text((440, 160), f"{ctx.user.name}", (255, 255, 255), font=secondaryFont)
+        card.save("assets/welcome/user_card2.png")
+
+        pic = nextcord.File("assets/welcome/user_card2.png")
+
+        embed = nextcord.Embed(
+            description="**Bild 2**",
             color=nextcord.Color.blurple()
         )
 
