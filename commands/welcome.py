@@ -1,3 +1,4 @@
+from ast import alias
 import sqlite3
 import nextcord
 from nextcord.ext import commands
@@ -13,7 +14,7 @@ class welcome(Cog):
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     async def _welcome(self, ctx):
         embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`",
+            description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
             color=nextcord.Color.blurple()
         )
 
@@ -110,7 +111,7 @@ class welcome(Cog):
         db.commit()
 
         embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** {picture}",
+            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`",
             color=nextcord.Color.dark_green()
         )
 
@@ -155,7 +156,34 @@ class welcome(Cog):
         db.commit()
 
         embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** {picture}",
+            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** `{picture}`",
+            color=nextcord.Color.dark_green()
+        )
+
+        await ctx.reply(embed=embed)
+    
+    @_picture.command(name="remove", aliases=["delete", "reset"])
+    @commands.has_permissions(manage_guild=True)
+    async def _remove2(self, ctx):
+        db = sqlite3.connect("database.db")
+        c = db.cursor()
+
+        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
+        welcome = c.fetchone()
+
+        if welcome is None or welcome[1] is None:
+            embed = nextcord.Embed(
+                description="**Es ist kein Willkommenskanal gesetzt**",
+                color=nextcord.Color.dark_red()
+            )
+
+            return await ctx.reply(embed=embed)
+
+        c.execute("UPDATE welcome SET picture = NULL WHERE guild_id = ?", [ctx.guild.id])
+        db.commit()
+
+        embed = nextcord.Embed(
+            description="**<:icon_member_joined:965033605707481128> Willkommensbild zurückgesetzt**",
             color=nextcord.Color.dark_green()
         )
 
@@ -196,6 +224,7 @@ class welcome(Cog):
         message = welcome[2].replace("\\n", "\n").format_map(safeDict(user_mention=member.mention, user_name=member.name, user_discriminator=member.discriminator, guild_name=member.guild, guild_membercount=member.guild.member_count))
 
         await channel.send(message, file=card)
+
 class ButtonView(ui.View):
     def __init__(self):
         super().__init__(timeout=600)
