@@ -1,26 +1,13 @@
 # Imports
 import nextcord
-import sqlite3
-import re
 from time import time
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import NotOwner
+from commands.utils.other import getPrefixFromDatabase, devCheck
+from commands.utils.embeds import successEmbed, errorEmbed, devLogging
+from commands.utils.database import update
 
-def getPrefixFromDatabase(bot, message):
-    db = sqlite3.connect("database.db")
-    c = db.cursor()
-    c.execute(f"SELECT prefix FROM guilds WHERE guild_id = '{message.guild.id}'")
-    prefix = c.fetchone()
-    if prefix is None:
-        c.execute("INSERT INTO guilds (guild_id, prefix) VALUES (?, ?)", (message.guild.id, "-"))
-        db.commit()
-        return "-"
-    return prefix
-
-# Bot
 bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all(), help_command=None)
-
-# Extensions
 
 extensions = [
     'commands.events',
@@ -38,15 +25,14 @@ extensions = [
 
 @bot.event
 async def on_ready():
-    db = sqlite3.connect("database.db")
-    c = db.cursor()
-    c.execute(f"UPDATE cursy SET uptime = '{time()}'")
-    db.commit()
+    update(table="cursy", columns="uptime", values=[time()])
+
     print('═════◢◤◈◥◣═════')
     print('Bot ist Online.')
     print(bot.user.name)
     print(bot.user.id)
     print('═════◥◣◈◢◤═════')
+
     await statusTask()
 
 async def statusTask():
@@ -54,79 +40,57 @@ async def statusTask():
 
 @bot.command()
 async def load(ctx, ext):
-    db = sqlite3.connect("database.db")
-    c = db.cursor()
-    c.execute("SELECT developer FROM cursy")
-    devs = c.fetchone()[0]
-    devlist = re.findall(r"[0-9]+", devs)
-
-    if str(ctx.author.id) not in devlist:
+    if not devCheck(ctx.author.id):
         raise NotOwner
 
-    extension = f"commands.{ext}"
-
     try:
-        bot.load_extension(extension)
+        bot.load_extension(ext if "commands." in ext else f"commands.{ext}")
 
-        await cogEmbed(ctx, success=True, text=f'{extension} wurde geladen.')
-    except Exception as error:
-        await cogEmbed(ctx, success=False, text=f'{extension} konnte nicht geladen werden\n`[{error}]`')
+        await devLogging(bot, ctx, f"{ctx.author} hat {ext} geladen.")
+        await successEmbed(bot, ctx, f"{ext} wurde geladen.")
+    except Exception as e:
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.\n```py\n{e}```")
 
 @bot.command()
 async def unload(ctx, ext):
-    db = sqlite3.connect("database.db")
-    c = db.cursor()
-    c.execute("SELECT developer FROM cursy")
-    devs = c.fetchone()[0]
-    devlist = re.findall(r"[0-9]+", devs)
-
-    if str(ctx.author.id) not in devlist:
+    if not devCheck(ctx.author.id):
         raise NotOwner
 
-    extension = f"commands.{ext}"
-
     try:
-        bot.unload_extension(extension)
+        bot.unload_extension(ext if "commands." in ext else f"commands.{ext}")
 
-        await cogEmbed(ctx, success=True, text=f'{extension} wurde deaktiviert.')
+        await devLogging(bot, ctx, f"{ctx.author} hat {ext} entladen.")
+        await successEmbed(bot, ctx, f"{ext} wurde deaktiviert.")
     except Exception as error:
-        await cogEmbed(ctx, success=False, text=f'{extension} konnte nicht deaktiviert werden\n`[{error}]`')
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht deaktiviert werden.\n```py\n{error}```")
 
 @bot.command()
 async def reload(ctx, ext):
-    db = sqlite3.connect("database.db")
-    c = db.cursor()
-    c.execute("SELECT developer FROM cursy")
-    devs = c.fetchone()[0]
-    devlist = re.findall(r"[0-9]+", devs)
-
-    if str(ctx.author.id) not in devlist:
+    if not devCheck(ctx.author.id):
         raise NotOwner
 
-    extension = f"commands.{ext}"
+    if ext in ["all", "alle", "*", "commands.*"]:
+        for extension in extensions:
+            try:
+                bot.reload_extension(extension)
+            except Exception as e:
+                await errorEmbed(bot, ctx, f"{extension} konnte nicht geladen werden.\n```py\n{e}```")
+
+        await devLogging(bot, ctx, f"{ctx.author} hat alle Cogs neu geladen.")
+        return await successEmbed(bot, ctx, "Alle Cogs wurden neu geladen.")
 
     try:
-        if ext != "*":
-
-            bot.reload_extension(name=extension)
-
-            return await cogEmbed(ctx, success=True, text=f'{extension} wurde neu geladen.')
-
-        for extension in extensions:
-            bot.reload_extension(name=extension)
-        
-        await cogEmbed(ctx, success=True, text=f'{len(extensions)} Cog´s neu geladen.')
-    except Exception as error:
-        await cogEmbed(ctx, success=False, text=f'{extension} konnte nicht geladen werden\n`[{error}]`')
-
-async def cogEmbed(ctx, success: bool, text: str):
-    return await ctx.reply(embed=nextcord.Embed(description=text, color=nextcord.Color.green() if success else nextcord.Color.red()))
+        bot.reload_extension(ext)
+        await devLogging(bot, ctx, f"{ctx.author} hat {ext} neu geladen.")
+        await successEmbed(bot, ctx, f"{ext} wurde neu geladen.")
+    except Exception as e:
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.\n```py\n{e}```")
 
 if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
-        except Exception as error:
-            print(f'{extension} konnte nicht geladen werden.\n`[{error}]`')
+        except Exception as e:
+            print(f'{extension} konnte nicht geladen werden.\n`[{e}]`')
 
 bot.run("***REMOVED***")

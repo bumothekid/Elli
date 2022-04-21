@@ -1,0 +1,206 @@
+import contextlib
+import nextcord
+from nextcord import ui
+
+botLoggingChannelID = 957444324080115762
+
+async def infoEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+    """ 
+    Creates and sends an information embed
+    This is used when a information is shown
+
+    Parameters
+    -----------
+    self: :class:`nextcord.Bot`
+        The bot instance
+    ctx: :class:`nextcord.Interaction`
+        The interaction to reply to or channel if you want to send the embed to an specific channel
+    text: :class:`str`
+        The text to embed
+    color: :class:`nextcord.Color`
+        Optional color to use for the embed
+    fields: :class:`list[dict]`
+        Optional fields with a name and a value
+    footer: :class:`dict`
+        Optional text and icon_url to use for the footer
+    """
+    infoEmbed = nextcord.Embed(
+        description=text, 
+        color=color
+    )
+
+    if fields is not None:
+        for field in fields:
+            try:
+                infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
+            except KeyError:
+                print("There was an KeyError while adding field")
+
+
+    if footer is not None:
+        try:
+            infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
+        except KeyError:
+            print("There was an KeyError while setting footer")
+
+    try:
+        match type(ctx):
+            case nextcord.Interaction:
+                await ctx.reply(embed=infoEmbed, view=view, file=file)
+            case nextcord.ext.commands.context.Context:
+                await ctx.reply(embed=infoEmbed, view=view, file=file)
+            case nextcord.message.Message:
+                await ctx.reply(embed=infoEmbed, view=view, file=file)
+            case nextcord.TextChannel:
+                await ctx.send(embed=infoEmbed, view=view, file=file)
+            case nextcord.Member:
+                dm = await ctx.create_dm()
+                await dm.send(embed=infoEmbed, view=view, file=file)
+            case _:
+                print(type(ctx))
+                print("Error: Unknown interaction")
+    except Exception:
+        await permissionError(self, ctx)
+
+async def successEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+    """ 
+    Creates and sends an successed embed
+    This is used when a something succeeds
+
+    Parameters
+    -----------
+    self: :class:`nextcord.Bot`
+        The bot instance
+    ctx :class:`nextcord.Interaction or nextcord.TextChannel`
+        The interaction to reply to or channel if you want to send the embed to an specific channel
+    text: :class:`str`
+        The text to embed
+    color: :class:`nextcord.Color`
+        Optional color to use for the embed
+    """
+    successEmbed = nextcord.Embed(
+        description=text,
+        color=color
+    )
+
+    if fields is not None:
+        for field in fields:
+            try:
+                infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
+            except KeyError:
+                print("There was an KeyError while adding field")
+
+
+    if footer is not None:
+        try:
+            infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
+        except KeyError:
+            print("There was an KeyError while setting footer")
+
+    try:
+        match type(ctx):
+            case nextcord.Interaction:
+                await ctx.reply(embed=successEmbed, view=view, file=file)
+            case nextcord.ext.commands.context.Context:
+                await ctx.reply(embed=successEmbed, view=view, file=file)
+            case nextcord.message.Message:
+                await ctx.reply(embed=successEmbed, view=view, file=file)
+            case nextcord.TextChannel:
+                await ctx.send(embed=successEmbed, view=view, file=file)
+            case nextcord.Member:
+                dm = await ctx.create_dm()
+                await dm.send(embed=successEmbed, view=view, file=file)
+            case _:
+                print(type(ctx))
+                print("Error: Unknown interaction")
+    except Exception:
+        await permissionError(self, ctx)
+
+async def errorEmbed(self, ctx: nextcord.Interaction | nextcord.message.Message | nextcord.TextChannel | nextcord.ext.commands.context.Context | nextcord.Member, text: str, file: nextcord.File = None):
+    """ 
+    Creates and sends an error embed
+    This is used when something is wrong and throws an exception
+
+    Parameters
+    -----------
+    self: :class:`nextcord.Bot`
+        The bot instance
+    ctx: :class:`nextcord.Interaction`
+        The interaction to reply to or channel if you want to send the embed to an specific channel
+    text: :class:`str`
+        The text to embed
+    """
+    errorEmbed = nextcord.Embed(
+        description=f"> **{text}**",
+        color=nextcord.Color.red()
+    )
+
+    try:
+        match type(ctx):
+            case nextcord.Interaction:
+                await ctx.reply(embed=errorEmbed, file=file)
+            case nextcord.ext.commands.context.Context:
+                await ctx.reply(embed=errorEmbed, file=file)
+            case nextcord.message.Message:
+                await ctx.reply(embed=errorEmbed, file=file)
+            case nextcord.TextChannel:
+                await ctx.send(embed=errorEmbed, file=file)
+            case nextcord.Member:
+                dm = await ctx.create_dm()
+                await dm.send(embed=errorEmbed, file=file)
+            case _:
+                print(type(ctx))
+                print("Error: Unknown interaction")
+    except Exception:
+        permissionError(self, ctx)
+
+async def errorLogging(self, ctx: nextcord.Interaction, error: str):
+    """
+    Creates and sends an error embed for critical errors into the bot logging channel
+    This is called when an error occurs
+
+    Parameters
+    -----------
+    self: :class:`nextcord.Bot`
+        The bot instance
+    ctx: :class:`nextcord.Interaction`
+        The interaction where the error occurred
+    error: :class:`str`
+        The error message that occurred
+    """
+    channel = self.bot.get_channel(botLoggingChannelID)
+    errorEmbed = nextcord.Embed(
+        color=nextcord.Color.red()
+    )
+
+    errorEmbed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
+    errorEmbed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.content}```", inline=False)
+    errorEmbed.add_field(name="<:icon_error_red:962068826311254177> Error", value=f"```python\n{error}```", inline=False)
+
+    await channel.send(embed=errorEmbed)
+
+async def devLogging(self, ctx: nextcord.Interaction, text: str):
+    channel = self.bot.get_channel(botLoggingChannelID)
+    embed = nextcord.Embed(
+        description=f"**{ctx.author} hat ein Befehl ausgeführt**",
+        color=nextcord.Color.blurple()
+    )
+
+    embed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
+    embed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.content}```", inline=False)
+    embed.add_field(name="<:icon_tick:962067144877695016> Action", value=f"```css\n{text}```", inline=False)
+
+    await channel.send(embed=embed)
+
+async def permissionError(self, ctx: nextcord.Interaction):
+    with contextlib.suppress(Exception):
+        emote = self.bot.get_emoji(962068826311254177)
+
+        permissionEmbed = nextcord.Embed(
+            description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",
+            color=nextcord.Color.red()
+        )
+
+        await ctx.add_reaction(emote)
+        await ctx.author.create_dm()
+        await ctx.author.dm_channel.send(embed=permissionEmbed)

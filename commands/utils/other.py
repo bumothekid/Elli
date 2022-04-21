@@ -1,0 +1,24 @@
+from re import findall
+from .database import readOne, insert
+
+class safeDict(dict):
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+def getPrefixFromDatabase(bot, message):
+    prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])
+
+    if prefix is None:
+        insert(table="guilds", columns="guild_id, prefix", values=[message.guild.id, "-"])
+        return "-"
+
+    return prefix
+
+def devCheck(authorid: int) -> bool:
+    devs = readOne(columns="developer", table="cursy")
+    devlist = findall(r"[0-9]+", devs[0])
+
+    if str(authorid) not in devlist:
+        return False
+    
+    return True

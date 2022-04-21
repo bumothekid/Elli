@@ -1,7 +1,9 @@
 import nextcord
 import sqlite3
-from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from .utils.other import getPrefixFromDatabase
+from .utils.database import readOne, insert
+from .utils.embeds import infoEmbed
 
 class eventsCog(Cog):
     def __init__(self, bot):
@@ -9,32 +11,24 @@ class eventsCog(Cog):
 
     @Cog.listener()
     async def on_guild_join(self, guild):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (guild.id,))
-        prefix = c.fetchone()
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[guild.id])
 
         if prefix is None:
-            c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (guild.id, "-"))
-            db.commit()
+            insert(table="guilds", columns="guild_id, prefix", values=[guild.id, "-"])
 
-        embed = nextcord.Embed(
-            description=f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
-            color=nextcord.Color.green()
+        await infoEmbed(self,
+                        self.bot.get_channel(957444324080115762),
+                        f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+                        color=nextcord.Color.green()
         )
-
-        channel = self.bot.get_channel(957444324080115762)
-        await channel.send(embed=embed)
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
-        embed = nextcord.Embed(
-            description=f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
-            color=nextcord.Color.red()
+        await infoEmbed(self,
+                        self.bot.get_channel(957444324080115762),
+                        f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+                        color=nextcord.Color.red()
         )
-
-        channel = self.bot.get_channel(957444324080115762)
-        await channel.send(embed=embed)
 
     @Cog.listener()
     async def on_message(self, message):
@@ -42,26 +36,7 @@ class eventsCog(Cog):
             return
 
         if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):
-            db = sqlite3.connect("database.db")
-            c = db.cursor()
-
-            c.execute("SELECT prefix FROM guilds WHERE guild_id = ?", (message.guild.id,))
-            prefix = c.fetchone()
-
-            if prefix is None:
-                c.execute("INSERT INTO guilds(guild_id, prefix) VALUES (?, ?)", (message.guild.id, "-"))
-                db.commit()
-
-                prefix = "-"
-            else:
-                prefix = prefix[0]
-
-            embed = nextcord.Embed(
-                description=f"> **Die Prefix für diesen Server ist:** `{prefix}`",
-                color=nextcord.Color.blurple()
-            )
-
-            await message.reply(embed=embed)
+            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`")
     
 
 

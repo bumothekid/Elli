@@ -1,9 +1,9 @@
-import sqlite3
 import nextcord
-
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
-from .utils.utils import safeDict
+from .utils.other import safeDict
+from .utils.database import readOne, readAll, insert, update, delete
+from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 
 class tempchannel(Cog):
     def __init__(self, bot):
@@ -11,136 +11,76 @@ class tempchannel(Cog):
 
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
     async def _tempchannel(self, ctx):
-        embed = nextcord.Embed(
-            description="** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> `-tempchannel remove`\n> `-tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
-            color=nextcord.Color.blurple()
-        )
-        await ctx.reply(embed=embed)
+        await infoEmbed(self, ctx, "** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> `-tempchannel remove`\n> `-tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`")
 
     @_tempchannel.command(name="add", aliases=['create', 'set'])
     @commands.has_permissions(manage_guild=True)
     async def _add(self, ctx, channel: nextcord.VoiceChannel):
         if channel not in ctx.guild.voice_channels:
             raise commands.ChannelNotFound(channel)
-        
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
-        tempchannel = c.fetchone()
+
+        tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is not None:
-            c.execute(f"UPDATE tempchannels SET channel_id = '{channel.id}' WHERE guild_id = '{ctx.guild.id}'")
-            db.commit()
+            update(table="tempchannels", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            embed = nextcord.Embed(
-                description=f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{channel.name}`\n> **Name:** `{tempchannel[2]}`",
-                color=nextcord.Color.dark_green()
-            )
+            return await successEmbed(self, ctx, f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{channel.name}`\n> **Name:** `{tempchannel[2]}`")
 
-            return await ctx.reply(embed=embed)
+        insert(table="tempchannels", columns="guild_id, channel_id, name", values=[ctx.guild.id, channel.id, "⏳ {user}"])
 
-        c.execute("INSERT INTO tempchannels(guild_id, channel_id, name) VALUES(?, ?, ?)", [ctx.guild.id, channel.id, "⏳ {user}"])
-        db.commit()
-    
-        name = "{user}"
-
-        embed = nextcord.Embed(
-            description=f"** `⏳`Tempchannel erstellt**\n\n> **Channel:** `{channel.name}`\n> **Name:** `⏳ {name}`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        await successEmbed(self, ctx, f"** `⏳`Tempchannel erstellt**\n\n> **Channel:** `{channel.name}`\n> **Name:** `⏳ {{name}}`")
 
     @_tempchannel.command(name="remove", aliases=['delete', 'del'])
     @commands.has_permissions(manage_guild=True)
     async def _remove(self, ctx):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
-        tempchannel = c.fetchone()
+        tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            embed = nextcord.Embed(
-                description="**Es existiert noch kein Tempchannel auf diesem Server**",
-                color=nextcord.Color.dark_red()
-            )
+            return await errorEmbed(self, ctx, "Es existiert noch kein Tempchannel auf diesem Server.")
 
-            return await ctx.reply(embed=embed)
+        update(table="tempchannels", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
 
-        c.execute(f"UPDATE tempchannels SET channel_id=NULL WHERE guild_id = '{ctx.guild.id}'")
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"** `⏳`Tempchannel gelöscht**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{tempchannel[2]}`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        await successEmbed(self, ctx, f"** `⏳`Tempchannel entfernt**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{tempchannel[2]}`")
 
     @_tempchannel.command(name="name", aliases=['setname'])
     @commands.has_permissions(manage_guild=True)
     async def _name(self, ctx, *, name):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{ctx.guild.id}'")
-        tempchannel = c.fetchone()
+        tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            embed = nextcord.Embed(
-                description="**Es existiert noch kein Tempchannel auf diesem Server**",
-                color=nextcord.Color.dark_red()
-            )
+            return await errorEmbed(self, ctx, "Es existiert noch kein Tempchannel auf diesem Server.")
 
-            return await ctx.reply(embed=embed)
-
-        c.execute(f"UPDATE tempchannels SET name = '{name}' WHERE guild_id = '{ctx.guild.id}'")
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{name}`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        update(table="tempchannels", columns="name", where="guild_id", values=[name, ctx.guild.id])
+        await successEmbed(self, ctx, f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{name}`")
 
     @Cog.listener()
     async def on_ready(self):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute("SELECT channel_id FROM open_tempchannels")
-        open_tempchannels = c.fetchall()
+        open_tempchannels = readAll(columns="channel_id", table="open_tempchannels")
 
         for tempchannel in open_tempchannels:
             channel = self.bot.get_channel(tempchannel[0])
 
             if not channel:
-                c.execute(f"DELETE FROM open_tempchannels WHERE channel_id = '{tempchannel[0]}'")
+                delete(table="open_tempchannels", where="channel_id", values=[tempchannel[0]])
                 continue
 
             if len(channel.members) == 0:
                 await channel.delete()
 
-                c.execute(f"DELETE FROM open_tempchannels WHERE channel_id = '{tempchannel[0]}'")
-        
-        db.commit()
+                delete(table="open_tempchannels", where="channel_id", values=[tempchannel[0]])
+                continue
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         # sourcery skip: merge-nested-ifs, remove-redundant-fstring
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM open_tempchannels WHERE guild_id = '{member.guild.id}'")
-        tempchannels = c.fetchall()
-
-        c.execute(f"SELECT * FROM tempchannels WHERE guild_id = '{member.guild.id}'")
-        tempchannel = c.fetchone()
+        tempchannels = readAll(columns="*", table="open_tempchannels", where="guild_id", values=[member.guild.id])
+        tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[member.guild.id])
 
         if tempchannels:
             if before.channel:
                 if before.channel.id in [tempchannel[1] for tempchannel in tempchannels]:
                     if len(before.channel.members) == 0:
-                        c.execute(f"DELETE FROM open_tempchannels WHERE guild_id = '{member.guild.id}' AND channel_id = '{before.channel.id}'")
-                        db.commit()
+                        delete(table="open_tempchannels", where="guild_id channel_id", values=[member.guild.id, before.channel.id])
 
                         await before.channel.delete(reason="Tempchannel leer")
 
@@ -158,8 +98,7 @@ class tempchannel(Cog):
 
                     await member.move_to(tempchannel)
 
-                    c.execute(f"INSERT INTO open_tempchannels(guild_id, channel_id, host_id, name) VALUES(?, ?, ?, ?)", [member.guild.id, tempchannel.id, member.id, tempchannel.name])
-                    db.commit()
+                    insert(table="open_tempchannels", columns="guild_id, channel_id, host_id, name", values=[member.guild.id, tempchannel.id, member.id, member.host_id, tempchannel.name])
 
 
 def setup(bot):

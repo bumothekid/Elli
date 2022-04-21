@@ -1,10 +1,11 @@
-from ast import alias
-import sqlite3
 import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
-from .utils.utils import safeDict, welcomeImageProcessing
+from .utils.image import welcomeImageProcessing
+from .utils.other import safeDict
+from .utils.embeds import infoEmbed, successEmbed, errorEmbed
+from .utils.database import readOne, insert, update
 from PIL import Image
 
 class welcome(Cog):
@@ -13,201 +14,94 @@ class welcome(Cog):
 
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     async def _welcome(self, ctx):
-        embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
-            color=nextcord.Color.blurple()
-        )
-
-        await ctx.reply(embed=embed)
+        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
     @_welcome.group(name="channel", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _channel(self, ctx):
-        embed = nextcord.Embed(
-            description="**Es fehlt ein benötigtes Argument.**",
-            color=nextcord.Color.dark_red()
-        )
-
-        await ctx.reply(embed=embed)
+        await errorEmbed(self, ctx, "Es fehlt ein benötigtes Argument.")
 
     @_channel.command(name="set", aliases=["add", "update"])
     @commands.has_permissions(manage_guild=True)
     async def _set(self, ctx, channel: nextcord.TextChannel):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-
-        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        welcome = c.fetchone()
+        welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is not None:
             message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
             picture = welcome[3] if welcome[3] is not None else "Keins"
-            c.execute("UPDATE welcome SET channel_id = ? WHERE guild_id = ?", (channel.id, ctx.guild.id))
-            db.commit()
+            update(table="welcome", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            embed = nextcord.Embed(
-                description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`",
-                color=nextcord.Color.dark_green()
-            )
+            return await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
-            return await ctx.reply(embed=embed)
+        insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!", "null"])
 
-        c.execute("INSERT INTO welcome(guild_id, channel_id, message, picture) VALUES(?,?,?, NULL)", [ctx.guild.id, channel.id, "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"])
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`")
 
     @_channel.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
     async def _remove(self, ctx):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-
-        c.execute("SELECT channel_id FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        channel = c.fetchone()
+        channel = readOne(columns="channel_id", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if channel is None:
-            embed = nextcord.Embed(
-                description="**Es ist kein Willkommenskanal gesetzt**",
-                color=nextcord.Color.dark_red()
-            )
+            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
-            return ctx.reply(embed=embed)
+        update(table="welcome", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
 
-        c.execute("UPDATE welcome SET channel_id = NULL WHERE guild_id = ?", [ctx.guild.id])
-        db.commit()
-
-        embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommenskanal zurückgesetzt**",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        await successEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommenskanal zurückgesetzt**")
     
     @_welcome.command(name="message", aliases=["text"])
     @commands.has_permissions(manage_guild=True)
     async def _message(self, ctx, *, message):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-
-        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        welcome = c.fetchone()
+        welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is None or welcome[1] is None:
-            embed = nextcord.Embed(
-                description="**Es ist kein Willkommenskanal gesetzt**",
-                color=nextcord.Color.dark_red()
-            )
-
-            return await ctx.reply(embed=embed)
+            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
         picture = welcome[3] if welcome[3] is not None else "Keins"
-        c.execute("UPDATE welcome SET message = ? WHERE guild_id = ?", [message, ctx.guild.id])
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
+        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
     @_welcome.group(name="picture", aliases=["pic"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _picture(self, ctx):
-        embed = nextcord.Embed(
-            description="**Es fehlt ein benötigtes Argument.**", 
-            color=nextcord.Color.dark_red()
-        )
-
-        await ctx.reply(embed=embed)
+        await errorEmbed(self, ctx, "Es fehlt ein benötigtes Argument.")
 
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
     async def _set2(self, ctx, picture):
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            embed = nextcord.Embed(
-                description="**Ungültiges Bild**\n**Gültige Bilder `<1 | 2 | 3 | 4 | 5 | 6>`**",
-                color=nextcord.Color.dark_red()
-            )
+            await errorEmbed(self, ctx, "Ungültiges Bild**\n**Gültige Bilder `<1 | 2 | 3 | 4 | 5 | 6>`")
 
-            return await ctx.reply(embed=embed)
-        
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
+        welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
-        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        welcome = c.fetchone()
+        if welcome is None or welcome[1] is None:
+            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
-        if welcome is None:
-            embed = nextcord.Embed(
-                description="**Es ist kein Willkommenskanal gesetzt**",
-                color=nextcord.Color.dark_red()
-            )
-
-            return await ctx.reply(embed=embed)
-
-        c.execute("UPDATE welcome SET picture = ? WHERE guild_id = ?", (picture, ctx.guild.id))
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** `{picture}`",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        update(table="welcome", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
+        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** `{picture}`")
     
     @_picture.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
     async def _remove2(self, ctx):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-
-        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [ctx.guild.id])
-        welcome = c.fetchone()
+        welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is None or welcome[1] is None:
-            embed = nextcord.Embed(
-                description="**Es ist kein Willkommenskanal gesetzt**",
-                color=nextcord.Color.dark_red()
-            )
+            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
-            return await ctx.reply(embed=embed)
-
-        c.execute("UPDATE welcome SET picture = NULL WHERE guild_id = ?", [ctx.guild.id])
-        db.commit()
-
-        embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommensbild zurückgesetzt**",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
+        update(table="welcome", columns="picture", where="guild_id", values=["null", ctx.guild.id])
+        await successEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbild zurückgesetzt**")
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
     async def _show(self, ctx):
-        embed = nextcord.Embed(
-            description="**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons",
-            color=nextcord.Color.blurple()
-        )
-        await ctx.reply(embed=embed, view=ButtonView())
+        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons", view=ButtonView())
     
     @Cog.listener()
     async def on_member_join(self, member):
         if member.bot:
             return
-        
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
 
-        c.execute("SELECT * FROM welcome WHERE guild_id = ?", [member.guild.id])
-        welcome = c.fetchone()
+        welcome = readOne(columns="*", table="welcome", where="guild_id", values=[member.guild.id])
 
         if welcome is None or welcome[1] is None:
             return

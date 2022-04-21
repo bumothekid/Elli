@@ -1,8 +1,10 @@
 import nextcord
-import sqlite3
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from time import time
+from .utils.database import readOne, readAll, insert, update, delete
+from .utils.embeds import errorEmbed, successEmbed
+from .utils.other import getPrefixFromDatabase
 
 class afk(Cog):
     def __init__(self, bot):
@@ -10,96 +12,51 @@ class afk(Cog):
 
     @commands.command(name="afk", aliases=["away"], invoke_without_command=True)
     async def _afk(self, ctx, *, reason="AFK"):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT reason FROM afk WHERE guild_id = '{ctx.guild.id}' AND user_id = '{ctx.author.id}'")
-        is_afk = c.fetchone()
+        is_afk = readOne(columns="reason", table="afk", where="guild_id user_id", values=[ctx.guild.id, ctx.author.id])
+
         if "https://" in reason or "http://" in reason:
-            embed = nextcord.Embed(
-                description="**Es dürfen keine Links in deinem AFK-Status sein**",
-                color=nextcord.Color.dark_red()
-            )
-            return await ctx.reply(embed=embed)
-        elif "discord." in reason or "discordapp." in reason:
-            embed = nextcord.Embed(
-                description="**Es dürfen keine Invites in deinem AFK-Status sein**",
-                color=nextcord.Color.dark_red()
-            )
-            return await ctx.reply(embed=embed)
-        elif len(reason) > 1000:
-            embed = nextcord.Embed(
-                description="**Dein AFK-Status darf nicht länger als 1000 Zeichen sein**",
-                color=nextcord.Color.dark_red()
-            )
-            return await ctx.reply(embed=embed)
+            return await errorEmbed(ctx, "Es dürfen keine Links in deinem AFK-Status sein.")
+
+        if "discord." in reason or "discordapp." in reason:
+            return await errorEmbed(ctx, "Es dürfen keine Invites in deinem AFK-Status sein.")
+
+        if len(reason) > 1000:
+            return await errorEmbed(ctx, "Dein AFK-Status darf nicht länger als `1000` Zeichen sein.")
 
         if is_afk is not None:
-            c.execute("UPDATE afk SET reason = ? WHERE guild_id = ? AND user_id = ?", [reason, ctx.guild.id, ctx.author.id])
+            update(table="afk", columns="reason", where="guild_id user_id", values=[reason, ctx.guild.id, ctx.author.id])
         else:
-            c.execute("INSERT INTO afk(guild_id, user_id, time, reason) VALUES(?, ?, ?, ?)", [ctx.guild.id, ctx.author.id, time(), reason])
+            insert(table="afk", columns="guild_id, user_id, time, reason", values=[ctx.guild.id, ctx.author.id, time(), reason])
 
-        db.commit()
-
-        embed = nextcord.Embed(
-            description=f"**<:Idle:960157731388555274> Du bist jetzt AFK**\n\n**Grund:** {reason}",
-            color=nextcord.Color.dark_gold()
-        )
-
-        await ctx.reply(embed=embed)
+        await successEmbed(self, ctx, f"**<:icon_idle:965966637704564796> Du bist jetzt AFK**\n\n**Grund:** {reason}", color=nextcord.Color.dark_gold())
 
     @Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or message.content.startswith("!"):
+        if message.author.bot or message.content.startswith(getPrefixFromDatabase(self.bot, message)):
             return
 
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT user_id, time, reason  FROM afk WHERE guild_id = '{message.guild.id}'")
-        users = c.fetchall()
-
+        users = readAll(columns="user_id, time, reason", table="afk", where="guild_id", values=[message.guild.id])
         if not users:
             return
 
         for user in users:
             if user[0] == message.author.id:
-
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = f"`{int(hours)} Stunden, {int(minutes)} Minuten und {int(seconds)} Sekunden`"
+                timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
 
-                if hours >= 1:
-                    if hours > 1:
-                        timeUp = f"`{int(hours)} Stunden, {int(minutes)} Minuten und {int(seconds)} Sekunden`"
-                    else:
-                        timeUp = f"`{int(hours)} Stunde, {int(minutes)} Minuten und {int(seconds)} Sekunden`"
-                else:
-                    timeUp = f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
+                delete(table="afk", where="guild_id user_id", values=[message.guild.id, message.author.id])
 
-
-
-                embed = nextcord.Embed(
-                    description=f"**<:Online:960157889899663411> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}",
-                    color=nextcord.Color.dark_green()
-                )
-
-                await message.reply(embed=embed)
-
-                c.execute(f"DELETE FROM afk WHERE guild_id = '{message.guild.id}' AND user_id = '{message.author.id}'")
-                return db.commit()
-            
+                return await successEmbed(self, message, f"**<:icon_online:965966580150313000> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}")
+    
             if f"<@{user[0]}>" in message.content or f"<@!{user[0]}>" in message.content:
                 user = message.guild.get_member(user[0])
 
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = f"`{int(hours)} Stunden, {int(minutes)} Minuten und {int(seconds)} Sekunden`"
+                timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
 
-                embed = nextcord.Embed(
-                    description=f"**<:Idle:960157731388555274> {user.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}",
-                    color=nextcord.Color.dark_gold()
-                )
-
-                return await message.reply(embed=embed)
+                return await successEmbed(self, message, f"**<:icon_idle:965966637704564796> {user.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", nextcord.Color.dark_gold())
 
 
 def setup(bot):

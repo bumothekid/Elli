@@ -1,9 +1,10 @@
 import contextlib
 import nextcord
-import sqlite3
 import re
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from .utils.embeds import errorEmbed, infoEmbed, successEmbed
+from .utils.database import readOne, insert, delete
 
 class reactionrole(Cog):
     def __init__(self, bot):
@@ -11,22 +12,15 @@ class reactionrole(Cog):
 
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
     async def _rr(self, ctx):
-        embed = nextcord.Embed(
-            description="**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`",
-            color=nextcord.Color.blurple()
-        )
-
-        return await ctx.reply(embed=embed)
-
-
+        infoEmbed(self, ctx, "**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
     async def _create(self, ctx, channel: nextcord.TextChannel, message, reaction: str, role: nextcord.Role):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM reactionroles WHERE guild_id = '{ctx.guild.id}' AND message_id = '{ctx.message.id}' AND reaction = '{reaction}'")
-        exists = c.fetchone()
+        exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
+
+        if exists is not None:
+            return await errorEmbed(self, ctx, "Du hast bereits eine Reactionrole mit diesem Emote bei dieser Nachricht.")
 
         if "<:" in reaction:
             reaction_id = re.findall(r"[0-9]+", reaction)[0]
@@ -52,40 +46,16 @@ class reactionrole(Cog):
             except:
                 raise commands.EmojiNotFound(argument=reaction)
 
-        if exists is not None: 
-            embed = nextcord.Embed(
-                description="**Du hast bereits eine Reactionrole mit diesem Emote bei dieser Nachricht**",
-                color=nextcord.Color.dark_red()
-            )
-
-            return await ctx.reply(embed=embed)
-
-        c.execute("INSERT INTO reactionroles(guild_id, channel_id, message_id, reaction, role_id) VALUES(?, ?, ?, ?, ?)", [ctx.guild.id, channel.id, message.id, reaction, role.id])
-
-        embed = nextcord.Embed(
-            description=f"**🎭 Die Reactionrole wurde eingerichtet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}",
-            color=nextcord.Color.dark_green()
-        )
-        
-        await ctx.reply(embed=embed)
-
-        db.commit()
+        insert(table="reactionroles", columns="guild_id, channel_id, message_id, reaction, role_id", values=[ctx.guild.id, channel.id, message.id, reaction, role.id])
+        await successEmbed(self, ctx, f"**🎭 Die Reactionrole wurde eingerichtet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
     async def _delete(self, ctx, channel: nextcord.TextChannel, message, reaction: str):
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT * FROM reactionroles WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message}' AND reaction = '{reaction}'")
-        exists = c.fetchone()
+        exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
         if exists is None:
-            embed = nextcord.Embed(
-                description="**Du hast keine Reactionrole mit diesem Emote bei dieser Nachricht**",
-                color=nextcord.Color.dark_red()
-            )
-
-            return await ctx.reply(embed=embed)
+            return await errorEmbed(self, ctx, "Du hast keine Reactionrole mit diesem Emote bei dieser Nachricht.")
         
         try:
             message = await self.bot.get_channel(channel.id).fetch_message(message)
@@ -103,16 +73,8 @@ class reactionrole(Cog):
         except:
             raise commands.EmojiNotFound(argument=reaction)
 
-        c.execute(f"DELETE FROM reactionroles WHERE guild_id = '{ctx.guild.id}' AND message_id = '{message.id}' AND reaction = '{reaction}'")
-
-        embed = nextcord.Embed(
-            description=f"**🎭 Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}",
-            color=nextcord.Color.dark_green()
-        )
-
-        await ctx.reply(embed=embed)
-
-        db.commit()
+        delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message.id, reaction])
+        await successEmbed(self, ctx, f"**🎭 Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
 
 
     @Cog.listener()
@@ -120,12 +82,8 @@ class reactionrole(Cog):
         if payload.member.bot:
             return
 
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT role_id FROM reactionroles WHERE guild_id = '{payload.guild_id}' AND message_id = '{payload.message_id}' AND reaction = '{str(payload.emoji)}'")
-        reactionrole = c.fetchone()
-
         guild = self.bot.get_guild(payload.guild_id)
+        reactionrole = readOne(columns="role_id", table="reactionroles", where="guild_id message_id reaction", values=[payload.guild_id, payload.message_id, str(payload.emoji)])
 
         if reactionrole is not None:
             role = guild.get_role(reactionrole[0])
@@ -137,14 +95,10 @@ class reactionrole(Cog):
     async def on_raw_reaction_remove(self, payload):
         guild = self.bot.get_guild(payload.guild_id)
         member = guild.get_member(payload.user_id)
-
         if member.bot:
             return
 
-        db = sqlite3.connect("database.db")
-        c = db.cursor()
-        c.execute(f"SELECT role_id FROM reactionroles WHERE guild_id = '{payload.guild_id}' AND message_id = '{payload.message_id}' AND reaction = '{str(payload.emoji)}'")
-        reactionrole = c.fetchone()
+        reactionrole = readOne(columns="role_id", table="reactionroles", where="guild_id message_id reaction", values=[payload.guild_id, payload.message_id, str(payload.emoji)])
 
         if reactionrole is not None:
             role = guild.get_role(reactionrole[0])
