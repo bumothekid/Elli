@@ -36,7 +36,7 @@ class deveveloper(Cog):
         update(table="cursy", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer regestriert.")
-        await devLogging(self.bot, ctx, f"{user} wurde von {ctx.author} als developer registriert")
+        await devLogging(self, ctx, f"{user} wurde von {ctx.author} als developer registriert")
 
     @_dev.command(name="remove")
     async def _remove(self, ctx, user: nextcord.User):

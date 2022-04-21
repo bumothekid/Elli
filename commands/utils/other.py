@@ -1,5 +1,6 @@
-from re import findall
+from re import I, findall
 from .database import readOne, insert
+from string import capwords
 
 class safeDict(dict):
     def __missing__(self, key):
@@ -22,3 +23,6 @@ def devCheck(authorid: int) -> bool:
         return False
     
     return True
+
+def capString(string: str) -> str:
+    return capwords(string.lower())

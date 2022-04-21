@@ -12,7 +12,7 @@ class reactionrole(Cog):
 
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
     async def _rr(self, ctx):
-        infoEmbed(self, ctx, "**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
+        await infoEmbed(self, ctx, "**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)

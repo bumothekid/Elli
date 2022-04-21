@@ -1,5 +1,4 @@
 import nextcord
-import sqlite3
 from nextcord.ext.commands import Cog
 from .utils.other import getPrefixFromDatabase
 from .utils.database import readOne, insert
@@ -36,7 +35,7 @@ class eventsCog(Cog):
             return
 
         if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):
-            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`")
+            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`.")
     
 
 

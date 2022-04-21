@@ -51,7 +51,7 @@ class giveaways(Cog):
                     if message is not None:
                         await message.delete()
                     
-                    return await errorEmbed(self, ctx, "Du hast mehr als `2` Minuten gebraucht um zu antworten.\n\nDer Giveaway startvorgang wurde abgebrochen.")
+                    return await errorEmbed(self, ctx, "Du hast mehr als `2` Minuten gebraucht um zu antworten.\n\n> Der Giveaway startvorgang wurde abgebrochen.")
 
                 match i:
                     case 0:
@@ -292,7 +292,7 @@ class giveaways(Cog):
         giveaway = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[ctx.guild.id, message.id])
 
         if giveaway is not None:
-            return await errorEmbed(self, ctx, "Das Giveaway ist noch am laufen.**\n**Du kannst mit `-giveaway end <messageid>` das Gewinnspiel beenden.")
+            return await errorEmbed(self, ctx, "Das Giveaway ist noch am laufen.**\n> **Du kannst mit `-giveaway end <#channel> <messageid>` das Gewinnspiel beenden.")
 
         emote = self.bot.get_emoji(958492679749140510)
         is_giveaway = any(reaction.emoji == emote for reaction in message.reactions)

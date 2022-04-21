@@ -98,7 +98,7 @@ class tempchannel(Cog):
 
                     await member.move_to(tempchannel)
 
-                    insert(table="open_tempchannels", columns="guild_id, channel_id, host_id, name", values=[member.guild.id, tempchannel.id, member.id, member.host_id, tempchannel.name])
+                    insert(table="open_tempchannels", columns="guild_id, channel_id, host_id, name", values=[member.guild.id, tempchannel.id, member.id, tempchannel.name])
 
 
 def setup(bot):

@@ -1,17 +1,18 @@
 import contextlib
 import nextcord
 from nextcord import ui
+from nextcord.ext.commands.bot import Bot
 
 botLoggingChannelID = 957444324080115762
 
-async def infoEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
     """ 
     Creates and sends an information embed
     This is used when a information is shown
 
     Parameters
     -----------
-    self: :class:`nextcord.Bot`
+    bot: :class:`nextcord.ext.commands.bot.Bot`
         The bot instance
     ctx: :class:`nextcord.Interaction`
         The interaction to reply to or channel if you want to send the embed to an specific channel
@@ -24,6 +25,12 @@ async def infoEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nex
     footer: :class:`dict`
         Optional text and icon_url to use for the footer
     """
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
+
     infoEmbed = nextcord.Embed(
         description=text, 
         color=color
@@ -60,16 +67,16 @@ async def infoEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nex
                 print(type(ctx))
                 print("Error: Unknown interaction")
     except Exception:
-        await permissionError(self, ctx)
+        await permissionError(bot, ctx)
 
-async def successEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
     """ 
     Creates and sends an successed embed
     This is used when a something succeeds
 
     Parameters
     -----------
-    self: :class:`nextcord.Bot`
+    bot: :class:`nextcord.ext.commands.bot.Bot`
         The bot instance
     ctx :class:`nextcord.Interaction or nextcord.TextChannel`
         The interaction to reply to or channel if you want to send the embed to an specific channel
@@ -78,6 +85,12 @@ async def successEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | 
     color: :class:`nextcord.Color`
         Optional color to use for the embed
     """
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
+
     successEmbed = nextcord.Embed(
         description=text,
         color=color
@@ -114,22 +127,28 @@ async def successEmbed(self, ctx: nextcord.Interaction | nextcord.TextChannel | 
                 print(type(ctx))
                 print("Error: Unknown interaction")
     except Exception:
-        await permissionError(self, ctx)
+        await permissionError(bot, ctx)
 
-async def errorEmbed(self, ctx: nextcord.Interaction | nextcord.message.Message | nextcord.TextChannel | nextcord.ext.commands.context.Context | nextcord.Member, text: str, file: nextcord.File = None):
+async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message | nextcord.TextChannel | nextcord.ext.commands.context.Context | nextcord.Member, text: str, file: nextcord.File = None):
     """ 
     Creates and sends an error embed
     This is used when something is wrong and throws an exception
 
     Parameters
     -----------
-    self: :class:`nextcord.Bot`
+    bot: :class:`nextcord.ext.commands.bot.Bot`
         The bot instance
     ctx: :class:`nextcord.Interaction`
         The interaction to reply to or channel if you want to send the embed to an specific channel
     text: :class:`str`
         The text to embed
     """
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
+
     errorEmbed = nextcord.Embed(
         description=f"> **{text}**",
         color=nextcord.Color.red()
@@ -152,23 +171,29 @@ async def errorEmbed(self, ctx: nextcord.Interaction | nextcord.message.Message 
                 print(type(ctx))
                 print("Error: Unknown interaction")
     except Exception:
-        permissionError(self, ctx)
+        permissionError(bot, ctx)
 
-async def errorLogging(self, ctx: nextcord.Interaction, error: str):
+async def errorLogging(bot, ctx: nextcord.Interaction, error: str):
     """
     Creates and sends an error embed for critical errors into the bot logging channel
     This is called when an error occurs
 
     Parameters
     -----------
-    self: :class:`nextcord.Bot`
+    bot: :class:`nextcord.ext.commands.bot.Bot`
         The bot instance
     ctx: :class:`nextcord.Interaction`
         The interaction where the error occurred
     error: :class:`str`
         The error message that occurred
     """
-    channel = self.bot.get_channel(botLoggingChannelID)
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
+
+    channel = bot.get_channel(botLoggingChannelID)
     errorEmbed = nextcord.Embed(
         color=nextcord.Color.red()
     )
@@ -179,8 +204,13 @@ async def errorLogging(self, ctx: nextcord.Interaction, error: str):
 
     await channel.send(embed=errorEmbed)
 
-async def devLogging(self, ctx: nextcord.Interaction, text: str):
-    channel = self.bot.get_channel(botLoggingChannelID)
+async def devLogging(bot, ctx: nextcord.Interaction, text: str):
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
+    channel = bot.get_channel(botLoggingChannelID)
     embed = nextcord.Embed(
         description=f"**{ctx.author} hat ein Befehl ausgeführt**",
         color=nextcord.Color.blurple()
@@ -192,9 +222,15 @@ async def devLogging(self, ctx: nextcord.Interaction, text: str):
 
     await channel.send(embed=embed)
 
-async def permissionError(self, ctx: nextcord.Interaction):
+async def permissionError(bot, ctx: nextcord.Interaction):
     with contextlib.suppress(Exception):
-        emote = self.bot.get_emoji(962068826311254177)
+        if type(bot) is not Bot:
+            try:
+                bot = bot.bot
+            except Exception:
+                return print("Error: Bot is not a bot or self")
+
+        emote = bot.get_emoji(962068826311254177)
 
         permissionEmbed = nextcord.Embed(
             description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",

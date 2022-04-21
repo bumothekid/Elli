@@ -3,7 +3,7 @@ import nextcord
 from time import time
 from nextcord.ext import commands
 from nextcord.ext.commands.errors import NotOwner
-from commands.utils.other import getPrefixFromDatabase, devCheck
+from commands.utils.other import getPrefixFromDatabase, devCheck, capString
 from commands.utils.embeds import successEmbed, errorEmbed, devLogging
 from commands.utils.database import update
 
@@ -43,48 +43,57 @@ async def load(ctx, ext):
     if not devCheck(ctx.author.id):
         raise NotOwner
 
+    rawExt = ext
+    ext = capString(ext)
+
     try:
-        bot.load_extension(ext if "commands." in ext else f"commands.{ext}")
+        bot.load_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
 
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} geladen.")
         await successEmbed(bot, ctx, f"{ext} wurde geladen.")
     except Exception as e:
-        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.\n```py\n{e}```")
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.**\n```py\n{e}```** ")
 
 @bot.command()
 async def unload(ctx, ext):
     if not devCheck(ctx.author.id):
         raise NotOwner
+    
+    rawExt = ext
+    ext = capString(ext)
 
     try:
-        bot.unload_extension(ext if "commands." in ext else f"commands.{ext}")
+        bot.unload_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
 
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} entladen.")
         await successEmbed(bot, ctx, f"{ext} wurde deaktiviert.")
     except Exception as error:
-        await errorEmbed(bot, ctx, f"{ext} konnte nicht deaktiviert werden.\n```py\n{error}```")
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht deaktiviert werden.**\n```py\n{error}```** ")
 
 @bot.command()
 async def reload(ctx, ext):
     if not devCheck(ctx.author.id):
         raise NotOwner
+    
+    rawExt = ext
+    ext = capString(ext)
 
-    if ext in ["all", "alle", "*", "commands.*"]:
+    if rawExt in ["all", "alle", "*", "commands.*"]:
         for extension in extensions:
             try:
                 bot.reload_extension(extension)
             except Exception as e:
-                await errorEmbed(bot, ctx, f"{extension} konnte nicht geladen werden.\n```py\n{e}```")
+                await errorEmbed(bot, ctx, f"{extension} konnte nicht geladen werden.**\n```py\n{e}```** ")
 
         await devLogging(bot, ctx, f"{ctx.author} hat alle Cogs neu geladen.")
         return await successEmbed(bot, ctx, "Alle Cogs wurden neu geladen.")
 
     try:
-        bot.reload_extension(ext)
+        bot.reload_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} neu geladen.")
         await successEmbed(bot, ctx, f"{ext} wurde neu geladen.")
     except Exception as e:
-        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.\n```py\n{e}```")
+        await errorEmbed(bot, ctx, f"{ext} konnte nicht geladen werden.**\n```py\n{e}```** ")
 
 if __name__ == '__main__':
     for extension in extensions:
