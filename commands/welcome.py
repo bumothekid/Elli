@@ -59,7 +59,7 @@ class welcome(Cog):
 
         picture = welcome[3] if welcome[3] is not None else "Keins"
         update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
     @_welcome.group(name="picture", aliases=["pic"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
