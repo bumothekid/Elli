@@ -7,14 +7,7 @@ async def memberCardImageProcessing(ctx, image: Image, text: str) -> Image:
     primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
     secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
 
-    if type(ctx) == nextcord.Interaction:
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=1024, static_format="png").read())
-        username = ctx.user.name
-    
-    if type(ctx) == nextcord.Member:
-        buffer_avatar = BytesIO(await ctx.display_avatar.replace(format="png", size=1024, static_format="png").read())
-        username = ctx.name
-
+    buffer_avatar = BytesIO(await ctx.display_avatar.replace(format="png", size=1024, static_format="png").read())
     avatar = Image.open(buffer_avatar).convert("RGBA")
     avatar.thumbnail((225, 225), Image.ANTIALIAS)
     avatar = add_corners(avatar, 12)
@@ -23,8 +16,12 @@ async def memberCardImageProcessing(ctx, image: Image, text: str) -> Image:
     offset = (20, (bg_h - 225) // 2 + 1)
     image.paste(avatar, offset, avatar)
 
-    draw.text((360, 80), text, (255, 255, 255), font=primaryFont)
-    draw.text((440, 160), username, (255, 255, 255), font=secondaryFont)
+    if "W" in text:
+        draw.text((360, 80), text, (255, 255, 255), font=primaryFont)
+    else:
+        draw.text((440, 80), text, (255, 255, 255), font=primaryFont)
+
+    draw.text((440, 160), ctx.name, (255, 255, 255), font=secondaryFont)
     return image
 
 # def dropShadow(image: Image, offset=(0, 0), shadow=(0, 0, 0, 1), blur=5):
