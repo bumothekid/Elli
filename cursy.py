@@ -7,7 +7,7 @@ from commands.utils.other import getPrefixFromDatabase, devCheck, capString
 from commands.utils.embeds import successEmbed, errorEmbed, devLogging
 from commands.utils.database import update
 
-bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all(), help_command=None)
+bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all(), help_command=None, case_insensitive=True)
 
 extensions = [
     'commands.events',
@@ -20,6 +20,7 @@ extensions = [
     'commands.tempchannel',
     'commands.ticket',
     'commands.afk',
+    'commands.moderation',
     'commands.bot'
 ]
 
