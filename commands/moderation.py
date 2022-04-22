@@ -63,5 +63,37 @@ class moderation(Cog):
         await member.ban(reason=reason)
         await successEmbed(self.bot, ctx, f"**<:icon_moderation:967038345395961896> {member} wurde gebannt.**")
 
+    @commands.command(name="addrole", aliases=["addr"])
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_guild_permissions(manage_roles=True)
+    @commands.cooldown(2, 20, BucketType.user)
+    async def _addrole(self, ctx, member: nextcord.Member, role: nextcord.Role):
+        if role.position >= ctx.author.top_role.position:
+            return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht geben.")
+
+        bot = ctx.guild.get_member(self.bot.user.id)
+
+        if role.position >= bot.top_role.position or member.top_role.position >= bot.top_role.position or role.name == "@everyone":
+            return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht geben.")
+
+        await member.add_roles(role)
+        await successEmbed(self.bot, ctx, f"**<:icon_moderation:967038345395961896> {member} hat die Rolle {role} erhalten.**")
+    
+    @commands.command(name="removerole", aliases=["remr"])
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_guild_permissions(manage_roles=True)
+    @commands.cooldown(2, 20, BucketType.user)
+    async def _removerole(self, ctx, member: nextcord.Member, role: nextcord.Role):
+        if role.position >= ctx.author.top_role.position:
+            return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht entziehen.")
+
+        bot = ctx.guild.get_member(self.bot.user.id)
+
+        if role.position >= bot.top_role.position or member.top_role.position >= bot.top_role.position:
+            return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht entziehen.")
+
+        await member.remove_roles(role)
+        await successEmbed(self.bot, ctx, f"**<:icon_moderation:967038345395961896> {member} hat die Rolle {role} entzogen.**")
+
 def setup(bot):
     bot.add_cog(moderation(bot))
