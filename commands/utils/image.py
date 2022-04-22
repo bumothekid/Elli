@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
 
 async def welcomeImageProcessing(ctx, image: Image) -> Image:
+    image = add_corners(image, 12).save("assets/welcome/card6.png")
     draw = ImageDraw.Draw(image)
     primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
     secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
@@ -18,7 +19,6 @@ async def welcomeImageProcessing(ctx, image: Image) -> Image:
     avatar = Image.open(buffer_avatar).convert("RGBA")
     avatar.thumbnail((225, 225), Image.ANTIALIAS)
     avatar = add_corners(avatar, 12)
-    # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
 
     _, bg_h = image.size
     offset = (20, (bg_h - 225) // 2 + 1)
@@ -27,6 +27,33 @@ async def welcomeImageProcessing(ctx, image: Image) -> Image:
     draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
     draw.text((440, 160), f"{username}", (255, 255, 255), font=secondaryFont)
     return image
+
+# def dropShadow(image: Image, offset=(0, 0), shadow=(0, 0, 0, 1), blur=5):
+#     """Add a drop shadow to the image
+    
+#     Parameters
+#     ----------
+#     image : PIL.Image.Image
+#         Image to add the drop shadow to
+#     offset : tuple
+#         Offset of the shadow
+#     shadow : tuple
+#         Shadow color
+#     blur : int
+#         Blur radius
+    
+#     Returns
+#     -------
+#     PIL.Image.Image
+#         Image with drop shadow
+#     """
+#     if isinstance(shadow, (list, tuple)):
+#         shadow = Image.new("RGBA", image.size, shadow)
+#     else:
+#         shadow = shadow.convert("RGBA")
+#     shadow.alpha_composite(image, offset)
+#     shadow = shadow.filter(ImageFilter.GaussianBlur(blur))
+#     return shadow
 
 def add_corners(image, radius):
     circle = Image.new('L', (radius * 2, radius * 2), 0)
@@ -40,25 +67,3 @@ def add_corners(image, radius):
     alpha.paste(circle.crop((radius, radius, radius * 2, radius * 2)), (w - radius, h - radius))
     image.putalpha(alpha)
     return image
-
-def dropShadow(image, offset=(5,5), background=0xffffff, shadow=0x444444, border=8, iterations=3):
-    totalWidth = image.size[0] + abs(offset[0]) + 2*border
-    totalHeight = image.size[1] + abs(offset[1]) + 2*border
-
-    back = Image.new(image.mode, (totalWidth, totalHeight), background)
-
-    shadowLeft = border + max(offset[0], 0)
-    shadowTop = border + max(offset[1], 0)
-
-    back.paste(shadow, [shadowLeft, shadowTop, shadowLeft + image.size[0], shadowTop + image.size[1]])
-
-    n = 0
-    while n < iterations:
-        back = back.filter(ImageFilter.BLUR)
-        n += 1
-
-    imageLeft = border - min(offset[0], 0)
-    imageTop = border - min(offset[1], 0)
-    back.paste(image, (imageLeft, imageTop))
-
-    return back
