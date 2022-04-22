@@ -2,8 +2,7 @@ import nextcord
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
 
-async def welcomeImageProcessing(ctx, image: Image) -> Image:
-    image = add_corners(image, 12).save("assets/welcome/card6.png")
+async def memberCardImageProcessing(ctx, image: Image, text: str) -> Image:
     draw = ImageDraw.Draw(image)
     primaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 64)
     secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
@@ -24,8 +23,8 @@ async def welcomeImageProcessing(ctx, image: Image) -> Image:
     offset = (20, (bg_h - 225) // 2 + 1)
     image.paste(avatar, offset, avatar)
 
-    draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
-    draw.text((440, 160), f"{username}", (255, 255, 255), font=secondaryFont)
+    draw.text((360, 80), text, (255, 255, 255), font=primaryFont)
+    draw.text((440, 160), username, (255, 255, 255), font=secondaryFont)
     return image
 
 # def dropShadow(image: Image, offset=(0, 0), shadow=(0, 0, 0, 1), blur=5):

@@ -2,7 +2,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
-from .utils.image import welcomeImageProcessing
+from .utils.image import memberCardImageProcessing
 from .utils.other import safeDict
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 from .utils.database import readOne, insert, update
@@ -110,7 +110,7 @@ class welcome(Cog):
         card = None
 
         if welcome[3] is not None:
-            img = await welcomeImageProcessing(member, Image.open(f"assets/welcome/card{welcome[3]}.png"))
+            img = await memberCardImageProcessing(member, Image.open(f"assets/welcome/card{welcome[3]}.png"), "Willkommen!")
             img.save(f"assets/welcome/user_card{welcome[3]}.png")
 
             card = nextcord.File(f"assets/welcome/user_card{welcome[3]}.png")
@@ -126,7 +126,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 1", custom_id="welpic1")
     async def _picture1(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card1.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card1.png"), "Willkommen!")
         card.save("assets/welcome/user_card1.png")
         pic = nextcord.File("assets/welcome/user_card1.png")
 
@@ -139,7 +139,7 @@ class ButtonView(ui.View):
     
     @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="welpic2")
     async def _picture2(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card2.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card2.png"), "Willkommen!")
         card.save("assets/welcome/user_card2.png")
         pic = nextcord.File("assets/welcome/user_card2.png")
 
@@ -152,7 +152,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 3", custom_id="welpic3")
     async def _picture3(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card3.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card3.png"), "Willkommen!")
         card.save("assets/welcome/user_card3.png")
         pic = nextcord.File("assets/welcome/user_card3.png")
 
@@ -165,7 +165,7 @@ class ButtonView(ui.View):
     
     @ui.button(style=ButtonStyle.primary, label="Bild 4", custom_id="welpic4")
     async def _picture4(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card4.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card4.png"), "Willkommen!")
         card.save("assets/welcome/user_card4.png")
         pic = nextcord.File("assets/welcome/user_card4.png")
 
@@ -178,7 +178,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 5", custom_id="welpic5")
     async def _picture5(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card5.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card5.png"), "Willkommen!")
         card.save("assets/welcome/user_card5.png")
         pic = nextcord.File("assets/welcome/user_card5.png")
 
@@ -191,7 +191,7 @@ class ButtonView(ui.View):
 
     @ui.button(style=ButtonStyle.primary, label="Bild 6", custom_id="welpic6")
     async def _picture6(self, _, ctx):
-        card = await welcomeImageProcessing(ctx, Image.open("assets/welcome/card6.png"))
+        card = await memberCardImageProcessing(ctx, Image.open("assets/welcome/card6.png"), "Willkommen!")
         card.save("assets/welcome/user_card6.png")
         pic = nextcord.File("assets/welcome/user_card6.png")
 
