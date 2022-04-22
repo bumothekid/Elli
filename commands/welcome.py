@@ -96,11 +96,8 @@ class welcome(Cog):
     async def _show(self, ctx):
         await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons", view=ButtonView())
     
-    # @Cog.listener()
-    # async def on_member_join(self, member):
-    @commands.command(name="join")
-    async def _join(self, ctx):
-        member = ctx.author
+    @Cog.listener()
+    async def on_member_join(self, member):
         if member.bot:
             return
 
