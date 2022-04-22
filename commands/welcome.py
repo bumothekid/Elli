@@ -14,7 +14,7 @@ class welcome(Cog):
 
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     async def _welcome(self, ctx):
-        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n`-welcome channel set <#channel>`\n`-welcome channel remove <#channel>`\n`-welcome message <message>`\n`-welcome picture set <picture>`\n`-welcome picture remove`\n`-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
+        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> `-welcome channel remove <#channel>`\n> `-welcome message <message>`\n> `-welcome picture set <picture>`\n> `-welcome picture remove`\n> `-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
     @_welcome.group(name="channel", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
