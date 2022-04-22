@@ -8,19 +8,20 @@ async def welcomeImageProcessing(ctx, image: Image) -> Image:
     secondaryFont = ImageFont.truetype("assets/fonts/Centrale Sans/Centrale Sans Regular.otf", 46)
 
     if type(ctx) == nextcord.Interaction:
-        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=128).read())
+        buffer_avatar = BytesIO(await ctx.user.display_avatar.replace(format="png", size=1024, static_format="png").read())
         username = ctx.user.name
     
     if type(ctx) == nextcord.Member:
-        buffer_avatar = BytesIO(await ctx.display_avatar.replace(format="png", size=128).read())
+        buffer_avatar = BytesIO(await ctx.display_avatar.replace(format="png", size=1024, static_format="png").read())
         username = ctx.name
 
-    avatar = Image.open(buffer_avatar).resize((225, 225))
-    avatar = add_corners(avatar, 8)
+    avatar = Image.open(buffer_avatar).convert("RGBA")
+    avatar.thumbnail((225, 225), Image.ANTIALIAS)
+    avatar = add_corners(avatar, 12)
     # avatar = dropShadow(avatar, shadow=(0x00, 0x00, 0x00, 0xff))
 
     _, bg_h = image.size
-    offset = (20, (bg_h - 225) // 2)
+    offset = (20, (bg_h - 225) // 2 + 1)
     image.paste(avatar, offset, avatar)
 
     draw.text((360, 80), "Willkommen!", (255, 255, 255), font=primaryFont)
