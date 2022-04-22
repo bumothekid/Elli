@@ -70,7 +70,7 @@ class welcome(Cog):
     @commands.has_permissions(manage_guild=True)
     async def _set2(self, ctx, picture):
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            await errorEmbed(self, ctx, "Ungültiges Bild**\n**Gültige Bilder `<1 | 2 | 3 | 4 | 5 | 6>`")
+            return await errorEmbed(self, ctx, "Es ist kein Bild mit dieser Nummer vorhanden. <1-6>")
 
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
