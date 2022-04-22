@@ -26,7 +26,7 @@ def devCheck(authorid: int) -> bool:
     return True
 
 def messagePinned(message: nextcord.Message) -> bool:
-    return bool(message.pinned)
+    return not message.pinned
 
 def capString(string: str) -> str:
     return capwords(string.lower())
