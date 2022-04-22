@@ -76,6 +76,10 @@ def insert(table: str, columns: str, values: list):
     """
     valueString = ""
     for i in range(len(values)):
+        if str(values[i]).lower() == "null":
+            values.pop(i)
+            valueString += "NULL" if i == 0 else ", NULL"
+            continue
         if i == 0: valueString += "?"; continue
         valueString += ", ?"
         
