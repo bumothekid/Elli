@@ -15,6 +15,7 @@ extensions = [
     'commands.error',
     'commands.developer',
     'commands.welcome',
+    'commands.leave',
     'commands.reactionrole',
     'commands.giveaway',
     'commands.tempchannel',
