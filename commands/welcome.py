@@ -95,7 +95,7 @@ class welcome(Cog):
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
     async def _show(self, ctx):
-        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Buttons", view=ButtonView())
+        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen", view=ButtonView())
     
     @Cog.listener()
     async def on_member_join(self, member):
