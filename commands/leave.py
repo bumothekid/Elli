@@ -32,3 +32,15 @@ class leave(Cog):
         insert(table="leave", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, "Tschüß {user_name}#{user_discriminator} hoffentlich kommst du bald wieder!", "null"])
 
         await successEmbed(self, ctx, f"**<:icon_member_left:965034270622122044> Verlasskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Tschüß {{user_name}}#{{user_discriminator}} hoffentlich kommst du bald wieder!\n> **Bild:** `Keins`")
+    
+    @_leave.command(name="remove", aliases=["delete", "del"])
+    @commands.has_permissions(manage_guild=True)
+    async def _remove(self, ctx):
+        leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
+
+        if leave is None:
+            return await errorEmbed(self, ctx, "Es ist kein Verlasskanal gesetzt.")
+
+        update(table="leave", columns="channel_id", where="guild_id", values=["null", ctx.guild.id])
+
+        await successEmbed(self, ctx, "**<:icon_member_left:965034270622122044> Verlasskanal zurückgesetzt**")
