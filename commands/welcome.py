@@ -77,8 +77,9 @@ class welcome(Cog):
         if welcome is None or welcome[1] is None:
             return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
+        message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
         update(table="welcome", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {welcome[2]}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
     
     @_picture.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
