@@ -1,3 +1,4 @@
+import nextcord
 from re import I, findall
 from .database import readOne, insert
 from string import capwords
@@ -23,6 +24,9 @@ def devCheck(authorid: int) -> bool:
         return False
     
     return True
+
+def messagePinned(message: nextcord.Message) -> bool:
+    return bool(message.pinned)
 
 def capString(string: str) -> str:
     return capwords(string.lower())
