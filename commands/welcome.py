@@ -49,7 +49,7 @@ class welcome(Cog):
 
         await successEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommenskanal zurückgesetzt**")
     
-    @_welcome.command(name="message", aliases=["text"])
+    @_welcome.command(name="message", aliases=["text", "msg"])
     @commands.has_permissions(manage_guild=True)
     async def _message(self, ctx, *, message):
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
