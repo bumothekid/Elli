@@ -5,31 +5,51 @@ from nextcord.ext.commands.bot import Bot
 
 botLoggingChannelID = 957444324080115762
 
-async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None, delete_after: int = None):
     """ 
     Creates and sends an information embed
     This is used when a information is shown
 
     Parameters
     -----------
-    bot: :class:`nextcord.ext.commands.bot.Bot`
+    bot: :class:`nextcord.ext.commands.Bot or nextcord.Interaction or nextcord.TextChannel or nextcord.Message or nextcord.ext.commands.Context or nextcord.Member`
         The bot instance
+
     ctx: :class:`nextcord.Interaction`
         The interaction to reply to or channel if you want to send the embed to an specific channel
+
     text: :class:`str`
         The text to embed
+
     color: :class:`nextcord.Color`
         Optional color to use for the embed
+
     fields: :class:`list[dict]`
         Optional fields with a name and a value
+
     footer: :class:`dict`
         Optional text and icon_url to use for the footer
+
+    view: :class:`nextcord.ui.View`
+        Optional view to use for the embed
+
+    file: :class:`nextcord.File`
+        Optional file to send with the embed
+
+    delete_after: :class:`int`
+        Optional time in seconds to delete the embed after it was sent
+        Only works if the embed is sent to a channel
+
     """
     if type(bot) is not Bot:
         try:
             bot = bot.bot
         except Exception:
             return print("Error: Bot is not a bot or self")
+
+    if delete_after is not None:
+        if not isinstance(delete_after, int):
+            raise ValueError("Error: delete_after is not an int")
 
     infoEmbed = nextcord.Embed(
         description=text, 
@@ -53,13 +73,13 @@ async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | next
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(embed=infoEmbed, view=view, file=file)
+                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(embed=infoEmbed, view=view, file=file)
+                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.message.Message:
-                await ctx.reply(embed=infoEmbed, view=view, file=file)
+                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.TextChannel:
-                await ctx.send(embed=infoEmbed, view=view, file=file)
+                await ctx.send(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.Member:
                 dm = await ctx.create_dm()
                 await dm.send(embed=infoEmbed, view=view, file=file)
@@ -69,27 +89,51 @@ async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | next
     except Exception:
         await permissionError(bot, ctx)
 
-async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None):
+async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None, delete_after: int = None):
     """ 
     Creates and sends an successed embed
     This is used when a something succeeds
 
     Parameters
     -----------
-    bot: :class:`nextcord.ext.commands.bot.Bot`
+    bot: :class:`nextcord.ext.commands.Bot or nextcord.Interaction or nextcord.TextChannel or nextcord.Message or nextcord.ext.commands.Context or nextcord.Member`
         The bot instance
+
     ctx :class:`nextcord.Interaction or nextcord.TextChannel`
         The interaction to reply to or channel if you want to send the embed to an specific channel
+
     text: :class:`str`
         The text to embed
+
     color: :class:`nextcord.Color`
         Optional color to use for the embed
+
+    fields: :class:`list[dict]`
+        Optional fields with a name and a value
+
+    footer: :class:`dict`
+        Optional text and icon_url to use for the footer
+
+    view: :class:`nextcord.ui.View`
+        Optional view to use for the embed
+
+    file: :class:`nextcord.File`
+        Optional file to send with the embed
+
+    delete_after: :class:`int`
+        Optional time in seconds to delete the embed after it was sent
+        Only works if the embed is sent to a channel
+
     """
     if type(bot) is not Bot:
         try:
             bot = bot.bot
         except Exception:
             return print("Error: Bot is not a bot or self")
+
+    if delete_after is not None:
+        if not isinstance(delete_after, int):
+            raise ValueError("delete_after is not an int")
 
     successEmbed = nextcord.Embed(
         description=text,
@@ -98,28 +142,22 @@ async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | n
 
     if fields is not None:
         for field in fields:
-            try:
-                infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
-            except KeyError:
-                print("There was an KeyError while adding field")
+            infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
 
 
     if footer is not None:
-        try:
-            infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
-        except KeyError:
-            print("There was an KeyError while setting footer")
+        infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
 
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(embed=successEmbed, view=view, file=file)
+                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(embed=successEmbed, view=view, file=file)
+                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.message.Message:
-                await ctx.reply(embed=successEmbed, view=view, file=file)
+                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.TextChannel:
-                await ctx.send(embed=successEmbed, view=view, file=file)
+                await ctx.send(embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.Member:
                 dm = await ctx.create_dm()
                 await dm.send(embed=successEmbed, view=view, file=file)
@@ -136,12 +174,18 @@ async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message |
 
     Parameters
     -----------
-    bot: :class:`nextcord.ext.commands.bot.Bot`
+    bot: :class:`nextcord.ext.commands.Bot or nextcord.Interaction or nextcord.TextChannel or nextcord.Message or nextcord.ext.commands.Context or nextcord.Member`
         The bot instance
+
     ctx: :class:`nextcord.Interaction`
         The interaction to reply to or channel if you want to send the embed to an specific channel
+
     text: :class:`str`
         The text to embed
+
+    file: :class:`nextcord.File`
+        Optional file to send with the embed
+
     """
     if type(bot) is not Bot:
         try:
@@ -171,7 +215,7 @@ async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message |
                 print(type(ctx))
                 print("Error: Unknown interaction")
     except Exception:
-        permissionError(bot, ctx)
+        await permissionError(bot, ctx)
 
 async def errorLogging(bot, ctx: nextcord.Interaction, error: str):
     """
