@@ -9,7 +9,8 @@ async def infoEmbed(
     bot,
     ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member,
     text: str,
-    color=nextcord.Color.blurple(),
+    content: str = None,
+    color: nextcord.Color = nextcord.Color.blurple(),
     fields: list[dict] = None,
     footer: dict = None,
     view: ui.View = None,
@@ -31,6 +32,9 @@ async def infoEmbed(
 
     text: :class:`str`
         The text to embed
+
+    content: :class:`str`
+        Optional content to send with the embed
 
     color: :class:`nextcord.Color`
         Optional color to use for the embed
@@ -91,16 +95,16 @@ async def infoEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.message.Message:
-                await ctx.reply(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.TextChannel:
-                await ctx.send(embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.Member:
                 dm = await ctx.create_dm()
-                await dm.send(embed=infoEmbed, view=view, file=file)
+                await dm.send(content=content, embed=infoEmbed, view=view, file=file)
             case _:
                 print(type(ctx))
                 print("Error: Unknown interaction")
@@ -110,7 +114,8 @@ async def infoEmbed(
 async def successEmbed(
     bot,
     ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member,
-    text: str, 
+    text: str,
+    content: str = None,
     color = nextcord.Color.green(),
     fields: list[dict] = None,
     footer: dict = None,
@@ -133,6 +138,9 @@ async def successEmbed(
 
     text: :class:`str`
         The text to embed
+
+    content: :class:`str`
+        Optional content to send with the embed
 
     color: :class:`nextcord.Color`
         Optional color to use for the embed
@@ -187,16 +195,16 @@ async def successEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.message.Message:
-                await ctx.reply(embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.TextChannel:
-                await ctx.send(embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                await ctx.send(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.Member:
                 dm = await ctx.create_dm()
-                await dm.send(embed=successEmbed, view=view, file=file)
+                await dm.send(content=content, embed=successEmbed, view=view, file=file)
             case _:
                 print(type(ctx))
                 print("Error: Unknown interaction")
