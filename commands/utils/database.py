@@ -17,6 +17,8 @@ def readOne(columns: str, table: str, where: str = "", values: list = None) -> t
     """
     if values is None: values = []
 
+    if not isinstance(values, list): values = [values]
+
     whereArray = where.split(' ')
     where = ""
     for i, item in enumerate(whereArray):
@@ -47,6 +49,7 @@ def readAll(columns: str, table: str, where: str = "", values: list = None) -> l
         Optional values from with column to read
     """
     if values is None: values = []
+    if not isinstance(values, list): values = [values]
 
     whereArray = where.split(' ')
     where = ""
@@ -74,6 +77,9 @@ def insert(table: str, columns: str, values: list):
     values: :class:`list`
         The values to insert in the row
     """
+
+    if not isinstance(values, list): values = [values]
+
     valueString = ""
     for i in range(len(values)):
         if str(values[i]).lower() == "null":
@@ -106,6 +112,8 @@ def update(table: str, columns: str, where: str = "", values: list = None):
         The values to update the row with
     """
     if values is None: values = []
+    if not isinstance(values, list): values = [values]
+
     whereArray = where.split(' ')
     where = ""
     for i, item in enumerate(whereArray):
@@ -143,6 +151,9 @@ def delete(table: str, where: str, values: list):
     values: :class:`list`
         The values of conditions
     """
+
+    if not isinstance(values, list): values = [values]
+
     whereArray = where.split(' ')
     where = ""
     for i, item in enumerate(whereArray):
