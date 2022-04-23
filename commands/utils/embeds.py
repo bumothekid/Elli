@@ -5,7 +5,18 @@ from nextcord.ext.commands.bot import Bot
 
 botLoggingChannelID = 957444324080115762
 
-async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color=nextcord.Color.blurple(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None, delete_after: int = None):
+async def infoEmbed(
+    bot,
+    ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member,
+    text: str,
+    color=nextcord.Color.blurple(),
+    fields: list[dict] = None,
+    footer: dict = None,
+    view: ui.View = None,
+    file: nextcord.File = None,
+    delete_after: int = None,
+    thumbnail: str = None
+    ):
     """ 
     Creates and sends an information embed
     This is used when a information is shown
@@ -39,17 +50,19 @@ async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | next
     delete_after: :class:`int`
         Optional time in seconds to delete the embed after it was sent
         Only works if the embed is sent to a channel
-
+    
+    thumbnail: :class:`str`
+        Optional thumbnail to use for the embed
     """
     if type(bot) is not Bot:
         try:
             bot = bot.bot
         except Exception:
-            return print("Error: Bot is not a bot or self")
+            return ValueError("Bot is not a bot or self")
 
     if delete_after is not None:
         if not isinstance(delete_after, int):
-            raise ValueError("Error: delete_after is not an int")
+            raise ValueError("delete_after is not an int")
 
     infoEmbed = nextcord.Embed(
         description=text, 
@@ -69,6 +82,11 @@ async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | next
             infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
         except KeyError:
             print("There was an KeyError while setting footer")
+        
+    if thumbnail is not None:
+        if not isinstance(thumbnail, str):
+            raise ValueError("thumbnail is not a str")
+        infoEmbed.set_thumbnail(url=thumbnail)
 
     try:
         match type(ctx):
@@ -89,7 +107,18 @@ async def infoEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | next
     except Exception:
         await permissionError(bot, ctx)
 
-async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member, text: str, color = nextcord.Color.green(),  fields: list[dict] = None, footer: dict = None, view: ui.View = None, file: nextcord.File = None, delete_after: int = None):
+async def successEmbed(
+    bot,
+    ctx: nextcord.Interaction | nextcord.TextChannel | nextcord.message.Message | nextcord.ext.commands.context.Context | nextcord.Member,
+    text: str, 
+    color = nextcord.Color.green(),
+    fields: list[dict] = None,
+    footer: dict = None,
+    view: ui.View = None,
+    file: nextcord.File = None,
+    delete_after: int = None,
+    thumbnail: str = None
+    ):
     """ 
     Creates and sends an successed embed
     This is used when a something succeeds
@@ -124,12 +153,14 @@ async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | n
         Optional time in seconds to delete the embed after it was sent
         Only works if the embed is sent to a channel
 
+    thumbnail: :class:`str`
+        Optional thumbnail to use for the embed
     """
     if type(bot) is not Bot:
         try:
             bot = bot.bot
         except Exception:
-            return print("Error: Bot is not a bot or self")
+            return ValueError("Bot is not a bot or self")
 
     if delete_after is not None:
         if not isinstance(delete_after, int):
@@ -142,11 +173,16 @@ async def successEmbed(bot, ctx: nextcord.Interaction | nextcord.TextChannel | n
 
     if fields is not None:
         for field in fields:
-            infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
+            successEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
 
 
     if footer is not None:
-        infoEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
+        successEmbed.set_footer(text=footer["text"], icon_url=footer["icon_url"])
+
+    if thumbnail is not None:
+        if not isinstance(thumbnail, str):
+            raise ValueError("thumbnail is not a str")
+        successEmbed.set_thumbnail(url=thumbnail)
 
     try:
         match type(ctx):
@@ -191,7 +227,7 @@ async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message |
         try:
             bot = bot.bot
         except Exception:
-            return print("Error: Bot is not a bot or self")
+            return ValueError("Bot is not a bot or self")
 
     errorEmbed = nextcord.Embed(
         description=f"> **{text}**",
