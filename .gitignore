@@ -3,6 +3,7 @@ commands/__pycache__/
 commands/utils/__pycache__/
 assets/welcome/user_card*
 assets/leave/user_card*
+*.code-workspace
 .DS_Store
 *.py[cod]
 *$py.class
