@@ -109,26 +109,26 @@ async def infoEmbed(
     
     print("Setting thumbnail")
 
-    # try:
-    match type(ctx):
-        case nextcord.Interaction:
-            print("Sending embed to interaction")
-            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-        case nextcord.ext.commands.context.Context:
-            print("Setting context")
-            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-        case nextcord.message.Message:
-            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-        case nextcord.TextChannel:
-            await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-        case nextcord.Member:
-            dm = await ctx.create_dm()
-            await dm.send(content=content, embed=infoEmbed, view=view, file=file)
-        case _:
-            print(type(ctx))
-            print("Error: Unknown interaction")
-    # except Exception:
-    #     await permissionError(bot, ctx)
+    try:
+        match type(ctx):
+            case nextcord.Interaction:
+                print("Sending embed to interaction")
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+            case nextcord.ext.commands.context.Context:
+                print("Setting context")
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+            case nextcord.message.Message:
+                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+            case nextcord.TextChannel:
+                await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+            case nextcord.Member:
+                dm = await ctx.create_dm()
+                await dm.send(content=content, embed=infoEmbed, view=view, file=file)
+            case _:
+                print(type(ctx))
+                print("Error: Unknown interaction")
+    except Exception:
+        await permissionError(bot, ctx)
 
 async def successEmbed(
     bot,
