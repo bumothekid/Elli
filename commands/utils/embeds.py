@@ -112,10 +112,8 @@ async def infoEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                print("Sending embed to interaction")
                 await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.ext.commands.context.Context:
-                print("Setting context")
                 await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
             case nextcord.message.Message:
                 await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
