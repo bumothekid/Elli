@@ -2,6 +2,7 @@ import contextlib
 import nextcord
 from nextcord import ui
 from nextcord.ext.commands.bot import Bot
+from .models.EmbedField import EmbedField
 
 botLoggingChannelID = 957444324080115762
 
@@ -11,7 +12,7 @@ async def infoEmbed(
     text: str,
     content: str = None,
     color: nextcord.Color = nextcord.Color.blurple(),
-    fields: list[dict] = None,
+    fields: list[dict] | list[EmbedField] = None,
     footer: dict = None,
     view: ui.View = None,
     file: nextcord.File = None,
@@ -39,7 +40,7 @@ async def infoEmbed(
     color: :class:`nextcord.Color`
         Optional color to use for the embed
 
-    fields: :class:`list[dict]`
+    fields: :class:`list[dict] or list[EmbedField]`
         Optional fields with a name and a value
 
     footer: :class:`dict`
@@ -74,11 +75,25 @@ async def infoEmbed(
     )
 
     if fields is not None:
+        if not isinstance(fields, list):
+            raise ValueError("fields is not a list")
+        
+
         for field in fields:
-            try:
-                infoEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
-            except KeyError:
-                print("There was an KeyError while adding field")
+            if isinstance(field, EmbedField):
+                infoEmbed.add_field(
+                    name=field.name,
+                    value=field.value,
+                    inline=field.inline
+                )
+            elif isinstance(field, dict):
+                infoEmbed.add_field(
+                    name=field["name"],
+                    value=field["value"],
+                    inline=field["inline"]
+                )
+            else:
+                raise ValueError("Field is not a EmbedField or dict")
 
 
     if footer is not None:
@@ -91,25 +106,29 @@ async def infoEmbed(
         if not isinstance(thumbnail, str):
             raise ValueError("thumbnail is not a str")
         infoEmbed.set_thumbnail(url=thumbnail)
+    
+    print("Setting thumbnail")
 
-    try:
-        match type(ctx):
-            case nextcord.Interaction:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-            case nextcord.ext.commands.context.Context:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-            case nextcord.message.Message:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-            case nextcord.TextChannel:
-                await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
-            case nextcord.Member:
-                dm = await ctx.create_dm()
-                await dm.send(content=content, embed=infoEmbed, view=view, file=file)
-            case _:
-                print(type(ctx))
-                print("Error: Unknown interaction")
-    except Exception:
-        await permissionError(bot, ctx)
+    # try:
+    match type(ctx):
+        case nextcord.Interaction:
+            print("Sending embed to interaction")
+            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+        case nextcord.ext.commands.context.Context:
+            print("Setting context")
+            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+        case nextcord.message.Message:
+            await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+        case nextcord.TextChannel:
+            await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+        case nextcord.Member:
+            dm = await ctx.create_dm()
+            await dm.send(content=content, embed=infoEmbed, view=view, file=file)
+        case _:
+            print(type(ctx))
+            print("Error: Unknown interaction")
+    # except Exception:
+    #     await permissionError(bot, ctx)
 
 async def successEmbed(
     bot,
@@ -117,7 +136,7 @@ async def successEmbed(
     text: str,
     content: str = None,
     color = nextcord.Color.green(),
-    fields: list[dict] = None,
+    fields: list[dict] | list[EmbedField] = None,
     footer: dict = None,
     view: ui.View = None,
     file: nextcord.File = None,
@@ -145,7 +164,7 @@ async def successEmbed(
     color: :class:`nextcord.Color`
         Optional color to use for the embed
 
-    fields: :class:`list[dict]`
+    fields: :class:`list[dict] or list[EmbedField]`
         Optional fields with a name and a value
 
     footer: :class:`dict`
@@ -180,8 +199,25 @@ async def successEmbed(
     )
 
     if fields is not None:
+        if not isinstance(fields, list):
+            raise ValueError("fields is not a list")
+        
+
         for field in fields:
-            successEmbed.add_field(name=field["name"], value=field["value"], inline=field["inline"])
+            if isinstance(field, EmbedField):
+                successEmbed.add_field(
+                    name=field.name,
+                    value=field.value,
+                    inline=field.inline
+                )
+            elif isinstance(field, dict):
+                successEmbed.add_field(
+                    name=field["name"],
+                    value=field["value"],
+                    inline=field["inline"]
+                )
+            else:
+                raise ValueError("Field is not a EmbedField or dict")
 
 
     if footer is not None:
