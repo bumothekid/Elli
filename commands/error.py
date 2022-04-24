@@ -50,6 +50,9 @@ class errorhandler(Cog):
         elif isinstance(error, commands.NoPrivateMessage):
             await errorEmbed(self, ctx, "Dieser Befehl ist nicht für Private Nachrichten verfügbar.")
 
+        elif isinstance(error, commands.UserInputError):
+            await errorEmbed(self, ctx, "Du hast eine Falsche eingabe getätigt.")
+
         else:
             # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
             await errorEmbed(self, ctx, "<:icon_error_red:962068826311254177> Es ist ein kritischer Fehler aufgetreten.")
