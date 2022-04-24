@@ -1,6 +1,7 @@
 # Byte-compiled / optimized / DLL files
 commands/__pycache__/
 commands/utils/__pycache__/
+commands/utils/models/__pycache__/
 assets/welcome/user_card*
 assets/leave/user_card*
 *.code-workspace
