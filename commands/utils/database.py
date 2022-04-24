@@ -25,7 +25,7 @@ def readOne(columns: str, table: str, where: str = "", values: list = None) -> t
         if item == "": continue
         if i == 0: where += f"WHERE {item} = ?"; continue
 
-        where += f"AND {item} = ?"
+        where += f" AND {item} = ?"
 
     db = sqlite3.connect("database.db")
     c = db.cursor()
@@ -56,7 +56,7 @@ def readAll(columns: str, table: str, where: str = "", values: list = None) -> l
     for i, item in enumerate(whereArray):
         if item == "": continue
         if i == 0: where += f"WHERE {item} = ?"; continue
-        where += f"AND {item} = ?"
+        where += f" AND {item} = ?"
 
     db = sqlite3.connect("database.db")
     c = db.cursor()
@@ -119,17 +119,17 @@ def update(table: str, columns: str, where: str = "", values: list = None):
     for i, item in enumerate(whereArray):
         if item == "": continue
         if i == 0: where += f"WHERE {item} = ?"; continue
-        where += f"AND {item} = ?"
+        where += f" AND {item} = ?"
 
     columnsArray = columns.split(' ')
     columns = ""
     for i, column in enumerate(columnsArray):
         if str(values[i]).lower() == "null":
             values.pop(i)
-            columns += f"{column} = NULL" if i == 0 else f"AND {column} = NULL"
+            columns += f"{column} = NULL" if i == 0 else f" AND {column} = NULL"
             continue
         if i == 0: columns += f"{column} = ?"; continue
-        columns += f"AND {column} = ?"
+        columns += f" AND {column} = ?"
 
 
     db = sqlite3.connect("database.db")
@@ -158,7 +158,7 @@ def delete(table: str, where: str, values: list):
     where = ""
     for i, item in enumerate(whereArray):
         if i == 0: where += f"{item} = ?"; continue
-        where += f"AND {item} = ?"
+        where += f" AND {item} = ?"
 
     db = sqlite3.connect("database.db")
     c = db.cursor()
