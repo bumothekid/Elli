@@ -93,8 +93,10 @@ def insert(table: str, columns: str, values: list):
     db = sqlite3.connect("database.db")
     c = db.cursor()
     
+    print(f"INSERT INTO {table} ({columns}) VALUES ({valueString})", values)
     c.execute(f"INSERT INTO {table}({columns}) VALUES({valueString})", values)
     db.commit()
+    print(f"Inserted {table}")
 
 def update(table: str, columns: str, where: str = "", values: list = None):
     """
@@ -126,17 +128,19 @@ def update(table: str, columns: str, where: str = "", values: list = None):
     for i, column in enumerate(columnsArray):
         if str(values[i]).lower() == "null":
             values.pop(i)
-            columns += f"{column} = NULL" if i == 0 else f" AND {column} = NULL"
+            columns += f"{column} = NULL" if i == 0 else f", {column} = NULL"
             continue
         if i == 0: columns += f"{column} = ?"; continue
-        columns += f" AND {column} = ?"
+        columns += f", {column} = ?"
 
 
     db = sqlite3.connect("database.db")
     c = db.cursor()
 
+    print(f"UPDATE {table} SET {columns} {where}", values)
     c.execute(f"UPDATE {table} SET {columns} {where}", values)
     db.commit()
+    print(f"Updated {table}")
 
 def delete(table: str, where: str, values: list):
     """
