@@ -106,8 +106,6 @@ async def infoEmbed(
         if not isinstance(thumbnail, str):
             raise ValueError("thumbnail is not a str")
         infoEmbed.set_thumbnail(url=thumbnail)
-    
-    print("Setting thumbnail")
 
     try:
         match type(ctx):
