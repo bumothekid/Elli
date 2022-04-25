@@ -14,11 +14,13 @@ class giveaways(Cog):
         self.bot = bot
 
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _giveaway(self, ctx):
         await infoEmbed(self, ctx, "**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`")
 
     @_giveaway.command(name="create", aliases=["start"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(1, 20, commands.BucketType.user)
     async def _create(self, ctx):
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
             return await errorEmbed(self, ctx, "Du kannst nur `9` Giveaways gleichzeitig starten.")
@@ -172,6 +174,7 @@ class giveaways(Cog):
 
     @_giveaway.command(name="quick", aliases=["q", "quickstart"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _quick(self, ctx, channel: nextcord.TextChannel, minutes, winner, *, prize):
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
             return await errorEmbed(self, ctx, "Du kannst nur `9` Giveaways gleichzeitig starten.")
@@ -215,6 +218,7 @@ class giveaways(Cog):
 
     @_giveaway.command(name="drop")
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _drop(self, ctx, channel: nextcord.TextChannel, *, prize):
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
             embed = nextcord.Embed(
@@ -263,6 +267,7 @@ class giveaways(Cog):
 
     @_giveaway.command(name="end", aliases=["stop"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _end(self, ctx, channel: nextcord.TextChannel, message):
         try:
             message = await channel.fetch_message(message)
@@ -280,6 +285,7 @@ class giveaways(Cog):
 
     @_giveaway.command(name="reroll")
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _rerroll(self, ctx, channel: nextcord.TextChannel, message, winners):
         try:
             message = await channel.fetch_message(message)
@@ -341,6 +347,7 @@ class giveaways(Cog):
     
     @_giveaway.command(name="list", aliases=["show"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 20, commands.BucketType.user)
     async def _list(self, ctx):
         giveaways = readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])
 

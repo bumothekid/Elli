@@ -11,6 +11,7 @@ class afk(Cog):
         self.bot = bot
 
     @commands.command(name="afk", aliases=["away"], invoke_without_command=True)
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def _afk(self, ctx, *, reason="AFK"):
         is_afk = readOne(columns="reason", table="afk", where="guild_id user_id", values=[ctx.guild.id, ctx.author.id])
 

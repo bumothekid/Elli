@@ -12,11 +12,13 @@ class ticket(Cog):
         self.bot = bot
 
     @commands.group(name="ticket", aliases=["ticketsystem"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _ticket(self, ctx):
         await infoEmbed(self, ctx, "**<:Ticket:959885507557470239> Ticket System**\n\n> `-ticket create <#channel> <@rolle> <text>`\n> `-ticket update <#channel> <messageid> <@rolle> <text>`\n> `-ticket delete <#channel> <messageid>`\n> `-ticket message <text>`\n> `-ticket list`\n> `-ticket log set <#channel>`\n> `-ticket log remove`\n\n> Variablen für custom Message: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`")
 
     @_ticket.command(name="create", aliases=["new"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _create(self, ctx, channel: nextcord.TextChannel, role: nextcord.Role, *, text):
         embed = nextcord.Embed(
             description="**<:Ticket:959885507557470239> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
@@ -37,6 +39,7 @@ class ticket(Cog):
 
     @_ticket.command(name="update", aliases=["edit"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _update(self, ctx, channel: nextcord.TextChannel, message_id, role: nextcord.Role, *, text):
         ticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
 
@@ -56,6 +59,7 @@ class ticket(Cog):
     
     @_ticket.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _delete(self, ctx, channel: nextcord.TextChannel, message_id):
         dbticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
 
@@ -73,6 +77,7 @@ class ticket(Cog):
 
     @_ticket.command(name="message", aliases=["setmessage"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _message(self, ctx, *, text):
         message = readOne(columns="*", table="ticket_messages", where="guild_id", values=[ctx.guild.id])
 
@@ -87,6 +92,7 @@ class ticket(Cog):
 
     @_ticket.command(name="list")
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _list(self, ctx):
         tickets = readAll(columns="*", table="tickets", where="guild_id", values=[ctx.guild.id])
 
@@ -111,6 +117,7 @@ class ticket(Cog):
 
     @_log.command(name="set", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set(self, ctx, channel: nextcord.TextChannel):
         log = readOne(columns="channel_id", table="ticket_logs", where="guild_id", values=[ctx.guild.id])
 
@@ -124,6 +131,7 @@ class ticket(Cog):
     
     @_log.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _delete(self, ctx):
         log = readOne(columns="channel_id", table="ticket_logs", where="guild_id", values=[ctx.guild.id])
 

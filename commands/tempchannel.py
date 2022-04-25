@@ -10,11 +10,13 @@ class tempchannel(Cog):
         self.bot = bot
 
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _tempchannel(self, ctx):
         await infoEmbed(self, ctx, "** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> `-tempchannel remove`\n> `-tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`")
 
     @_tempchannel.command(name="add", aliases=['create', 'set'])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add(self, ctx, channel: nextcord.VoiceChannel):
         if channel not in ctx.guild.voice_channels:
             raise commands.ChannelNotFound(channel)
@@ -32,6 +34,7 @@ class tempchannel(Cog):
 
     @_tempchannel.command(name="remove", aliases=['delete', 'del'])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx):
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
@@ -44,6 +47,7 @@ class tempchannel(Cog):
 
     @_tempchannel.command(name="name", aliases=['setname'])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _name(self, ctx, *, name):
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 

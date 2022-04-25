@@ -14,37 +14,41 @@ class levelsys(Cog):
         self.bot = bot
     
     @commands.group(name="level", aliases=["levelsystem", "levelsys", "r", "rank"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _level(self, ctx, member: nextcord.Member = None):
-        if ctx.invoked_subcommand is None:
-            if member is None:
-                member = ctx.author
-
-            if not checkLevelOn(ctx.guild.id):
-                return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-            if member is None:
-                member = ctx.author
-
-            user: User = readUser(ctx.guild.id, member.id)
+        if ctx.invoked_subcommand is not None:
+            return
             
-            level = user.level
-            xp = user.xp
-            xpNeeded = user.xp_needed
+        if member is None:
+            member = ctx.author
 
-            allUsers = readAll("user_id", "level_users", "guild_id", [ctx.guild.id], "xp DESC")
+        if not checkLevelOn(ctx.guild.id):
+            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
 
-            top10 = False
-            placing = 1
-            if allUsers:
-                for user in allUsers:
-                    if user[0] == member.id:
-                        top10 = True
-                        break
-                    placing += 1
+        if member is None:
+            member = ctx.author
 
-            await infoEmbed(self.bot, ctx, f"**Level - {member}**\n\n> **Level:** {level}\n> **XP:** {xp}/{xpNeeded}\n> **Platz:** {placing}/10\n> **Top 10:** {'Ja' if top10 else 'Nein'}", thumbnail=member.display_avatar.url, color=member.color)
+        user: User = readUser(ctx.guild.id, member.id)
+
+        level = user.level
+        xp = user.xp
+        xpNeeded = user.xp_needed
+
+        allUsers = readAll("user_id", "level_users", "guild_id", [ctx.guild.id], "xp DESC")
+
+        top10 = False
+        placing = 1
+        if allUsers:
+            for user in allUsers:
+                if user[0] == member.id:
+                    top10 = True
+                    break
+                placing += 1
+
+        await infoEmbed(self.bot, ctx, f"**Level - {member}**\n\n> **Level:** {level}\n> **XP:** {xp}/{xpNeeded}\n> **Platz:** {placing}/10\n> **Top 10:** {'Ja' if top10 else 'Nein'}", thumbnail=member.display_avatar.url, color=member.color)
     
     @commands.command(name="leaderboard", aliases=["lb", "top", "top10"])
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _leaderboard(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist deaktiviert.")
@@ -66,6 +70,7 @@ class levelsys(Cog):
             await errorEmbed(self.bot, ctx, "Es sind keine noch User in der Datenbank gespeichert.")
     
     @_level.command(name="settings", aliases=["options"])
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _settings(self, ctx):
         await infoEmbed(self.bot, ctx, "** Level System**\n\n"
                                         "> `-level <@user>`\n"
@@ -105,6 +110,7 @@ class levelsys(Cog):
     
     @_level.command(name="on", aliases=["enable", "e"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _on(self, ctx):
         if checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist bereits aktiviert.")
@@ -114,6 +120,7 @@ class levelsys(Cog):
     
     @_level.command(name="off", aliases=["disable", "d"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _off(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist bereits deaktiviert.")
@@ -123,6 +130,7 @@ class levelsys(Cog):
 
     @_level.command(name="xp", aliases=["exp", "expirience"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _xp(self, ctx, amount: int):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -141,6 +149,7 @@ class levelsys(Cog):
 
     @_level.command(name="cooldown", aliases=["cd", "c"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _cooldown(self, ctx, seconds: int):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -159,6 +168,7 @@ class levelsys(Cog):
 
     @_level.command(name="message", aliases=["msg", "m"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _message(self, ctx, *, text: str = None):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -185,6 +195,7 @@ class levelsys(Cog):
 
     @_ping.command(name="on", aliases=["enable", "e"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _on2(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -194,6 +205,7 @@ class levelsys(Cog):
     
     @_ping.command(name="off", aliases=["disable", "d"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _off2(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -211,6 +223,7 @@ class levelsys(Cog):
         
     @_custom.command(name="add", aliases=["a", "set"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set2(self, ctx, level: int, *, text: str):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -232,6 +245,7 @@ class levelsys(Cog):
     
     @_custom.command(name="remove", aliases=["r", "del", "delete"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove2(self, ctx, level: int):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -252,6 +266,7 @@ class levelsys(Cog):
 
     @_custom.command(name="show", aliases=["s"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show2(self, ctx, level: int = None):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -285,6 +300,7 @@ class levelsys(Cog):
         await successEmbed(self.bot, ctx, f"**Eigenen Nachrichten:**\n\n{message}")
     
     @_level.group(name="roles", aliases=["r"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _roles(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -307,6 +323,7 @@ class levelsys(Cog):
 
     @_roles.command(name="add", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add(self, ctx, level: int, role: nextcord.Role):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -331,6 +348,7 @@ class levelsys(Cog):
 
     @_roles.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx, level: int):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -357,6 +375,7 @@ class levelsys(Cog):
 
     @_joinrole.command(name="set", aliases=["s", "add"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set9(self, ctx, role: nextcord.Role):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -371,6 +390,7 @@ class levelsys(Cog):
 
     @_joinrole.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove9(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -384,6 +404,7 @@ class levelsys(Cog):
         await successEmbed(self.bot, ctx, "Die joinrole wurde entfernt.")
 
     @_level.group(name="blacklist", aliases=["b"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _blacklist(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -414,6 +435,7 @@ class levelsys(Cog):
 
     @_blacklist.command(name="add", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add2(self, ctx, id: nextcord.TextChannel | nextcord.Role):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -434,6 +456,7 @@ class levelsys(Cog):
 
     @_blacklist.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove2(self, ctx, id: nextcord.TextChannel | nextcord.Role):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -462,6 +485,7 @@ class levelsys(Cog):
     
     @_level2.command(name="add", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add3(self, ctx, level: int, member: nextcord.Member):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -477,6 +501,7 @@ class levelsys(Cog):
     
     @_level2.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove3(self, ctx, level: int, member: nextcord.Member):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -492,6 +517,7 @@ class levelsys(Cog):
 
     @_level.group(name="modifyxp", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _xp2(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -500,6 +526,7 @@ class levelsys(Cog):
 
     @_xp2.command(name="add", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add4(self, ctx, xp: int, member: nextcord.Member):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -517,6 +544,7 @@ class levelsys(Cog):
     
     @_xp2.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove4(self, ctx, xp: int, member: nextcord.Member):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -540,6 +568,7 @@ class levelsys(Cog):
 
     @_level.group(name="reset", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _reset(self, ctx, user: nextcord.Member = None):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -553,6 +582,7 @@ class levelsys(Cog):
 
     @_reset.command(name="all", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _reset2(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -569,6 +599,7 @@ class levelsys(Cog):
 
     @_reset.command(name="level", aliases=["l"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _reset3(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
@@ -578,6 +609,7 @@ class levelsys(Cog):
 
     @_reset.command(name="settings", aliases=["s"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _reset4(self, ctx):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")

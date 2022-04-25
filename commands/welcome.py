@@ -15,6 +15,7 @@ class welcome(Cog):
         self.bot = bot
 
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _welcome(self, ctx):
         await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> `-welcome channel remove <#channel>`\n> `-welcome message <message>`\n> `-welcome picture set <picture>`\n> `-welcome picture remove`\n> `-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
@@ -25,6 +26,7 @@ class welcome(Cog):
 
     @_channel.command(name="set", aliases=["add", "update"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set(self, ctx, channel: nextcord.TextChannel):
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
@@ -41,6 +43,7 @@ class welcome(Cog):
 
     @_channel.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx):
         channel = readOne(columns="channel_id", table="welcome", where="guild_id", values=[ctx.guild.id])
 
@@ -53,6 +56,7 @@ class welcome(Cog):
     
     @_welcome.command(name="message", aliases=["text", "msg"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _message(self, ctx, *, message):
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
@@ -70,6 +74,7 @@ class welcome(Cog):
 
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set2(self, ctx, picture):
         if picture not in ["1", "2", "3", "4", "5", "6"]:
             return await errorEmbed(self, ctx, "Es ist kein Bild mit dieser Nummer vorhanden. <1-6>")
@@ -85,6 +90,7 @@ class welcome(Cog):
     
     @_picture.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove2(self, ctx):
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
@@ -96,6 +102,7 @@ class welcome(Cog):
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show(self, ctx):
         await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
     

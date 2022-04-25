@@ -11,11 +11,13 @@ class reactionrole(Cog):
         self.bot = bot
 
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _rr(self, ctx):
         await infoEmbed(self, ctx, "**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _create(self, ctx, channel: nextcord.TextChannel, message, reaction: str, role: nextcord.Role):
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
@@ -51,6 +53,7 @@ class reactionrole(Cog):
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _delete(self, ctx, channel: nextcord.TextChannel, message, reaction: str):
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 

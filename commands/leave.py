@@ -15,6 +15,7 @@ class leave(Cog):
         self.bot = bot
 
     @commands.group(name="leave", invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _leave(self, ctx):
         await infoEmbed(self.bot, ctx, "**<:icon_member_left:965034270622122044> Verlassnachrichten**\n\n> `-leave channel set <#channel>`\n> `-leave channel remove <#channel>`\n> `-leave message <message>`\n> `-leave picture set <picture>`\n> `-leave picture remove`\n> `-leave picture show`\n\n> Variablen für die Verlassnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
@@ -24,6 +25,7 @@ class leave(Cog):
 
     @_channel.command(name="set", aliases=["add", "update"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set(self, ctx, channel: nextcord.TextChannel):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
@@ -40,6 +42,7 @@ class leave(Cog):
     
     @_channel.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
@@ -52,6 +55,7 @@ class leave(Cog):
 
     @_leave.command(name="message", aliases=["msg"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _message(self, ctx, *, message: str):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
@@ -69,6 +73,7 @@ class leave(Cog):
     
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set2(self, ctx, picture):
         if picture not in ["1", "2", "3", "4", "5", "6"]:
             return await errorEmbed(self.bot, ctx, "Es ist kein Bild mit dieser Nummer vorhanden. <1-6>")
@@ -84,6 +89,7 @@ class leave(Cog):
 
     @_picture.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove2(self, ctx):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
@@ -95,6 +101,7 @@ class leave(Cog):
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show(self, ctx):
         await infoEmbed(self, ctx, "**<:icon_member_left:965034270622122044> Verlassbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
 

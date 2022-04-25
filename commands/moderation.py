@@ -10,12 +10,13 @@ class moderation(Cog):
         self.bot = bot
 
     @commands.command(name="moderation", aliases=["mod"])
+    @commands.cooldown(2, 10, BucketType.user)
     async def _moderation(self, ctx):
         await infoEmbed(self.bot, ctx, "**<:icon_moderation:967038345395961896> Moderations Befehle**\n\n> `-clear <anzahl>`\n> `> kick <@user> <grund>`\n> `-ban <@user> <grund>`\n> `-addrole <@user> <@rolle>`\n> `-removerole <@user> <@rolle>`")
 
     @commands.command(name="clear", aliases=["clr", "clean"])
     @commands.has_permissions(manage_messages=True)
-    @commands.cooldown(2, 20, BucketType.user)
+    @commands.cooldown(2, 10, BucketType.user)
     async def _clear(self, ctx, amount: int):
         if amount > 200:
             return await errorEmbed(self.bot, ctx, "Du kannst maximal 200 Nachrichten löschen.")
@@ -26,7 +27,7 @@ class moderation(Cog):
     @commands.command(name="kick", aliases=["k"])
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
-    @commands.cooldown(2, 20, BucketType.user)
+    @commands.cooldown(5, 10, BucketType.user)
     async def _kick(self, ctx, member: nextcord.Member, *, reason: str = None):
         if reason is None:
             reason = "Kein Grund angegeben."
@@ -46,7 +47,7 @@ class moderation(Cog):
     @commands.command(name="ban", aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
-    @commands.cooldown(2, 20, BucketType.user)
+    @commands.cooldown(5, 10, BucketType.user)
     async def _ban(self, ctx, member: nextcord.Member, *, reason: str = None):
         if reason is None:
             reason = "Kein Grund angegeben."
