@@ -33,7 +33,8 @@ def readOne(columns: str, table: str, where: str = "", values: list = None) -> t
     c.execute(f"SELECT {columns} FROM {table} {where}", values)
     return c.fetchone()
 
-def readAll(columns: str, table: str, where: str = "", values: list = None) -> list[tuple]:
+def readAll(columns: str, table: str, where: str = "", values: list = None, filter: str = "") -> list[tuple]:
+    # sourcery skip: avoid-builtin-shadow
     """
     Reads multiple rows from the database and returns a list of tuples
 
@@ -47,6 +48,8 @@ def readAll(columns: str, table: str, where: str = "", values: list = None) -> l
         Optional conditions from with column to read
     values: :class:`list`
         Optional values from with column to read
+    filter: :class:`str`
+        Optional filter to apply to the rows
     """
     if values is None: values = []
     if not isinstance(values, list): values = [values]
@@ -58,10 +61,13 @@ def readAll(columns: str, table: str, where: str = "", values: list = None) -> l
         if i == 0: where += f"WHERE {item} = ?"; continue
         where += f" AND {item} = ?"
 
+    if filter != "":
+        filter = f"ORDER BY {filter}"
+
     db = sqlite3.connect("database.db")
     c = db.cursor()
 
-    c.execute(f"SELECT {columns} FROM {table} {where}", values)
+    c.execute(f"SELECT {columns} FROM {table} {where} {filter}", values)
     return c.fetchall()
 
 def insert(table: str, columns: str, values: list):
