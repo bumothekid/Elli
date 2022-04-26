@@ -1,7 +1,7 @@
-from ast import alias
 import asyncio
 import random
 import nextcord
+import requests
 
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
@@ -76,7 +76,36 @@ class fun(Cog):
 
         await successEmbed(self.bot, ctx, f"**8ball**\n\n> **Antwort:** *{random.choice(anwsers)}*\n\n> **Frage:** *{question}`")
                 
+    @commands.command(name="cat", aliases=["kitty", "kitten"])
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def _cat(self, ctx):
+        async with ctx.channel.typing():
+            try:
+                r = requests.get("https://aws.random.cat/meow")
+                r.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
+                return
+            data = r.json()
+
+            await successEmbed(self.bot, ctx, f"**Kitty**\n\n> **URL:** [`📎` Link]({data['file']})", image=data['file'])
+
+    @commands.command(name="dog", aliases=["puppy"])
+    @commands.cooldown(5, 30, commands.BucketType.user)
+    async def _dog(self, ctx):
+        async with ctx.channel.typing():
+            try:
+                r = requests.get("https://random.dog/woof.json")
+                r.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
+                return
+            data = r.json()
+
+            if data['url'].endswith(".mp4"):
+                return await self._dog(ctx)
                 
+            await successEmbed(self.bot, ctx, f"**Dog**\n\n> **URL:** [`📎` Link]({data['url']})", image=data['url'])
 
 def setup(bot):
     bot.add_cog(fun(bot))
