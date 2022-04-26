@@ -14,6 +14,9 @@ extensions = [
     'commands.help',
     'commands.error',
     'commands.developer',
+    'commands.general',
+    'commands.fun',
+    'commands.moderation',
     'commands.welcome',
     'commands.leave',
     'commands.levelsys',
@@ -21,9 +24,7 @@ extensions = [
     'commands.giveaway',
     'commands.tempchannel',
     'commands.ticket',
-    'commands.afk',
-    'commands.moderation',
-    'commands.bot'
+    'commands.afk'
 ]
 
 @bot.event
