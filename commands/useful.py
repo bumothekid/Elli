@@ -32,5 +32,15 @@ class useful(Cog):
             thumbnail=member.display_avatar.url
         )
 
+    @commands.command(name="serverinfo", aliases=["server", "si"])
+    @commands.cooldown(2, 20, commands.BucketType.user)
+    async def _serverinfo(self, ctx):
+        await infoEmbed(
+            self,
+            ctx,
+            f"**{ctx.guild.name}'s Serverinfo**\n\n> **Server Name:** `{ctx.guild.name}`\n> **Server ID: `{ctx.guild.id}`**\n> **Server Owner: `{ctx.guild.owner}`**\n\n> **Verifikations Stufe: `{capString(str(ctx.guild.verification_level))}`**\n> **Boost Stufe: `{ctx.guild.premium_tier}`**\n> **Boost Anzahl: `{ctx.guild.premium_subscription_count}`**\n\n> **Mitglieder: `{len(ctx.guild.members)}`**\n> **Server Icon:** [`📎` Link]({ctx.guild.icon.url})\n> **Server Erstellt: <t:{int(ctx.guild.created_at.timestamp())}:R>**",
+            thumbnail=ctx.guild.icon.url
+        )
+
 def setup(bot):
     bot.add_cog(useful(bot))
