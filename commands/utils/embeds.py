@@ -231,16 +231,16 @@ async def successEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
                 return message
             case nextcord.ext.commands.context.Context:
-                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
                 return message
             case nextcord.message.Message:
-                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
                 return message
             case nextcord.TextChannel:
-                message = await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.send(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
                 return message
             case nextcord.Member:
                 dm = await ctx.create_dm()
