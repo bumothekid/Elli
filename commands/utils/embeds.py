@@ -351,20 +351,30 @@ async def devLogging(bot, ctx: nextcord.Interaction, text: str):
     await channel.send(embed=embed)
 
 async def permissionError(bot, ctx: nextcord.Interaction):
-    with contextlib.suppress(Exception):
-        if type(bot) is not Bot:
-            try:
-                bot = bot.bot
-            except Exception:
-                return print("Error: Bot is not a bot or self")
+    # with contextlib.suppress(Exception):
+    if type(bot) is not Bot:
+        try:
+            bot = bot.bot
+        except Exception:
+            return print("Error: Bot is not a bot or self")
 
-        emote = bot.get_emoji(962068826311254177)
+    emote = bot.get_emoji(962068826311254177)
 
-        permissionEmbed = nextcord.Embed(
-            description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",
-            color=nextcord.Color.red()
-        )
+    permissionEmbed = nextcord.Embed(
+        description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",
+        color=nextcord.Color.red()
+    )
+    
+    match type(ctx):
+        case nextcord.Interaction:
+            await ctx.message.add_reaction(emote)
+        case nextcord.ext.commands.context.Context:
+            await ctx.message.add_reaction(emote)
+        case nextcord.message.Message:
+            await ctx.add_reaction(emote)
+        case _:
+            print(type(ctx))
+            print("Error: Unknown interaction")
 
-        await ctx.add_reaction(emote)
-        await ctx.author.create_dm()
-        await ctx.author.dm_channel.send(embed=permissionEmbed)
+    await ctx.author.create_dm()
+    await ctx.author.dm_channel.send(embed=permissionEmbed)
