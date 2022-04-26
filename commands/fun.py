@@ -1,3 +1,4 @@
+from ast import alias
 import asyncio
 import random
 import nextcord
@@ -5,7 +6,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
-from .utils.other import capString
+from .utils.other import capString, checkLink
 
 class fun(Cog):
     def __init__(self, bot):
@@ -63,9 +64,17 @@ class fun(Cog):
         
         else:
             await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
+    
+    @commands.command(name="8ball", aliases=["8b", "ask"])
+    @commands.cooldown(5, 20, commands.BucketType.user)
+    async def _8ball(self, ctx, *, question: str):
+        anwsers = ["Ja", "Sicher", "100%", "Vielleicht", "Eher weniger", "Joa", "Lieber nicht", "Nein"]
 
-        
-                
+        if checkLink(ctx.message):
+            await errorEmbed(self.bot, ctx, "Du kannst keine Links in deine Frage schreiben.")
+            return
+
+        await successEmbed(self.bot, ctx, f"**8ball**\n\n> **Antwort:** *{random.choice(anwsers)}*\n\n> **Frage:** *{question}`")
                 
                 
 
