@@ -5,7 +5,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from time import time
-from .utils.embeds import devLogging, errorEmbed, successEmbed, infoEmbed
+from .utils.embeds import errorEmbed, successEmbed, infoEmbed
 from .utils.database import readOne, insert, update
 
 class general(Cog):
@@ -66,15 +66,6 @@ class general(Cog):
             ctx,
             f"**<:icon_support:966028792890003547> Support**\n\n> **Support:** `Hier scheint wohl noch etwas zu fehlen.`"
         )
-    
-    @commands.command(name="bug", aliases=['bugreport', "report"])
-    @commands.cooldown(2, 20, commands.BucketType.user)
-    async def _bug(self, ctx, bug: str):
-        if len(bug) < 10:
-            return await errorEmbed(self, ctx, "Der Bugreport muss mindestens 10 Zeichen lang sein.")
-        
-        await successEmbed(self, ctx, f"**<:icon_bug:966028792890003547> Bugreport**\n\n> **Bugreport:** `{bug}`")
-        await devLogging(self, ctx, f"{ctx.author} hat einen Bugreport gemeldet:\n> **{bug}**")
 
 def setup(bot):
     bot.add_cog(general(bot))

@@ -4,7 +4,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 
 from .utils.other import capString
-from .utils.embeds import successEmbed, errorEmbed, infoEmbed
+from .utils.embeds import successEmbed, errorEmbed, infoEmbed, devLogging
 
 class useful(Cog):
     def __init__(self, bot):
@@ -54,6 +54,15 @@ class useful(Cog):
             f"**{member.name}'s Avatar**\n\n> **Avatar: [`📎` Link]({member.display_avatar.url})**",
             thumbnail=member.display_avatar.url
         )
+
+    @commands.command(name="bug", aliases=['bugreport', "report"])
+    @commands.cooldown(2, 20, commands.BucketType.user)
+    async def _bug(self, ctx, bug: str):
+        if len(bug) < 10:
+            return await errorEmbed(self, ctx, "Der Bugreport muss mindestens 10 Zeichen lang sein.")
+        
+        await successEmbed(self, ctx, f"**<:icon_bug:966028792890003547> Bugreport**\n\n> **Bugreport:** `{bug}`")
+        await devLogging(self, ctx, f"{ctx.author} hat einen Bugreport gemeldet:\n> **{bug}**")
 
 def setup(bot):
     bot.add_cog(useful(bot))
