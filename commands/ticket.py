@@ -143,6 +143,9 @@ class ticket(Cog):
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        if payload.member is None:
+            return
+            
         if payload.member.bot:
             return
 
