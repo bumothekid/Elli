@@ -17,7 +17,8 @@ async def infoEmbed(
     view: ui.View = None,
     file: nextcord.File = None,
     delete_after: int = None,
-    thumbnail: str = None
+    thumbnail: str = None,
+    image: str = None
     ) -> nextcord.Message:
     """ 
     Creates and sends an information embed
@@ -58,6 +59,9 @@ async def infoEmbed(
     
     thumbnail: :class:`str`
         Optional thumbnail to use for the embed
+    
+    image: :class:`str`
+        Optional image to use for the embed
     """
     if type(bot) is not Bot:
         try:
@@ -107,6 +111,12 @@ async def infoEmbed(
             raise ValueError("thumbnail is not a str")
         infoEmbed.set_thumbnail(url=thumbnail)
 
+    if image is not None:
+        if not isinstance(image, str):
+            raise ValueError("image is not a str")
+
+        infoEmbed.set_image(url=image)
+
     try:
         match type(ctx):
             case nextcord.Interaction:
@@ -141,7 +151,8 @@ async def successEmbed(
     view: ui.View = None,
     file: nextcord.File = None,
     delete_after: int = None,
-    thumbnail: str = None
+    thumbnail: str = None,
+    image: str = None
     ) -> nextcord.Message:
     """ 
     Creates and sends an successed embed
@@ -182,6 +193,9 @@ async def successEmbed(
 
     thumbnail: :class:`str`
         Optional thumbnail to use for the embed
+
+    image: :class:`str`
+        Optional image to use for the embed
     """
     if type(bot) is not Bot:
         try:
@@ -227,6 +241,12 @@ async def successEmbed(
         if not isinstance(thumbnail, str):
             raise ValueError("thumbnail is not a str")
         successEmbed.set_thumbnail(url=thumbnail)
+
+    if image is not None:
+        if not isinstance(image, str):
+            raise ValueError("image is not a str")
+
+        successEmbed.set_image(url=image)
 
     try:
         match type(ctx):
