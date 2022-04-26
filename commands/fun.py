@@ -1,5 +1,6 @@
 import asyncio
 import random
+import nextcord
 
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
@@ -22,32 +23,34 @@ class fun(Cog):
 
             while i < 3:
                 try:
-                    anwser = self.bot.wait_for('message', timeout=60.0, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
+                    anwser = await self.bot.wait_for('message', timeout=60.0, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
                     await errorEmbed(self.bot, ctx, "Der Befehl wurde abgebrochen, da du zu lange zum antwortet gebraucht hast.")
                     break
                 
-                if anwser.lower() not in ["stein", "schere", "papier"]:
+                if anwser.content.lower() not in ["stein", "schere", "papier"]:
                     if i == 3:
                         await errorEmbed(self.bot, ctx, "Du hast `3` Versuche verbraucht der befehl wird abgebrochen.")
                         break
                     await errorEmbed(self.bot, ctx, "Bitte wähle `Stein`, `Schere` oder `Papier`")
                     continue
             
-                choice = anwser.lower()
+                choice = anwser.content
                 break
         
+        choice = choice.lower()
+        
         if choice == botchoice:
-            await successEmbed(self.bot, ctx, f"**Unentschieden!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+            await successEmbed(self.bot, ctx, f"**Unentschieden!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.white())
         
         elif choice == "stein" and botchoice == "schere":
             await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
         
         elif choice == "stein" and botchoice == "papier":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
         
         elif choice == "schere" and botchoice == "stein":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
         
         elif choice == "schere" and botchoice == "papier":
             await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
@@ -56,7 +59,7 @@ class fun(Cog):
             await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
 
         elif choice == "papier" and botchoice == "schere":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
         
         else:
             await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
