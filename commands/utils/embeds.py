@@ -18,7 +18,7 @@ async def infoEmbed(
     file: nextcord.File = None,
     delete_after: int = None,
     thumbnail: str = None
-    ):
+    ) -> nextcord.Message:
     """ 
     Creates and sends an information embed
     This is used when a information is shown
@@ -110,13 +110,17 @@ async def infoEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.message.Message:
-                await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.TextChannel:
-                await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.Member:
                 dm = await ctx.create_dm()
                 await dm.send(content=content, embed=infoEmbed, view=view, file=file)
@@ -138,7 +142,7 @@ async def successEmbed(
     file: nextcord.File = None,
     delete_after: int = None,
     thumbnail: str = None
-    ):
+    ) -> nextcord.Message:
     """ 
     Creates and sends an successed embed
     This is used when a something succeeds
@@ -227,13 +231,17 @@ async def successEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.ext.commands.context.Context:
-                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.message.Message:
-                await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.TextChannel:
-                await ctx.send(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                message = await ctx.send(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                return message
             case nextcord.Member:
                 dm = await ctx.create_dm()
                 await dm.send(content=content, embed=successEmbed, view=view, file=file)
