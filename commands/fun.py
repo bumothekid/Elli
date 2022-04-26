@@ -12,7 +12,7 @@ class fun(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command("ssp")
+    @commands.command(name="ssp", aliases=["rsp", "rps"])
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _ssp(self, ctx, choice: str = None):
         botchoice = random.choice(["stein", "schere", "papier"])
