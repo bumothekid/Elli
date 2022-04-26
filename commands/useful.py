@@ -8,7 +8,7 @@ class useful(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="ping")
+    @commands.command(name="ping", aliases=["latency"])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _ping(self, ctx):
         await infoEmbed(
