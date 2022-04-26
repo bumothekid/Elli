@@ -49,15 +49,6 @@ class general(Cog):
 
         await successEmbed(self, ctx, f"**<:icon_commands:966028792890003547> Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `{oldPrefix[0]}`")
 
-    @commands.command(name="ping")
-    @commands.cooldown(2, 20, commands.BucketType.user)
-    async def _ping(self, ctx):
-        await infoEmbed(
-            self,
-            ctx,
-            f"**{self.bot.user.name}'s Latenz**\n\n> **Latenz: `{round(self.bot.latency * 1000)}ms`**"
-        )
-
     @commands.command(name="invite")
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _invite(self, ctx):

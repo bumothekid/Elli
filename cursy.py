@@ -15,6 +15,7 @@ extensions = [
     'commands.error',
     'commands.developer',
     'commands.general',
+    'commands.useful',
     'commands.fun',
     'commands.moderation',
     'commands.welcome',
