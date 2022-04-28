@@ -1,5 +1,7 @@
 import asyncio
+from pprint import pprint
 import random
+import aiohttp
 import nextcord
 import requests
 
@@ -106,6 +108,32 @@ class fun(Cog):
                 return await self._dog(ctx)
                 
             await successEmbed(self.bot, ctx, f"**Dog**\n\n> **URL:** [`📎` Link]({data['url']})", image=data['url'])
+
+    # TODO: Fix meme command
+
+    @commands.command(name="meme", aliases=["memes"])
+    @commands.cooldown(5, 20, commands.BucketType.user)
+    async def _meme(self, ctx):
+        await errorEmbed(self.bot, ctx, "Der Meme befehl ist momentan deaktiviert.")
+        # print("aaa")
+        # r = requests.get("https://www.reddit.com/r/memes/new.json?")
+        # print("bbb")
+        # r.raise_for_status()
+        # except requests.exceptions.RequestException as e:
+        # return await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
+        
+        # data = r.json()
+        # pprint(data)
+        # num = random.randint(0, 20)
+        # meme = data["data"]["children"][num]["data"]
+
+        # title = meme["title"]
+        # memeURL = meme["url"]
+        # upvotes = meme["ups"]
+        # comments = meme["num_comments"]
+        # await infoEmbed(self.bot, ctx, f"**[{title}]({memeURL})**", image=memeURL, footer={"text": f"👍 {upvotes} | 💬 {comments}", "icon_url": ""})
+
+    
 
 def setup(bot):
     bot.add_cog(fun(bot))
