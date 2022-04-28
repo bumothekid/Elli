@@ -1,4 +1,5 @@
 import asyncio
+from audioop import reverse
 from pprint import pprint
 import random
 import aiohttp
@@ -132,6 +133,16 @@ class fun(Cog):
         # upvotes = meme["ups"]
         # comments = meme["num_comments"]
         # await infoEmbed(self.bot, ctx, f"**[{title}]({memeURL})**", image=memeURL, footer={"text": f"👍 {upvotes} | 💬 {comments}", "icon_url": ""})
+
+    @commands.command(name="reverse")
+    @commands.cooldown(5, 20, commands.BucketType.user)
+    async def _reverse(self, ctx, *, text: str):
+        reverse = text[::-1]
+
+        if checkLink(text) or checkLink(reverse):
+            return await errorEmbed(self.bot, ctx, "Es dürfen keine Links in deinem Text sein")
+
+        await infoEmbed(self.bot, ctx, f"**Umgekehter Text von {ctx.author}**\n\n> **Text:** {reverse}")
 
     
 
