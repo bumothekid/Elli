@@ -31,11 +31,11 @@ def messagePinned(message: nextcord.Message) -> bool:
 def capString(string: str) -> str:
     return capwords(string.lower())
 
-def checkLink(message: nextcord.Message) -> bool:
-    if "https://" in message.content or "http://" in message.content:
+def checkLink(text: str) -> bool:
+    if "https://" in text or "http://" in text:
         return True
     
-    if "discord." in message.content or "discordapp." in message.content:
+    if "discord." in text or "discordapp." in text:
         return True
     
     return False
