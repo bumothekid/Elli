@@ -13,7 +13,7 @@ class reactionrole(Cog):
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _rr(self, ctx):
-        await infoEmbed(self, ctx, "**🎭 Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
+        await infoEmbed(self, ctx, "**<:icon_roles:968233835710017566> Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
@@ -49,7 +49,7 @@ class reactionrole(Cog):
                 raise commands.EmojiNotFound(argument=reaction)
 
         insert(table="reactionroles", columns="guild_id, channel_id, message_id, reaction, role_id", values=[ctx.guild.id, channel.id, message.id, reaction, role.id])
-        await successEmbed(self, ctx, f"**🎭 Die Reactionrole wurde eingerichtet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
+        await successEmbed(self, ctx, f"**<:icon_roles:968233835710017566> Die Reactionrole wurde eingerichtet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -77,7 +77,7 @@ class reactionrole(Cog):
             raise commands.EmojiNotFound(argument=reaction)
 
         delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message.id, reaction])
-        await successEmbed(self, ctx, f"**🎭 Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
+        await successEmbed(self, ctx, f"**<:icon_roles:968233835710017566> Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
 
 
     @Cog.listener()
@@ -111,13 +111,6 @@ class reactionrole(Cog):
 
             with contextlib.suppress(Exception):
                 await member.remove_roles(role, reason="Reactionrole")
-
-
-        
-
-
-
-    
     
 def setup(bot):
     bot.add_cog(reactionrole(bot))
