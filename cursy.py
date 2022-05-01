@@ -25,7 +25,8 @@ extensions = [
     'commands.giveaway',
     'commands.tempchannel',
     'commands.ticket',
-    'commands.afk'
+    'commands.afk',
+    'commands.automod'
 ]
 
 @bot.event
