@@ -17,7 +17,7 @@ class ClassHelp(commands.Cog):
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def help(self, ctx):
         view = HelpButtonView(self.bot)
-        message = await infoEmbed(self.bot, ctx, f"**<:icon_commands:966028792890003547> {self.bot.user.name}'s Command Kategorien**\n\n> **<:icon_discord:968229925528145980> Generell**\n> **💡 Nützlich**\n> **<:icon_moderation:967038345395961896> Moderation**\n> **<:icon_fun:968221028985761812> Fun**\n> **<:icon_member_joined:965033605707481128> Welcome**\n> **<:icon_member_left:965034270622122044> Leave**\n> **<a:giveaway:958492679749140510> Giveaway**\n> **<:icon_ticket:959885507557470239> Ticket System**\n> **⏳ Tempchannel**\n> **<:icon_roles:968233835710017566> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:icon_badword:970238990743658518> Bad Words**", view=view)
+        message = await infoEmbed(self.bot, ctx, f"**<:icon_commands:966028792890003547> {self.bot.user.name}'s Command Kategorien**\n\n> **<:icon_discord:968229925528145980> Generell**\n> **💡 Nützlich**\n> **<:icon_moderation:967038345395961896> Moderation**\n> **<:icon_fun:968221028985761812> Fun**\n> **<:icon_member_joined:965033605707481128> Welcome**\n> **<:icon_member_left:965034270622122044> Leave**\n> **<a:giveaway:958492679749140510> Giveaway**\n> **<:icon_ticket:959885507557470239> Ticket System**\n> **⏳ Tempchannel**\n> **<:icon_roles:968233835710017566> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:icon_badword:970238990743658518> Bad Words**\n<:icon_ghostping:970292783027986463> Anti Ghostping", view=view)
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
@@ -25,7 +25,7 @@ class ClassHelp(commands.Cog):
 async def calltimeout(bot, message):
     view = HelpButtonView(bot, True)
     embed = nextcord.Embed(
-                description=f"**<:icon_commands:966028792890003547> {bot.user.name}'s Command Kategorien**\n\n> **<:icon_discord:968229925528145980> Generell**\n> **💡 Nützlich**\n> **<:icon_moderation:967038345395961896> Moderation**\n> **<:icon_fun:968221028985761812> Fun**\n> **<:icon_member_joined:965033605707481128> Welcome**\n> **<:icon_member_left:965034270622122044> Leave**\n> **<a:giveaway:958492679749140510> Giveaway**\n> **<:icon_ticket:959885507557470239> Ticket System**\n> **⏳ Tempchannel**\n> **<:icon_roles:968233835710017566> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**",
+                description=f"**<:icon_commands:966028792890003547> {bot.user.name}'s Command Kategorien**\n\n> **<:icon_discord:968229925528145980> Generell**\n> **💡 Nützlich**\n> **<:icon_moderation:967038345395961896> Moderation**\n> **<:icon_fun:968221028985761812> Fun**\n> **<:icon_member_joined:965033605707481128> Welcome**\n> **<:icon_member_left:965034270622122044> Leave**\n> **<a:giveaway:958492679749140510> Giveaway**\n> **<:icon_ticket:959885507557470239> Ticket System**\n> **⏳ Tempchannel**\n> **<:icon_roles:968233835710017566> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:icon_badword:970238990743658518> Bad Words**\n<:icon_ghostping:970292783027986463> Anti Ghostping",
                 color=nextcord.Color.blurple()
     )
     message = await message.edit(embed=embed, view=view)
@@ -60,7 +60,8 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label="Reaction Roles", emoji="<:icon_roles:968233835710017566>"),
             nextcord.SelectOption(label="Level System", emoji="🌟"),
             nextcord.SelectOption(label="Invite Logger", emoji="📨"),
-            nextcord.SelectOption(label="Bad Words", emoji="<:icon_badword:970238990743658518>")
+            nextcord.SelectOption(label="Bad Words", emoji="<:icon_badword:970238990743658518>"),
+            nextcord.SelectOption(label="Anti Ghostping", emoji="<:icon_ghostping:970292783027986463>")
         ]
         super().__init__(placeholder="Wähle eine Kategorie", options=options, disabled=disabled)
         self.bot = bot
@@ -210,6 +211,14 @@ class HelpButton(nextcord.ui.Select):
             case "Bad Words":
                 embed = nextcord.Embed(
                     description="**<:icon_badword:970238990743658518> Bad Words**\n\n> `-badword add <word>`\n> <:icon_reply:969871237062983740> Fügt ein Wort der Blacklist hinzu\n> `-badword remove <word>`\n> <:icon_reply:969871237062983740> Entfernt ein Wort von der Blacklist\n> `-badword show`\n> <:icon_reply:969871237062983740> Zeigt dir alle Wörter auf der Blacklist",
+                    color=nextcord.Color.blurple()
+                )
+
+                await interaction.message.edit(embed=embed)
+
+            case "Anti Ghostping":
+                embed = nextcord.Embed(
+                    description="**<:icon_ghostping:970292783027986463> Anti-Ghostpings**\n\n> `-ghostping on`\n> `-ghostping off`",
                     color=nextcord.Color.blurple()
                 )
 
