@@ -85,7 +85,7 @@ class automod(Cog):
         if message.author.guild_permissions.administrator:
             return
         
-        if message.content.startswith(getPrefixFromDatabase(message)):
+        if message.content.startswith(getPrefixFromDatabase(self.bot, message)):
             return
 
         words = readAll("word", "badwords", "guild_id", [message.guild.id])
@@ -93,7 +93,7 @@ class automod(Cog):
         if all(word[0].lower() not in message.content.lower() for word in words):
             return
         
-        await infoEmbed(self.bot, message, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
+        await infoEmbed(self.bot, message.channel, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
         with contextlib.suppress(Exception):
             await message.delete()
 
@@ -111,7 +111,7 @@ class automod(Cog):
         words = readAll("word", "badwords", "guild_id", [message.guild.id])
         
         if any(word[0].lower() in message.content.lower() for word in words):
-            await infoEmbed(self.bot, message, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
+            await infoEmbed(self.bot, message.channel, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
             with contextlib.suppress(Exception):
                 await message.delete()
 
