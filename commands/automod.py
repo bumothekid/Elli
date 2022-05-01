@@ -100,7 +100,7 @@ class automod(Cog):
     @Cog.listener()
     async def on_raw_message_edit(self, payload):
         channel = self.bot.get_channel(payload.channel_id)
-        message = channel.fetch_message(payload.message_id)
+        message = await channel.fetch_message(payload.message_id)
 
         if message.author.bot:
             return
