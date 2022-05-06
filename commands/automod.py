@@ -83,7 +83,7 @@ class automod(Cog):
     @commands.group(name="linkblocker", invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _linkblocker(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n `-linkblocker off`")
+        await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> `-linkblocker off`")
 
     @_linkblocker.command(nane="on", aliases=["activate", "activ"])
     @commands.cooldown(2, 10, commands.BucketType.user)
