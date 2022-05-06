@@ -1,5 +1,6 @@
 from cgitb import enable
 import contextlib
+from distutils.log import error
 import re
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
@@ -78,6 +79,31 @@ class automod(Cog):
 
         update("ghostping", "enabled", "guild_id", [0, ctx.guild.id])
         await successEmbed(self.bot, ctx, "Das Anti-Ghostping System wurde deaktiviert.")
+
+    @commands.group(name="linkblocker", invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def _linkblocker(self, ctx):
+        await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n `-linkblocker off`")
+
+    @_linkblocker.command(nane="on", aliases=["activate", "activ"])
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    @commands.has_guild_permissions(manage_guild=True)
+    async def _on2(self, ctx):
+        if checkLinkOn(ctx.guild.id):
+            return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits aktiviert.")
+
+        update("linkblocker", "enabled", "guild_id", [1, ctx.guild.id])
+        await successEmbed(self.bot, ctx, "Der Linkblocker wurde aktiviert.")
+
+
+    @_linkblocker.command(name="off", aliases=["deactivate"])
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def _off2(self, ctx):
+        if not checkLinkOn(ctx.guild.id):
+            return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits deaktiviert.")
+
+        update("linkblocker", "enabled", "guild_id", [0, ctx.guild.id])
+        await successEmbed(self.bot, ctx, "Der Linkblocker wurde deaktiviert.")
 
     @Cog.listener()
     async def on_message(self, message):
