@@ -119,6 +119,15 @@ class automod(Cog):
         if message.author.guild_permissions.administrator:
             return
 
+        if checkLink(message.content.lower()):
+            if not checkLinkOn(message.guild.id):
+                return
+
+            await infoEmbed(self.bot, message.channel, "**<:icon_automod:967038254367006791> Du darfst hier keine Links reinschicken.**")
+
+            with contextlib.suppress(Exception):
+                return await message.delete()
+
         words = readAll("word", "badwords", "guild_id", [message.guild.id])
         
         if any(word[0].lower() in message.content.lower() for word in words):
