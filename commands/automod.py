@@ -1,8 +1,10 @@
+from cgitb import enable
 import contextlib
+import re
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 
-from .utils.other import getPrefixFromDatabase
+from .utils.other import checkLink, getPrefixFromDatabase
 from .utils.embeds import infoEmbed, errorEmbed, successEmbed
 from .utils.database import delete, insert, readOne, readAll, update
 
@@ -84,6 +86,15 @@ class automod(Cog):
 
         if message.author.guild_permissions.administrator:
             return
+
+        if checkLink(message.content.lower()):
+            if not checkLinkOn(message.guild.id):
+                return
+
+            await infoEmbed(self.bot, message.channel, "**<:icon_automod:967038254367006791> Du darfst hier keine Links reinschicken.**")
+
+            with contextlib.suppress(Exception):
+                return await message.delete()
         
         if message.content.startswith(getPrefixFromDatabase(self.bot, message)):
             return
@@ -137,6 +148,15 @@ def checkGhostOn(guildid: int) -> bool:
         insert("ghostping", "guild_id, enabled", [guildid, 0])
         return False
     
+    return enabled[0] == 1
+
+def checkLinkOn(guildid: int) -> bool:
+    enabled = readOne("enabled", "linkblocker", "guild_id", [guildid])
+
+    if enabled is None:
+        insert("linkblocker", "guild_id, enabled", [guildid, 0])
+        return False
+
     return enabled[0] == 1
 
 def setup(bot):
