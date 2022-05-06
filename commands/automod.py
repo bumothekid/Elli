@@ -80,7 +80,7 @@ class automod(Cog):
         update("ghostping", "enabled", "guild_id", [0, ctx.guild.id])
         await successEmbed(self.bot, ctx, "Das Anti-Ghostping System wurde deaktiviert.")
 
-    @commands.group(name="linkblocker", invoke_without_command=True)
+    @commands.group(name="linkblocker", aliases=["antilink", "anti-link", "link"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _linkblocker(self, ctx):
         await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> `-linkblocker off`")
@@ -88,7 +88,7 @@ class automod(Cog):
     @_linkblocker.command(nane="on", aliases=["activate", "activ"])
     @commands.cooldown(2, 10, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
-    async def _on2(self, ctx):
+    async def _on3(self, ctx):
         if checkLinkOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits aktiviert.")
 
@@ -98,7 +98,7 @@ class automod(Cog):
 
     @_linkblocker.command(name="off", aliases=["deactivate"])
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _off2(self, ctx):
+    async def _off3(self, ctx):
         if not checkLinkOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits deaktiviert.")
 
