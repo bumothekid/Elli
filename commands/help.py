@@ -227,7 +227,7 @@ class HelpButton(nextcord.ui.Select):
 
             case "Link Blocker":
                 embed = nextcord.Embed(
-                    description="**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> <:icon_reply:969871237062983740> Schaltet den Linkblocker ein\n ``\n> <:icon_reply:969871237062983740> Schaltet den Link Blocker aus",
+                    description="**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> <:icon_reply:969871237062983740> Schaltet den Linkblocker ein\n `-linkblocker off`\n> <:icon_reply:969871237062983740> Schaltet den Link Blocker aus",
                     color=nextcord.Color.blurple()
                 )
 
