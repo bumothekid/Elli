@@ -56,14 +56,24 @@ class levelsys(Cog):
         if allUsers := readAll("user_id", "level_users", "guild_id", [ctx.guild.id], "xp DESC"):
             fields = []
 
-            for user in allUsers:
+            for i, user in enumerate(allUsers, 1):
                 member = ctx.guild.get_member(user[0])
                 user = readUser(ctx.guild.id, user[0])
 
                 if member is None or user is None:
                     continue
 
-                fields.append(EmbedField(member.mention, f"Level: {user.level}\nXP: {user.xp}", False))
+                match i:
+                    case 1:
+                        fieldname = "🥇 " + str(member)
+                    case 2:
+                        fieldname = "🥈 " + str(member)
+                    case 3:
+                        fieldname = "🥉 " + str(member)
+                    case _:
+                        fieldname = str(member)
+
+                fields.append(EmbedField(fieldname, f"Level: {user.level}\nXP: {user.xp}", False))
             
             await successEmbed(self.bot, ctx, "**Level Leaderboard**\n\n", fields=fields)
         else:
