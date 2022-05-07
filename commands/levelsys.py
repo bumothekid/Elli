@@ -63,7 +63,7 @@ class levelsys(Cog):
                 if member is None or user is None:
                     continue
 
-                fields += EmbedField(member.mention, f"Level: {user.level}\nXP: {user.xp}", False)
+                fields.append(EmbedField(member.mention, f"Level: {user.level}\nXP: {user.xp}", False))
             
             await successEmbed(self.bot, ctx, "**Level Leaderboard**\n\n", fields=fields)
         else:
