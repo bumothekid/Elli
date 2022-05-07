@@ -86,20 +86,20 @@ class automod(Cog):
     async def _linkblocker(self, ctx):
         await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> `-linkblocker off`")
 
-    @_linkblocker.command(nane="on", aliases=["activate", "activ"])
+    @_linkblocker.command(name="on", aliases=["activate", "activ"])
     @commands.cooldown(2, 10, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
-    async def _on3(self, ctx):
+    async def _on2(self, ctx):
         if checkLinkOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits aktiviert.")
 
         update("linkblocker", "enabled", "guild_id", [1, ctx.guild.id])
         await successEmbed(self.bot, ctx, "Der Linkblocker wurde aktiviert.")
 
-
     @_linkblocker.command(name="off", aliases=["deactivate"])
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _off3(self, ctx):
+    @commands.has_guild_permissions(manage_guild=True)
+    async def _off2(self, ctx):
         if not checkLinkOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Der Linkblocker ist bereits deaktiviert.")
 
