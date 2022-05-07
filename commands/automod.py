@@ -73,6 +73,7 @@ class automod(Cog):
 
     @_ghostping.command(name="off", aliases=["deactivate"])
     @commands.cooldown(2, 10, commands.BucketType.user)
+    @commands.has_guild_permissions(manage_guild=True)
     async def _off(self, ctx):
         if not checkGhostOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Anti-Ghostping ist bereits deaktiviert.")
