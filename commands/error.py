@@ -1,7 +1,5 @@
-import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
-from nextcord import Forbidden
 from .utils.embeds import errorEmbed, errorLogging
 
 class errorhandler(Cog):

@@ -1,7 +1,4 @@
-from cgitb import enable
 import contextlib
-from distutils.log import error
-import re
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 

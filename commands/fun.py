@@ -1,8 +1,5 @@
 import asyncio
-from audioop import reverse
-from pprint import pprint
 import random
-import aiohttp
 import nextcord
 import requests
 

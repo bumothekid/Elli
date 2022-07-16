@@ -42,7 +42,7 @@ async def on_ready():
     await statusTask()
 
 async def statusTask():
-    await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.listening, name='ZS und Bumo'))
+    await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.listening, name='Bumo'))
 
 @bot.command()
 async def load(ctx, ext):
@@ -108,4 +108,5 @@ if __name__ == '__main__':
         except Exception as e:
             print(f'{extension} konnte nicht geladen werden.\n`[{e}]`')
 
-bot.run("***REMOVED***")
+bot.run("OTk3ODc4MDkyMjAwNjgxNTQy.GH5udN.SQoyKqkya26OahYcer8XT6o5PFS_M9Np71Il44") # TestBotABC
+# bot.run("***REMOVED***")
