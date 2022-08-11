@@ -108,4 +108,4 @@ if __name__ == '__main__':
         except Exception as e:
             print(f'{extension} konnte nicht geladen werden.\n`[{e}]`')
 
-bot.run("***REMOVED***")
+bot.run("Token")
