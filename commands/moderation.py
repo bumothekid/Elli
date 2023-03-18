@@ -43,6 +43,9 @@ class moderation(Cog):
         
         if member.top_role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht kicken.")
+        
+        if member.top_role.position >= ctx.me.top_role.position:
+            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu kicken.")
 
         await member.kick(reason=reason)
         await successEmbed(self.bot, ctx, f"**<:icon_moderation:967038345395961896> {member} wurde gekickt.**")
@@ -63,6 +66,9 @@ class moderation(Cog):
         
         if member.top_role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht bannen.")
+        
+        if member.top_role.position >= ctx.me.top_role.position:
+            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu bannen.")
 
         await member.ban(reason=reason)
         await successEmbed(self.bot, ctx, f"**<:icon_moderation:967038345395961896> {member} wurde gebannt.**")
@@ -80,6 +86,9 @@ class moderation(Cog):
         
         if member.top_role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht muten.")
+        
+        if member.top_role.position >= ctx.me.top_role.position:
+            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu muten.")
 
         timeRegex = re.compile(r'(?:(\d{1,5})(d|h|m|s))+?')
         timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -128,6 +137,9 @@ class moderation(Cog):
         
         if member.top_role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht unmuten.")
+        
+        if member.top_role.position >= ctx.me.top_role.position:
+            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu entmuten.")
 
         await member.timeout(timeout=None, reason=f"Unmute von {ctx.author}")
         await successEmbed(self.bot, ctx, f"{member} wurde entmutet.")
