@@ -70,11 +70,11 @@ class fun(Cog):
     async def _8ball(self, ctx, *, question: str):
         anwsers = ["Ja", "Sicher", "100%", "Vielleicht", "Eher weniger", "Joa", "Lieber nicht", "Nein"]
 
-        if checkLink(ctx.message):
+        if checkLink(ctx.message.content):
             await errorEmbed(self.bot, ctx, "Du kannst keine Links in deine Frage schreiben.")
             return
 
-        await successEmbed(self.bot, ctx, f"**8ball**\n\n> **Antwort:** *{random.choice(anwsers)}*\n\n> **Frage:** *{question}`")
+        await successEmbed(self.bot, ctx, f"**8ball**\n\n> **Antwort:** *{random.choice(anwsers)}*\n\n> **Frage:** `{question}`")
                 
     @commands.command(name="cat", aliases=["kitty", "kitten"])
     @commands.cooldown(5, 30, commands.BucketType.user)
