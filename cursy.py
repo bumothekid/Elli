@@ -1,11 +1,13 @@
 # Imports
+import os
 import nextcord
 from time import time
+from dotenv import load_dotenv
 from nextcord.ext import commands
-from nextcord.ext.commands.errors import NotOwner
-from commands.utils.other import getPrefixFromDatabase, devCheck, capString
-from commands.utils.embeds import successEmbed, errorEmbed, devLogging
 from commands.utils.database import update
+from nextcord.ext.commands.errors import NotOwner
+from commands.utils.embeds import successEmbed, errorEmbed, devLogging
+from commands.utils.other import getPrefixFromDatabase, devCheck, capString
 
 bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all(), help_command=None, case_insensitive=True)
 
@@ -108,5 +110,8 @@ if __name__ == '__main__':
         except Exception as e:
             print(f'{extension} konnte nicht geladen werden.\n`[{e}]`')
 
-bot.run("OTk3ODc4MDkyMjAwNjgxNTQy.GH5udN.SQoyKqkya26OahYcer8XT6o5PFS_M9Np71Il44") # TestBotABC
-# bot.run("***REMOVED***")
+    load_dotenv()
+    test_token = os.getenv("TEST_TOKEN")
+    bot_token = os.getenv("TOKEN")
+
+    bot.run(bot_token)
