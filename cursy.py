@@ -1,5 +1,6 @@
 # Imports
 import os
+import asyncio
 import nextcord
 from time import time
 from dotenv import load_dotenv
@@ -44,7 +45,22 @@ async def on_ready():
     await statusTask()
 
 async def statusTask():
-    await bot.change_presence(activity=nextcord.Activity(type=nextcord.ActivityType.listening, name='Bumo'))
+    while True:
+        User = sum(len(s.members) for s in bot.guilds)
+        await bot.change_presence(
+            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {User} User",
+                                    url="https://www.twitch.tv/twitch")
+        )
+        await asyncio.sleep(100)
+        servers = list(bot.guilds)
+        await bot.change_presence(
+            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {len(servers)} Server",
+                                    url="https://www.twitch.tv/twitch"))
+        await asyncio.sleep(100)
+        await bot.change_presence(
+            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name="💕-help | -invite Invite",
+                                    url="https://www.twitch.tv/twitch"))
+        await asyncio.sleep(100)
 
 @bot.command()
 async def load(ctx, ext):
