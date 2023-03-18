@@ -42,7 +42,7 @@ class fun(Cog):
         choice = choice.lower()
         
         if choice == botchoice:
-            await successEmbed(self.bot, ctx, f"**Unentschieden!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.white())
+            await successEmbed(self.bot, ctx, f"**Unentschieden!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.light_gray())
         
         elif choice == "stein" and botchoice == "schere":
             await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
