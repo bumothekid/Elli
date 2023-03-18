@@ -8,6 +8,9 @@ class safeDict(dict):
         return "{" + key + "}"
 
 def getPrefixFromDatabase(bot, message):
+    if message.guild is None:
+        return "-"
+
     prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])
 
     if prefix is None:
@@ -20,10 +23,7 @@ def devCheck(authorid: int) -> bool:
     devs = readOne(columns="developer", table="cursy")
     devlist = findall(r"[0-9]+", devs[0])
 
-    if str(authorid) not in devlist:
-        return False
-    
-    return True
+    return str(authorid) in devlist
 
 def messagePinned(message: nextcord.Message) -> bool:
     return not message.pinned
@@ -34,8 +34,5 @@ def capString(string: str) -> str:
 def checkLink(text: str) -> bool:
     if "https://" in text or "http://" in text:
         return True
-    
-    if "discord." in text or "discordapp." in text:
-        return True
-    
-    return False
+
+    return "discord." in text or "discordapp." in text
