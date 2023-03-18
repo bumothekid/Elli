@@ -17,7 +17,7 @@ class eventsCog(Cog):
 
         await infoEmbed(self,
                         self.bot.get_channel(957444324080115762),
-                        f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+                        f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon.url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
                         color=nextcord.Color.green()
         )
 
@@ -25,7 +25,7 @@ class eventsCog(Cog):
     async def on_guild_remove(self, guild):
         await infoEmbed(self,
                         self.bot.get_channel(957444324080115762),
-                        f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon_url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
+                        f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon.url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
                         color=nextcord.Color.red()
         )
 
