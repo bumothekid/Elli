@@ -1,3 +1,4 @@
+import contextlib
 import nextcord
 from nextcord.ext import commands
 
@@ -68,8 +69,7 @@ class HelpButton(nextcord.ui.Select):
         if f"{interaction.message.id}|{interaction.user.id}" not in cache:
             return
 
-        try:
-    
+        with contextlib.suppress(Exception):
             match self.values[0]:
                 case "Kategorien":
                     embed = nextcord.Embed(
@@ -81,7 +81,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Generell":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_discord:968229925528145980> Generelle Commands**\n\n> `-help`\n> <:icon_reply:969871237062983740> Zeigt diese Hilfe an\n> `-botinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Bot an\n> `-invite`\n> <:icon_reply:969871237062983740> Zeigt einen Invite zu diesem Bot an\n> `-support`\n> <:icon_reply:969871237062983740> Zeigt einen Support-Server an\n> `-vote`\n> <:icon_reply:969871237062983740> Zeigt einen Vote-Link an",
+                        description=f"**<:icon_discord:968229925528145980> Generelle Commands**\n\n> `-help`\n> <:icon_reply:969871237062983740> Zeigt diese Hilfe an\n> `-prefix <prefix>`\n> <:icon_reply:969871237062983740>  Ändert die Prefix von dem Bot\n> `-botinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Bot an\n> `-invite`\n> <:icon_reply:969871237062983740> Zeigt einen Invite zu diesem Bot an\n> `-support`\n> <:icon_reply:969871237062983740> Zeigt einen Support-Server an\n> `-vote`\n> <:icon_reply:969871237062983740> Zeigt einen Vote-Link an",
                         color=nextcord.Color.blurple()
                         )
 
@@ -118,7 +118,7 @@ class HelpButton(nextcord.ui.Select):
                     )
 
                     await interaction.message.edit(embed=embed)
-                
+
                 case "Leave":
                     embed = nextcord.Embed(
                         description=f"**<:icon_member_left:965034270622122044> Verlassnachrichten**\n\n> `-leave channel set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Verlasskanal\n> `-leave channel remove`\n> <:icon_reply:969871237062983740> Entfernt den davor gesetzten Verlasskanal\n> `-leave message <message>`\n> <:icon_reply:969871237062983740> Setzt eine neue Verlassnachricht\n> `-leave picture set <picture>`\n> <:icon_reply:969871237062983740> Setzt ein Verlassbild\n> `-leave picture remove`\n> <:icon_reply:969871237062983740> Entfernt das aktuelle Verlassbild\n> `-leave picture show`\n> <:icon_reply:969871237062983740> Zeigt dir alle aktuell Verfügbaren Verlassbilder\n\n> Variablen für die Verlassnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
@@ -126,13 +126,13 @@ class HelpButton(nextcord.ui.Select):
                     )
 
                     await interaction.message.edit(embed=embed)
-                
+
                 case "Giveaway":
                     embed = nextcord.Embed(
                         description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `-giveaway create`\n> <:icon_reply:969871237062983740> Starten den start prozess für ein Giveaway\n> `-giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:icon_reply:969871237062983740> Erstellt ein Giveaway mit einem Befehl\n> `-giveaway drop <#channel> <preis>`\n> <:icon_reply:969871237062983740> Erstellt einen Drop den die erste person erhält die Reagiert\n> `-giveaway end <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Beendet ein noch laufendes Giveaway\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> <:icon_reply:969871237062983740> Wählt ein neue Gewinner für das Giveaway\n> `-giveaway list`\n> <:icon_reply:969871237062983740> Zeigt dir alle momentan laufenden Giveaways an",
                         color=nextcord.Color.blurple()
                     )
-                    
+
                     await interaction.message.edit(embed=embed)
 
                 case "Ticket System":
@@ -205,9 +205,9 @@ class HelpButton(nextcord.ui.Select):
                         description="Soon!",
                         color=nextcord.Color.blurple()
                     )
-                    
+
                     await interaction.message.edit(embed=embed)
-                
+
                 case "Bad Words":
                     embed = nextcord.Embed(
                         description="**<:icon_badword:970238990743658518> Bad Words**\n\n> `-badword add <word>`\n> <:icon_reply:969871237062983740> Fügt ein Wort der Blacklist hinzu\n> `-badword remove <word>`\n> <:icon_reply:969871237062983740> Entfernt ein Wort von der Blacklist\n> `-badword show`\n> <:icon_reply:969871237062983740> Zeigt dir alle Wörter auf der Blacklist",
@@ -231,8 +231,6 @@ class HelpButton(nextcord.ui.Select):
                     )
 
                     await interaction.message.edit(embed=embed)
-        except:
-            pass
 
 def setup(bot):
     bot.add_cog(ClassHelp(bot))
