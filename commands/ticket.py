@@ -60,7 +60,7 @@ class ticket(Cog):
     @_ticket.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _delete(self, ctx, channel: nextcord.TextChannel, message_id):
+    async def _delete(self, ctx, channel: nextcord.TextChannel, *, message_id):
         dbticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
 
         if dbticket is None:
@@ -154,7 +154,7 @@ class ticket(Cog):
             return
 
         db_ticket = readOne(columns="*", table="tickets", where="guild_id message_id", values=[payload.guild_id, payload.message_id])
-        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id channel_id message_id", values=[payload.guild_id, payload.channel_id, payload.message_id])
+        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id user_id", values=[payload.guild_id, payload.member.id])
         ticket_message = readOne(columns="*", table="ticket_messages", where="guild_id", values=[payload.guild_id])
 
         if db_ticket is None and open_ticket is None:
@@ -171,7 +171,7 @@ class ticket(Cog):
             if open_ticket is not None:
                 await message.remove_reaction(emote, payload.member)
 
-                return await errorEmbed(self, payload.member, "Du hast bereits ein Ticket auf {guild.name} geöffnet.")
+                return await errorEmbed(self, payload.member, f"Du hast bereits ein Ticket auf {guild.name} geöffnet.")
 
             role = guild.get_role(db_ticket[3])
             await message.remove_reaction(emote, payload.member)
