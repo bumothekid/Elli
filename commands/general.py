@@ -35,6 +35,8 @@ class general(Cog):
             return await errorEmbed(self, ctx, "Es dürfen keine Markierungen oder Emotes in der Prefix sein.")
         if len(prefix) > 4:
             return await errorEmbed(self, ctx, "Die Prefix darf nicht länger als 4 Zeichen lang sein.")
+        if "`" in prefix:
+            return await errorEmbed(self, ctx, "Die Prefix darf kein ` enthalten.")
 
         oldPrefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])
 
