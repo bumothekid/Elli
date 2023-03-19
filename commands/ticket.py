@@ -152,9 +152,9 @@ class ticket(Cog):
         emote = self.bot.get_emoji(959885507557470239)
         if payload.emoji not in [emote] and payload.emoji.name not in ["🔒", "🔓", "❌"]:
             return
-
+        
         db_ticket = readOne(columns="*", table="tickets", where="guild_id message_id", values=[payload.guild_id, payload.message_id])
-        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id user_id", values=[payload.guild_id, payload.member.id])
+        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id channel_id", values=[payload.guild_id, payload.channel_id])
         ticket_message = readOne(columns="*", table="ticket_messages", where="guild_id", values=[payload.guild_id])
 
         if db_ticket is None and open_ticket is None:
