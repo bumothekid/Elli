@@ -65,16 +65,16 @@ class levelsys(Cog):
 
                 match i:
                     case 1:
-                        fieldname = "🥇 " + str(member)
+                        fieldname = f"🥇 {str(member)}"
                     case 2:
-                        fieldname = "🥈 " + str(member)
+                        fieldname = f"🥈 {str(member)}"
                     case 3:
-                        fieldname = "🥉 " + str(member)
+                        fieldname = f"🥉 {str(member)}"
                     case _:
                         fieldname = str(member)
 
                 fields.append(EmbedField(fieldname, f"Level: {user.level}\nXP: {user.xp}", False))
-            
+
             await successEmbed(self.bot, ctx, "**Level Leaderboard**\n\n", fields=fields)
         else:
             await errorEmbed(self.bot, ctx, "Es sind keine noch User in der Datenbank gespeichert.")
