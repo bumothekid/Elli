@@ -184,7 +184,7 @@ class levelsys(Cog):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
         
         if text is None:
-            message = readOne("level_system", "message", "guild_id", [ctx.guild.id])
+            message = readOne("message", "level_system", "guild_id", [ctx.guild.id])
 
             if message is None:
                 return await errorEmbed(self.bot, ctx, "Es wurde keine Level Up Nachricht gesetzt.")
@@ -210,7 +210,7 @@ class levelsys(Cog):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
 
-        update("level_system", "ping", "guild_id", [1, ctx.guild.id])
+        update("level_system", "mention", "guild_id", [1, ctx.guild.id])
         await successEmbed(self.bot, ctx, "Die Ping Nachricht wurde aktiviert.")
     
     @_ping.command(name="off", aliases=["disable", "d"])
@@ -220,7 +220,7 @@ class levelsys(Cog):
         if not checkLevelOn(ctx.guild.id):
             return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
 
-        update("level_system", "ping", "guild_id", [0, ctx.guild.id])
+        update("level_system", "mention", "guild_id", [0, ctx.guild.id])
         await successEmbed(self.bot, ctx, "Die Ping Nachricht wurde deaktiviert.")
 
     @_level.group(name="custom", invoke_without_command=True)
@@ -548,7 +548,7 @@ class levelsys(Cog):
             user.level += 1
             user.xp_needed = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
 
-        update("level_users", "level, xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
         await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
     
@@ -572,7 +572,7 @@ class levelsys(Cog):
             user.level -= 1
             user.xp_needed = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
 
-        update("level_users", "level, xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
         await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
 
