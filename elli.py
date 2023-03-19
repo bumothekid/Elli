@@ -34,7 +34,7 @@ extensions = [
 
 @bot.event
 async def on_ready():
-    update(table="cursy", columns="uptime", values=[time()])
+    update(table="elli", columns="uptime", values=[time()])
 
     print('═════◢◤◈◥◣═════')
     print('Bot ist Online.')

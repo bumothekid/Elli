@@ -20,7 +20,7 @@ def getPrefixFromDatabase(bot, message):
     return prefix
 
 def devCheck(authorid: int) -> bool:
-    devs = readOne(columns="developer", table="cursy")
+    devs = readOne(columns="developer", table="elli")
     devlist = findall(r"[0-9]+", devs[0])
 
     return str(authorid) in devlist

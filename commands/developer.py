@@ -23,7 +23,7 @@ class deveveloper(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        devs = readOne(columns="developer", table="cursy")
+        devs = readOne(columns="developer", table="elli")
         devlist = re.findall(r"[0-9]+", devs[0])
 
         if str(user.id) in devlist:
@@ -33,7 +33,7 @@ class deveveloper(Cog):
             return await errorEmbed(self, ctx, "Du kannst keine Bots als Developer regestrieren.")
 
         devs_new = f"{devs[0]}, {user.id}"
-        update(table="cursy", columns="developer", values=[devs_new])
+        update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer regestriert.")
         await devLogging(self, ctx, f"{user} wurde von {ctx.author} als developer registriert")
@@ -43,14 +43,14 @@ class deveveloper(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        devs = readOne(columns="developer", table="cursy")
+        devs = readOne(columns="developer", table="elli")
         devlist = re.findall(r"[0-9]+", devs[0])
 
         if str(user.id) not in devlist:
             return await errorEmbed(self, ctx, f"{user.mention} ist nicht als Developer registriert.")
 
         devs_new = str(devs[0].replace(f", {user.id}", ""))
-        update(table="cursy", columns="developer", values=[devs_new])
+        update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer entfernt.")
         await devLogging(self, ctx, f"{user} wurde von {ctx.author} als Developer entfernt.")
@@ -60,7 +60,7 @@ class deveveloper(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        devs = readOne(columns="developer", table="cursy")
+        devs = readOne(columns="developer", table="elli")
         devlist = re.findall(r"[0-9]+", devs[0])
         lists = ''
 
@@ -75,9 +75,9 @@ class deveveloper(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        vers = readOne(columns="version", table="cursy")
+        vers = readOne(columns="version", table="elli")
 
-        update(table="cursy", columns="version", values=[version])
+        update(table="elli", columns="version", values=[version])
 
 
         await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{version}` Version gesetzt.\n> **Alte Version:** `{vers[0]}`")
