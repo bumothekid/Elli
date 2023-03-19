@@ -4,7 +4,7 @@ from nextcord import ui
 from nextcord.ext.commands.bot import Bot
 from .models.EmbedField import EmbedField
 
-botLoggingChannelID = 957444324080115762
+botLoggingChannelID = 1087069858455375953
 
 async def infoEmbed(
     bot,
