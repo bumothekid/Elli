@@ -343,12 +343,9 @@ async def errorLogging(bot, ctx: nextcord.Interaction, error: str):
 
     channel = bot.get_channel(botLoggingChannelID)
     errorEmbed = nextcord.Embed(
+        description=f"> **An error occurred**\n\n> **<:icon_globe:960643612872417280> Guild:** `{ctx.guild}`\n> **<:icon_reply:969871237062983740> Guild ID:** `{ctx.guild.id}`\n> **<:icon_clide:960643699279265843> Command:** `{ctx.message.content}`\n> **<:icon_reply:969871237062983740> Command Executer:** `{ctx.author}`\n> **<:icon_error_red:962068826311254177> Error:**\n```py{error}```",
         color=nextcord.Color.red()
     )
-
-    errorEmbed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
-    errorEmbed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.content}```", inline=False)
-    errorEmbed.add_field(name="<:icon_error_red:962068826311254177> Error", value=f"```python\n{error}```", inline=False)
 
     await channel.send(embed=errorEmbed)
 
@@ -358,15 +355,12 @@ async def devLogging(bot, ctx: nextcord.Interaction, text: str):
             bot = bot.bot
         except Exception:
             return print("Error: Bot is not a bot or self")
+        
     channel = bot.get_channel(botLoggingChannelID)
     embed = nextcord.Embed(
-        description=f"**{ctx.author} hat ein Befehl ausgeführt**",
+        description=f"> **A developer command was used**\n\n> **<:icon_globe:960643612872417280> Guild:** `{ctx.guild}`\n> **<:icon_reply:969871237062983740> Guild ID:** `{ctx.guild.id}`\n> **<:icon_clide:960643699279265843> Command:** `{ctx.message.content}`\n> **<:icon_reply:969871237062983740> Command Executer:** `{ctx.author}`\n> **<:icon_tick:962067144877695016> Action:**\n```css\n{text}```",
         color=nextcord.Color.blurple()
     )
-
-    embed.add_field(name="<:icon_globe:960643612872417280> Guild", value=f"```ini\n{ctx.guild}```", inline=False)
-    embed.add_field(name="<:icon_clide:960643699279265843> Command", value=f"```ini\n{ctx.message.content}```", inline=False)
-    embed.add_field(name="<:icon_tick:962067144877695016> Action", value=f"```css\n{text}```", inline=False)
 
     await channel.send(embed=embed)
 
