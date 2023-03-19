@@ -75,8 +75,8 @@ class reactionrole(Cog):
             await message.remove_reaction(reaction, self.bot.user)
         except:
             raise commands.EmojiNotFound(argument=reaction)
-
-        delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message.id, reaction])
+        
+        delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id,message.id, str(reaction)])
         await successEmbed(self, ctx, f"**<:icon_roles:968233835710017566> Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
 
 
