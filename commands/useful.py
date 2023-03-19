@@ -57,7 +57,7 @@ class useful(Cog):
 
     @commands.command(name="bug", aliases=['bugreport', "report"])
     @commands.cooldown(2, 20, commands.BucketType.user)
-    async def _bug(self, ctx, bug: str):
+    async def _bug(self, ctx, *, bug):
         if len(bug) < 10:
             return await errorEmbed(self, ctx, "Der Bugreport muss mindestens 10 Zeichen lang sein.")
         
