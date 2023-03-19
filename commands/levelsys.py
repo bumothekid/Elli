@@ -568,7 +568,7 @@ class levelsys(Cog):
             user.level = 1
             user.xp_needed = 27
 
-        user.level = 0
+        user.level = 1
         user.xp_needed = 27
 
         while user.xp_needed < user.xp:
