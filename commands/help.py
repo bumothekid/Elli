@@ -132,7 +132,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Giveaway":
                     embed = nextcord.Embed(
-                        description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `{prefix}giveaway create`\n> <:icon_reply:969871237062983740> Starten den start prozess für ein Giveaway\n> `{prefix}giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:icon_reply:969871237062983740> Erstellt ein Giveaway mit einem Befehl\n> `{prefix}giveaway drop <#channel> <preis>`\n> <:icon_reply:969871237062983740> Erstellt einen Drop den die erste person erhält die Reagiert\n> `{prefix}giveaway end <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Beendet ein noch laufendes Giveaway\n> `{prefix}giveaway reroll <#channel> <messageid> <winner>`\n> <:icon_reply:969871237062983740> Wählt ein neue Gewinner für das Giveaway\n> `{prefix}giveaway list`\n> <:icon_reply:969871237062983740> Zeigt dir alle momentan laufenden Giveaways an",
+                        description=f"**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `{prefix}giveaway create`\n> <:icon_reply:969871237062983740> Starten den start prozess für ein Giveaway\n> `{prefix}giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:icon_reply:969871237062983740> Erstellt ein Giveaway mit einem Befehl\n> `{prefix}giveaway drop <#channel> <preis>`\n> <:icon_reply:969871237062983740> Erstellt einen Drop den die erste person erhält die Reagiert\n> `{prefix}giveaway end <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Beendet ein noch laufendes Giveaway\n> `{prefix}giveaway reroll <#channel> <messageid> <winner>`\n> <:icon_reply:969871237062983740> Wählt ein neue Gewinner für das Giveaway\n> `{prefix}giveaway list`\n> <:icon_reply:969871237062983740> Zeigt dir alle momentan laufenden Giveaways an",
                         color=nextcord.Color.blurple()
                     )
 
@@ -140,7 +140,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Ticket System":
                     embed = nextcord.Embed(
-                        description="**<:Ticket:959885507557470239> Ticket System**\n\n> `{prefix}ticket create <#channel> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Erstellt ein neues Ticket wo User Reagieren können\n> `{prefix}ticket update <#channel> <messageid> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Setzt ein neuen Text für ein bereits erstelltes Ticket\n> `{prefix}ticket delete <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Löscht ein altes Ticket das nicht mehr gebraucht wird\n> `{prefix}ticket message <text>`\n> <:icon_reply:969871237062983740> Setzt einen neuen Ticket öffnungs Text\n> `{prefix}ticket list`\n> <:icon_reply:969871237062983740> Zeigt alle aktuellen Tickets an\n> `{prefix}ticket log set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Kanal für Ticket Protokollierung\n> `{prefix}ticket log remove`\n> <:icon_reply:969871237062983740> Entfernt den Kanal für die Ticket Protokollierung\n\n> Variablen für die Ticket öffnungs Nachricht: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+                        description=f"**<:Ticket:959885507557470239> Ticket System**\n\n> `{prefix}ticket create <#channel> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Erstellt ein neues Ticket wo User Reagieren können\n> `{prefix}ticket update <#channel> <messageid> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Setzt ein neuen Text für ein bereits erstelltes Ticket\n> `{prefix}ticket delete <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Löscht ein altes Ticket das nicht mehr gebraucht wird\n> `{prefix}ticket message <text>`\n> <:icon_reply:969871237062983740> Setzt einen neuen Ticket öffnungs Text\n> `{prefix}ticket list`\n> <:icon_reply:969871237062983740> Zeigt alle aktuellen Tickets an\n> `{prefix}ticket log set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Kanal für Ticket Protokollierung\n> `{prefix}ticket log remove`\n> <:icon_reply:969871237062983740> Entfernt den Kanal für die Ticket Protokollierung\n\n> Variablen für die Ticket öffnungs Nachricht: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
                         color=nextcord.Color.blurple()
                     )
 
@@ -148,7 +148,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Tempchannel":
                     embed = nextcord.Embed(
-                        description="** `⏳`Tempchannel Commands**\n\n> `{prefix}tempchannel set <channel>`\n> <:icon_reply:969871237062983740> Setzt ein Tempchannel Sprachkanal\n> `{prefix}tempchannel remove`\n> <:icon_reply:969871237062983740> Entfernt den Sprachkanal als Tempchannel\n> `{prefix}tempchannel name <name>`\n> <:icon_reply:969871237062983740> Setzt einen neuen standard Namen\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
+                        description=f"** `⏳`Tempchannel Commands**\n\n> `{prefix}tempchannel set <channel>`\n> <:icon_reply:969871237062983740> Setzt ein Tempchannel Sprachkanal\n> `{prefix}tempchannel remove`\n> <:icon_reply:969871237062983740> Entfernt den Sprachkanal als Tempchannel\n> `{prefix}tempchannel name <name>`\n> <:icon_reply:969871237062983740> Setzt einen neuen standard Namen\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
                         color=nextcord.Color.blurple()
                     )
 
@@ -156,7 +156,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Reaction Roles":
                     embed = nextcord.Embed(
-                        description="**<:icon_roles:968233835710017566> Reactionrole einrichtung**\n\n> `{prefix}rr create <#channel> <messageid> <emote> <@&rolle>`\n> <:icon_reply:969871237062983740> Erstellt eine neue Reaction Role\n> `{prefix}rr delete <#channel> <messageid> <emote>`\n> <:icon_reply:969871237062983740> Löscht eine bereits vorhandene Reaction Role",
+                        description=f"**<:icon_roles:968233835710017566> Reactionrole einrichtung**\n\n> `{prefix}rr create <#channel> <messageid> <emote> <@&rolle>`\n> <:icon_reply:969871237062983740> Erstellt eine neue Reaction Role\n> `{prefix}rr delete <#channel> <messageid> <emote>`\n> <:icon_reply:969871237062983740> Löscht eine bereits vorhandene Reaction Role",
                         color=nextcord.Color.blurple()
                     )
 
