@@ -503,7 +503,7 @@ class levelsys(Cog):
         user = readUser(ctx.guild.id, member.id)
 
         user.level += level
-        user.xp = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
+        user.xp = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
 
         update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
@@ -519,7 +519,7 @@ class levelsys(Cog):
         user = readUser(ctx.guild.id, member.id)
 
         user.level -= level
-        user.xp = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
+        user.xp = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
 
         update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
@@ -546,7 +546,7 @@ class levelsys(Cog):
         user.xp += xp
         while user.xp_needed < user.xp:
             user.level += 1
-            user.xp_needed = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
+            user.xp_needed = math.ceil(10 * ((user.level) ** 1.5) + 20)
 
         update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
@@ -566,11 +566,14 @@ class levelsys(Cog):
         if user.xp <= 0:
             user.xp = 0
             user.level = 1
-            user.xp_needed = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
+            user.xp_needed = 27
+
+        user.level = 0
+        user.xp_needed = 27
 
         while user.xp_needed < user.xp:
-            user.level -= 1
-            user.xp_needed = (math.floor(5 * (math.pow((user.level - 1), 2)) + 50 * (user.level - 1) + 100))
+            user.level += 1
+            user.xp_needed = math.ceil(10 * ((user.level) ** 1.5) + 20)
 
         update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
 
@@ -703,12 +706,12 @@ def readUser(guildid: int, userid: int) -> User:
     level = readOne("messages, level, xp, cooldown", "level_users", "guild_id user_id", [guildid, userid])
 
     if level is None:
-        xp_needed = (math.floor(5 * (math.pow(1, 2)) + 50 * 1 + 100))
+        xp_needed = 27
 
         insert("level_users", "guild_id, user_id, messages, level, xp, cooldown", [guildid, userid, 0, 1, 0, time()])
         return User(userid, 0, 1, 0, time(), xp_needed)
-    
-    xp_needed = (math.floor(5 * (math.pow(level[1], 2)) + 50 * level[1] + 100))
+
+    xp_needed = 27 if level[1] == 1 else math.ceil(10 * (level[1] ** 1.5) + 20)
     return User(userid, level[0], level[1], level[2], level[3], xp_needed)
 
 def addUserXP(guildid: int, userid: int, xp: int, cooldown: int) -> bool:
@@ -722,7 +725,7 @@ def addUserXP(guildid: int, userid: int, xp: int, cooldown: int) -> bool:
     
     if user.xp >= user.xp_needed:
         user.level += 1
-        user.xp_needed = (math.floor(5 * (math.pow(user.level, 2)) + 50 * user.level + 100))
+        user.xp_needed = 27 if user.level == 1 else math.ceil(10 * (user.level ** 1.5) + 20)
         update("level_users", "level xp messages", "guild_id user_id", [user.level, user.xp, user.messages, guildid, userid])
         return True
     
