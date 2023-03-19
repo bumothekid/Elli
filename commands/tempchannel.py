@@ -100,7 +100,10 @@ class tempchannel(Cog):
                     await tempchannel.set_permissions(member, overwrite=memberPermissions)
                     await tempchannel.set_permissions(member.guild.default_role, overwrite=nextcord.PermissionOverwrite(speak=True))
 
-                    await member.move_to(tempchannel)
+                    try:
+                        await member.move_to(tempchannel)
+                    except nextcord.errors.HTTPException:
+                        await tempchannel.delete()
 
                     insert(table="open_tempchannels", columns="guild_id, channel_id, host_id, name", values=[member.guild.id, tempchannel.id, member.id, tempchannel.name])
 
