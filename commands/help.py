@@ -2,10 +2,11 @@ import contextlib
 import nextcord
 from nextcord.ext import commands
 
-from .utils.models.EmbedField import EmbedField
 from .utils.embeds import infoEmbed
+from .utils.database import readOne
 
 cache = []
+prefix = None
 
 class ClassHelp(commands.Cog):
     def __init__(self, bot):
@@ -16,6 +17,8 @@ class ClassHelp(commands.Cog):
     async def help(self, ctx):
         view = HelpButtonView(self.bot)
         message = await infoEmbed(self.bot, ctx, f"**<:icon_commands:966028792890003547> {self.bot.user.name}'s Command Kategorien**\n\n> **<:icon_discord:968229925528145980> Generell**\n> **💡 Nützlich**\n> **<:icon_moderation:967038345395961896> Moderation**\n> **<:icon_fun:968221028985761812> Fun**\n> **<:icon_member_joined:965033605707481128> Welcome**\n> **<:icon_member_left:965034270622122044> Leave**\n> **<a:giveaway:958492679749140510> Giveaway**\n> **<:icon_ticket:959885507557470239> Ticket System**\n> **⏳ Tempchannel**\n> **<:icon_roles:968233835710017566> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:icon_badword:970238990743658518> Bad Words**\n> **<:icon_ghostping:970292783027986463> Anti Ghostping**\n> **<:icon_automod:967038254367006791> Link Blocker**", view=view)
+        global prefix
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])[0]
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
@@ -81,7 +84,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Generell":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_discord:968229925528145980> Generelle Commands**\n\n> `-help`\n> <:icon_reply:969871237062983740> Zeigt diese Hilfe an\n> `-prefix <prefix>`\n> <:icon_reply:969871237062983740>  Ändert die Prefix von dem Bot\n> `-botinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Bot an\n> `-invite`\n> <:icon_reply:969871237062983740> Zeigt einen Invite zu diesem Bot an\n> `-support`\n> <:icon_reply:969871237062983740> Zeigt einen Support-Server an\n> `-vote`\n> <:icon_reply:969871237062983740> Zeigt einen Vote-Link an",
+                        description=f"**<:icon_discord:968229925528145980> Generelle Commands**\n\n> `{prefix}help`\n> <:icon_reply:969871237062983740> Zeigt diese Hilfe an\n> `{prefix}prefix <prefix>`\n> <:icon_reply:969871237062983740>  Ändert die Prefix von dem Bot\n> `{prefix}botinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Bot an\n> `{prefix}invite`\n> <:icon_reply:969871237062983740> Zeigt einen Invite zu diesem Bot an\n> `{prefix}support`\n> <:icon_reply:969871237062983740> Zeigt einen Support-Server an\n> `{prefix}vote`\n> <:icon_reply:969871237062983740> Zeigt einen Vote-Link an",
                         color=nextcord.Color.blurple()
                         )
 
@@ -89,7 +92,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Nützlich":
                     embed = nextcord.Embed(
-                        description=f"**💡 Nützlich**\n\n> `-ping`\n> <:icon_reply:969871237062983740> Zeigt den Ping an\n> `-userinfo <@user>`\n> <:icon_reply:969871237062983740> Zeigt Infos zu einem User an\n> `-serverinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Server an\n> `-avatar <@user>`\n> <:icon_reply:969871237062983740> Zeigt das Avatar eines Users an\n> `-bugreport <text>`\n> <:icon_reply:969871237062983740> Sendet einen Bug Report an die Developer",
+                        description=f"**💡 Nützlich**\n\n> `{prefix}ping`\n> <:icon_reply:969871237062983740> Zeigt den Ping an\n> `{prefix}userinfo <@user>`\n> <:icon_reply:969871237062983740> Zeigt Infos zu einem User an\n> `{prefix}serverinfo`\n> <:icon_reply:969871237062983740> Zeigt Infos zu diesem Server an\n> `{prefix}avatar <@user>`\n> <:icon_reply:969871237062983740> Zeigt das Avatar eines Users an\n> `{prefix}bugreport <text>`\n> <:icon_reply:969871237062983740> Sendet einen Bug Report an die Developer",
                         color=nextcord.Color.blurple()
                     )
 
@@ -97,7 +100,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Moderation":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_moderation:967038345395961896> Moderation**\n\n> `-clear <anzahl>`\n> <:icon_reply:969871237062983740> Löscht eine bestimmte Anzahl von Nachrichten\n> `-ban <@user>`\n> <:icon_reply:969871237062983740> Bannt einen User\n> `-kick <@user>`\n> <:icon_reply:969871237062983740> Kickt einen User\n> `-mute <@user> <time>`\n> <:icon_reply:969871237062983740> Mute einen User\n> `-unmute <@user>`\n> <:icon_reply:969871237062983740> Unmute einen User\n> `-addrole <@user> <@rolle>`\n> <:icon_reply:969871237062983740> Fügt eine Rolle einem User hinzu\n> `-removerole <@user> <@rolle>`\n> <:icon_reply:969871237062983740> Entfernt eine Rolle eines Users",
+                        description=f"**<:icon_moderation:967038345395961896> Moderation**\n\n> `{prefix}clear <anzahl>`\n> <:icon_reply:969871237062983740> Löscht eine bestimmte Anzahl von Nachrichten\n> `{prefix}ban <@user>`\n> <:icon_reply:969871237062983740> Bannt einen User\n> `{prefix}kick <@user>`\n> <:icon_reply:969871237062983740> Kickt einen User\n> `{prefix}mute <@user> <time>`\n> <:icon_reply:969871237062983740> Mute einen User\n> `{prefix}unmute <@user>`\n> <:icon_reply:969871237062983740> Unmute einen User\n> `{prefix}addrole <@user> <@rolle>`\n> <:icon_reply:969871237062983740> Fügt eine Rolle einem User hinzu\n> `{prefix}removerole <@user> <@rolle>`\n> <:icon_reply:969871237062983740> Entfernt eine Rolle eines Users",
                         color=nextcord.Color.blurple()
                     )
 
@@ -105,7 +108,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Fun":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_fun:968221028985761812> Fun**\n\n> `-8ball <frage>`\n> <:icon_reply:969871237062983740> Fragt eine Frage mit einem 8ball\n> `-cat`\n> <:icon_reply:969871237062983740> Zeigt ein Bild von einer Katze\n> `-dog`\n> <:icon_reply:969871237062983740> Zeigt ein Bild von einem Hund\n> `-reverse <text>`\n> <:icon_reply:969871237062983740> Dreht den Text um den du angibst",
+                        description=f"**<:icon_fun:968221028985761812> Fun**\n\n> `{prefix}8ball <frage>`\n> <:icon_reply:969871237062983740> Fragt eine Frage mit einem 8ball\n> `{prefix}cat`\n> <:icon_reply:969871237062983740> Zeigt ein Bild von einer Katze\n> `{prefix}dog`\n> <:icon_reply:969871237062983740> Zeigt ein Bild von einem Hund\n> `{prefix}reverse <text>`\n> <:icon_reply:969871237062983740> Dreht den Text um den du angibst",
                         color=nextcord.Color.blurple()
                     )
 
@@ -113,7 +116,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Welcome":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Willkommenskanal\n> `-welcome channel remove`\n> <:icon_reply:969871237062983740> Entfernt den davor gesetzten Willkommenskanal\n> `-welcome message <message>`\n> <:icon_reply:969871237062983740> Setzt eine neue Willkommensnachricht\n> `-welcome picture set <picture>`\n> <:icon_reply:969871237062983740> Setzt ein Willkommensbild\n> `-welcome picture remove`\n> <:icon_reply:969871237062983740> Entfernt das aktuelle Willkommensbild\n> `-welcome picture show`\n> <:icon_reply:969871237062983740> Zeigt dir alle aktuell Verfügbaren Willkommensbilder\n\n> Variablen für die Willkommensnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
+                        description=f"**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n> `{prefix}welcome channel set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Willkommenskanal\n> `{prefix}welcome channel remove`\n> <:icon_reply:969871237062983740> Entfernt den davor gesetzten Willkommenskanal\n> `{prefix}welcome message <message>`\n> <:icon_reply:969871237062983740> Setzt eine neue Willkommensnachricht\n> `{prefix}welcome picture set <picture>`\n> <:icon_reply:969871237062983740> Setzt ein Willkommensbild\n> `{prefix}welcome picture remove`\n> <:icon_reply:969871237062983740> Entfernt das aktuelle Willkommensbild\n> `{prefix}welcome picture show`\n> <:icon_reply:969871237062983740> Zeigt dir alle aktuell Verfügbaren Willkommensbilder\n\n> Variablen für die Willkommensnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
                         color=nextcord.Color.blurple()
                     )
 
@@ -121,7 +124,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Leave":
                     embed = nextcord.Embed(
-                        description=f"**<:icon_member_left:965034270622122044> Verlassnachrichten**\n\n> `-leave channel set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Verlasskanal\n> `-leave channel remove`\n> <:icon_reply:969871237062983740> Entfernt den davor gesetzten Verlasskanal\n> `-leave message <message>`\n> <:icon_reply:969871237062983740> Setzt eine neue Verlassnachricht\n> `-leave picture set <picture>`\n> <:icon_reply:969871237062983740> Setzt ein Verlassbild\n> `-leave picture remove`\n> <:icon_reply:969871237062983740> Entfernt das aktuelle Verlassbild\n> `-leave picture show`\n> <:icon_reply:969871237062983740> Zeigt dir alle aktuell Verfügbaren Verlassbilder\n\n> Variablen für die Verlassnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
+                        description=f"**<:icon_member_left:965034270622122044> Verlassnachrichten**\n\n> `{prefix}leave channel set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Verlasskanal\n> `{prefix}leave channel remove`\n> <:icon_reply:969871237062983740> Entfernt den davor gesetzten Verlasskanal\n> `{prefix}leave message <message>`\n> <:icon_reply:969871237062983740> Setzt eine neue Verlassnachricht\n> `{prefix}leave picture set <picture>`\n> <:icon_reply:969871237062983740> Setzt ein Verlassbild\n> `{prefix}leave picture remove`\n> <:icon_reply:969871237062983740> Entfernt das aktuelle Verlassbild\n> `{prefix}leave picture show`\n> <:icon_reply:969871237062983740> Zeigt dir alle aktuell Verfügbaren Verlassbilder\n\n> Variablen für die Verlassnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
                         color=nextcord.Color.blurple()
                     )
 
@@ -129,7 +132,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Giveaway":
                     embed = nextcord.Embed(
-                        description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `-giveaway create`\n> <:icon_reply:969871237062983740> Starten den start prozess für ein Giveaway\n> `-giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:icon_reply:969871237062983740> Erstellt ein Giveaway mit einem Befehl\n> `-giveaway drop <#channel> <preis>`\n> <:icon_reply:969871237062983740> Erstellt einen Drop den die erste person erhält die Reagiert\n> `-giveaway end <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Beendet ein noch laufendes Giveaway\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> <:icon_reply:969871237062983740> Wählt ein neue Gewinner für das Giveaway\n> `-giveaway list`\n> <:icon_reply:969871237062983740> Zeigt dir alle momentan laufenden Giveaways an",
+                        description="**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `{prefix}giveaway create`\n> <:icon_reply:969871237062983740> Starten den start prozess für ein Giveaway\n> `{prefix}giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:icon_reply:969871237062983740> Erstellt ein Giveaway mit einem Befehl\n> `{prefix}giveaway drop <#channel> <preis>`\n> <:icon_reply:969871237062983740> Erstellt einen Drop den die erste person erhält die Reagiert\n> `{prefix}giveaway end <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Beendet ein noch laufendes Giveaway\n> `{prefix}giveaway reroll <#channel> <messageid> <winner>`\n> <:icon_reply:969871237062983740> Wählt ein neue Gewinner für das Giveaway\n> `{prefix}giveaway list`\n> <:icon_reply:969871237062983740> Zeigt dir alle momentan laufenden Giveaways an",
                         color=nextcord.Color.blurple()
                     )
 
@@ -137,7 +140,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Ticket System":
                     embed = nextcord.Embed(
-                        description="**<:Ticket:959885507557470239> Ticket System**\n\n> `-ticket create <#channel> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Erstellt ein neues Ticket wo User Reagieren können\n> `-ticket update <#channel> <messageid> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Setzt ein neuen Text für ein bereits erstelltes Ticket\n> `-ticket delete <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Löscht ein altes Ticket das nicht mehr gebraucht wird\n> `-ticket message <text>`\n> <:icon_reply:969871237062983740> Setzt einen neuen Ticket öffnungs Text\n> `-ticket list`\n> <:icon_reply:969871237062983740> Zeigt alle aktuellen Tickets an\n> `-ticket log set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Kanal für Ticket Protokollierung\n> `-ticket log remove`\n> <:icon_reply:969871237062983740> Entfernt den Kanal für die Ticket Protokollierung\n\n> Variablen für die Ticket öffnungs Nachricht: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+                        description="**<:Ticket:959885507557470239> Ticket System**\n\n> `{prefix}ticket create <#channel> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Erstellt ein neues Ticket wo User Reagieren können\n> `{prefix}ticket update <#channel> <messageid> <@rolle> <text>`\n> <:icon_reply:969871237062983740> Setzt ein neuen Text für ein bereits erstelltes Ticket\n> `{prefix}ticket delete <#channel> <messageid>`\n> <:icon_reply:969871237062983740> Löscht ein altes Ticket das nicht mehr gebraucht wird\n> `{prefix}ticket message <text>`\n> <:icon_reply:969871237062983740> Setzt einen neuen Ticket öffnungs Text\n> `{prefix}ticket list`\n> <:icon_reply:969871237062983740> Zeigt alle aktuellen Tickets an\n> `{prefix}ticket log set <#channel>`\n> <:icon_reply:969871237062983740> Setzt einen Kanal für Ticket Protokollierung\n> `{prefix}ticket log remove`\n> <:icon_reply:969871237062983740> Entfernt den Kanal für die Ticket Protokollierung\n\n> Variablen für die Ticket öffnungs Nachricht: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
                         color=nextcord.Color.blurple()
                     )
 
@@ -145,7 +148,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Tempchannel":
                     embed = nextcord.Embed(
-                        description="** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> <:icon_reply:969871237062983740> Setzt ein Tempchannel Sprachkanal\n> `-tempchannel remove`\n> <:icon_reply:969871237062983740> Entfernt den Sprachkanal als Tempchannel\n> `-tempchannel name <name>`\n> <:icon_reply:969871237062983740> Setzt einen neuen standard Namen\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
+                        description="** `⏳`Tempchannel Commands**\n\n> `{prefix}tempchannel set <channel>`\n> <:icon_reply:969871237062983740> Setzt ein Tempchannel Sprachkanal\n> `{prefix}tempchannel remove`\n> <:icon_reply:969871237062983740> Entfernt den Sprachkanal als Tempchannel\n> `{prefix}tempchannel name <name>`\n> <:icon_reply:969871237062983740> Setzt einen neuen standard Namen\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
                         color=nextcord.Color.blurple()
                     )
 
@@ -153,7 +156,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Reaction Roles":
                     embed = nextcord.Embed(
-                        description="**<:icon_roles:968233835710017566> Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> <:icon_reply:969871237062983740> Erstellt eine neue Reaction Role\n> `-rr delete <#channel> <messageid> <emote>`\n> <:icon_reply:969871237062983740> Löscht eine bereits vorhandene Reaction Role",
+                        description="**<:icon_roles:968233835710017566> Reactionrole einrichtung**\n\n> `{prefix}rr create <#channel> <messageid> <emote> <@&rolle>`\n> <:icon_reply:969871237062983740> Erstellt eine neue Reaction Role\n> `{prefix}rr delete <#channel> <messageid> <emote>`\n> <:icon_reply:969871237062983740> Löscht eine bereits vorhandene Reaction Role",
                         color=nextcord.Color.blurple()
                     )
 
@@ -162,35 +165,35 @@ class HelpButton(nextcord.ui.Select):
                 case "Level System":
                     embed = nextcord.Embed(
                         description="** Level System**\n\n"
-                                            "> `-level <@user>`\n> <:icon_reply:969871237062983740> Zeigt dir dein/das Level eines Users an\n"
-                                            "> `-leaderboard`\n> <:icon_reply:969871237062983740> Zeigt dir die Top 10 User\n\n"
-                                            "> `-level settings`\n> <:icon_reply:969871237062983740> Zeigt dir alle möglichen Einstellungen\n"
-                                            "> `-level <on | off>`\n> <:icon_reply:969871237062983740> Schaltet das Level Sytem an und aus\n"
-                                            "> `-level xp <anzahl>`\n> <:icon_reply:969871237062983740> Setzt eine XP anzahl per Nachricht\n"
-                                            "> `-level cooldown <sekunden>`\n> <:icon_reply:969871237062983740> Setzt den cooldown auf eine bestimmte Zeit\n\n"
-                                            "> `-level message <text>`\n> <:icon_reply:969871237062983740> Setzt die Nachricht für ein Level Up\n"
-                                            "> `-level message`\n> <:icon_reply:969871237062983740> Zeigt dir die aktuelle Level Up Nachricht\n"
-                                            "> `-level ping <on | off>`\n> <:icon_reply:969871237062983740> Schaltet den Ping @ ein und aus bei einem Level Up\n\n"
-                                            "> `-level custom add <level> <text>`\n> <:icon_reply:969871237062983740> Setzt eine custom Nachricht für ein bestimmtes Level\n"
-                                            "> `-level custom remove <level>\n> <:icon_reply:969871237062983740>` Entfernt eine custom Nachricht für ein bestimmtes Level\n"
-                                            "> `-level custom show <level>`\n> <:icon_reply:969871237062983740> Zeigt dir die custom Nachricht von einem bestimmten Level\n"
-                                            "> `-level custom show`\n> <:icon_reply:969871237062983740> Zeigt dir alle custom Nachrichten\n\n"
-                                            "> `-level roles add <level> <@rolle>`\n> <:icon_reply:969871237062983740> Fügt eine Level Up Rolle zu einem bestimmten Level hinzu\n"
-                                            "> `-level roles remove <level>`\n> <:icon_reply:969871237062983740> Entfernt eine Level Up Rolle von einem bestimmten Level\n"
-                                            "> `-level roles joinrole add <@rolle>`\n> <:icon_reply:969871237062983740> Setzt eine Start Rolle für das Level System die bei dem ersten Level Up wieder weggenommen wird\n"
-                                            "> `-level roles joinrole remove`\n> <:icon_reply:969871237062983740> Entfernt diese Start Rolle wieder\n"
-                                            "> `-level roles`\n> <:icon_reply:969871237062983740> Zeigt alle Level an mit einer Level Up Rolle\n\n"
-                                            "> `-level blacklist add <@rolle | #channel>`\n> <:icon_reply:969871237062983740> Fügt einen Kanal oder eine Rolle der Blacklist hinzu\n"
-                                            "> `-level blacklist remove <@rolle | #channel>`\n> <:icon_reply:969871237062983740> Entfernt eine Rolle oder einen Kanal von der Blacklist\n"
-                                            "> `-level blacklist`\n> <:icon_reply:969871237062983740> Zeigt alle Rollen und Kanäle die auf einer Blacklist stehen\n\n"
-                                            "> `-level modifylevel add <level> <@user>`\n> <:icon_reply:969871237062983740> Füge eine bestimmte anzahl an Leveln einem User hinzu\n"
-                                            "> `-level modifylevel remove <level> <@user>`\n> <:icon_reply:969871237062983740> Entfernte eine bestimmte anzahl an Leveln von einem User\n"
-                                            "> `-level modifyxp add <xp> <@user>`\n> <:icon_reply:969871237062983740> Füge eine bestimmte anzahl an XP einem User hinzu\n"
-                                            "> `-level modifyxp remove <xp> <@user>`\n> <:icon_reply:969871237062983740> Entferne eine bestimmte anzahl an XP von einem User\n\n"
-                                            "> `-level reset <@user>`\n> <:icon_reply:969871237062983740> Setzte einen User komplett zurück\n"
-                                            "> `-level reset level`\n> <:icon_reply:969871237062983740> Setze alle Level zurück\n"
-                                            "> `-level reset settings`\n> <:icon_reply:969871237062983740> Setzte alle Einstellungen zurück\n"
-                                            "> `-level reset all`\n> <:icon_reply:969871237062983740> Setze alles zurück\n\n"
+                                            f"> `{prefix}level <@user>`\n> <:icon_reply:969871237062983740> Zeigt dir dein/das Level eines Users an\n"
+                                            f"> `{prefix}leaderboard`\n> <:icon_reply:969871237062983740> Zeigt dir die Top 10 User\n\n"
+                                            f"> `{prefix}level settings`\n> <:icon_reply:969871237062983740> Zeigt dir alle möglichen Einstellungen\n"
+                                            f"> `{prefix}level <on | off>`\n> <:icon_reply:969871237062983740> Schaltet das Level Sytem an und aus\n"
+                                            f"> `{prefix}level xp <anzahl>`\n> <:icon_reply:969871237062983740> Setzt eine XP anzahl per Nachricht\n"
+                                            f"> `{prefix}level cooldown <sekunden>`\n> <:icon_reply:969871237062983740> Setzt den cooldown auf eine bestimmte Zeit\n\n"
+                                            f"> `{prefix}level message <text>`\n> <:icon_reply:969871237062983740> Setzt die Nachricht für ein Level Up\n"
+                                            f"> `{prefix}level message`\n> <:icon_reply:969871237062983740> Zeigt dir die aktuelle Level Up Nachricht\n"
+                                            f"> `{prefix}level ping <on | off>`\n> <:icon_reply:969871237062983740> Schaltet den Ping @ ein und aus bei einem Level Up\n\n"
+                                            f"> `{prefix}level custom add <level> <text>`\n> <:icon_reply:969871237062983740> Setzt eine custom Nachricht für ein bestimmtes Level\n"
+                                            f"> `{prefix}level custom remove <level>`\n> <:icon_reply:969871237062983740>` Entfernt eine custom Nachricht für ein bestimmtes Level\n"
+                                            f"> `{prefix}level custom show <level>`\n> <:icon_reply:969871237062983740> Zeigt dir die custom Nachricht von einem bestimmten Level\n"
+                                            f"> `{prefix}level custom show`\n> <:icon_reply:969871237062983740> Zeigt dir alle custom Nachrichten\n\n"
+                                            f"> `{prefix}level roles add <level> <@rolle>`\n> <:icon_reply:969871237062983740> Fügt eine Level Up Rolle zu einem bestimmten Level hinzu\n"
+                                            f"> `{prefix}level roles remove <level>`\n> <:icon_reply:969871237062983740> Entfernt eine Level Up Rolle von einem bestimmten Level\n"
+                                            f"> `{prefix}level roles joinrole add <@rolle>`\n> <:icon_reply:969871237062983740> Setzt eine Start Rolle für das Level System die bei dem ersten Level Up wieder weggenommen wird\n"
+                                            f"> `{prefix}level roles joinrole remove`\n> <:icon_reply:969871237062983740> Entfernt diese Start Rolle wieder\n"
+                                            f"> `{prefix}level roles`\n> <:icon_reply:969871237062983740> Zeigt alle Level an mit einer Level Up Rolle\n\n"
+                                            f"> `{prefix}level blacklist add <@rolle | #channel>`\n> <:icon_reply:969871237062983740> Fügt einen Kanal oder eine Rolle der Blacklist hinzu\n"
+                                            f"> `{prefix}level blacklist remove <@rolle | #channel>`\n> <:icon_reply:969871237062983740> Entfernt eine Rolle oder einen Kanal von der Blacklist\n"
+                                            f"> `{prefix}level blacklist`\n> <:icon_reply:969871237062983740> Zeigt alle Rollen und Kanäle die auf einer Blacklist stehen\n\n"
+                                            f"> `{prefix}level modifylevel add <level> <@user>`\n> <:icon_reply:969871237062983740> Füge eine bestimmte anzahl an Leveln einem User hinzu\n"
+                                            f"> `{prefix}level modifylevel remove <level> <@user>`\n> <:icon_reply:969871237062983740> Entfernte eine bestimmte anzahl an Leveln von einem User\n"
+                                            f"> `{prefix}level modifyxp add <xp> <@user>`\n> <:icon_reply:969871237062983740> Füge eine bestimmte anzahl an XP einem User hinzu\n"
+                                            f"> `{prefix}level modifyxp remove <xp> <@user>`\n> <:icon_reply:969871237062983740> Entferne eine bestimmte anzahl an XP von einem User\n\n"
+                                            f"> `{prefix}level reset <@user>`\n> <:icon_reply:969871237062983740> Setzte einen User komplett zurück\n"
+                                            f"> `{prefix}level reset level`\n> <:icon_reply:969871237062983740> Setze alle Level zurück\n"
+                                            f"> `{prefix}level reset settings`\n> <:icon_reply:969871237062983740> Setzte alle Einstellungen zurück\n"
+                                            f"> `{prefix}level reset all`\n> <:icon_reply:969871237062983740> Setze alles zurück\n\n"
                                             "> Variablen für die Level Up Nachricht:\n"
                                             "> `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{level}`, `{xp_needed}`, `{level_next}` und `{role}` für custom Nachrichten\n\n"
                                             "> Du kannst eine Level Up Nachricht mit mehreren erstellen mit `\\n`\n"
@@ -210,7 +213,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Bad Words":
                     embed = nextcord.Embed(
-                        description="**<:icon_badword:970238990743658518> Bad Words**\n\n> `-badword add <word>`\n> <:icon_reply:969871237062983740> Fügt ein Wort der Blacklist hinzu\n> `-badword remove <word>`\n> <:icon_reply:969871237062983740> Entfernt ein Wort von der Blacklist\n> `-badword show`\n> <:icon_reply:969871237062983740> Zeigt dir alle Wörter auf der Blacklist",
+                        description=f"**<:icon_badword:970238990743658518> Bad Words**\n\n> `{prefix}badword add <word>`\n> <:icon_reply:969871237062983740> Fügt ein Wort der Blacklist hinzu\n> `{prefix}badword remove <word>`\n> <:icon_reply:969871237062983740> Entfernt ein Wort von der Blacklist\n> `{prefix}badword show`\n> <:icon_reply:969871237062983740> Zeigt dir alle Wörter auf der Blacklist",
                         color=nextcord.Color.blurple()
                     )
 
@@ -218,7 +221,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Anti Ghostping":
                     embed = nextcord.Embed(
-                        description="**<:icon_ghostping:970292783027986463> Anti-Ghostpings**\n\n> `-ghostping on`\n> <:icon_reply:969871237062983740> Schaltet die Anti Ghostping Erkenn Funktion ein\n> `-ghostping off`\n> <:icon_reply:969871237062983740> Schaltet die Anti Ghostping Erkenn Funktion aus",
+                        description=f"**<:icon_ghostping:970292783027986463> Anti-Ghostpings**\n\n> `{prefix}ghostping on`\n> <:icon_reply:969871237062983740> Schaltet die Anti Ghostping Erkenn Funktion ein\n> `{prefix}ghostping off`\n> <:icon_reply:969871237062983740> Schaltet die Anti Ghostping Erkenn Funktion aus",
                         color=nextcord.Color.blurple()
                     )
 
@@ -226,7 +229,7 @@ class HelpButton(nextcord.ui.Select):
 
                 case "Link Blocker":
                     embed = nextcord.Embed(
-                        description="**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> <:icon_reply:969871237062983740> Schaltet den Linkblocker ein\n> `-linkblocker off`\n> <:icon_reply:969871237062983740> Schaltet den Link Blocker aus",
+                        description=f"**<:icon_automod:967038254367006791> Link Blocker**\n\n> `{prefix}linkblocker on`\n> <:icon_reply:969871237062983740> Schaltet den Linkblocker ein\n> `{prefix}linkblocker off`\n> <:icon_reply:969871237062983740> Schaltet den Link Blocker aus",
                         color=nextcord.Color.blurple()
                     )
 
