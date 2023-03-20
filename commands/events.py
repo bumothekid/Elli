@@ -16,7 +16,7 @@ class eventsCog(Cog):
             insert(table="guilds", columns="guild_id, prefix", values=[guild.id, "-"])
 
         await infoEmbed(self,
-                        self.bot.get_channel(957444324080115762),
+                        self.bot.get_channel(1087441039855468614),
                         f"**Joined a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon.url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
                         color=nextcord.Color.green()
         )
@@ -24,7 +24,7 @@ class eventsCog(Cog):
     @Cog.listener()
     async def on_guild_remove(self, guild):
         await infoEmbed(self,
-                        self.bot.get_channel(957444324080115762),
+                        self.bot.get_channel(1087441039855468614),
                         f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({guild.icon.url})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
                         color=nextcord.Color.red()
         )
