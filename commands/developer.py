@@ -16,7 +16,7 @@ class deveveloper(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        await infoEmbed(self, ctx, "**<:icon_developer:960643728140284004> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
+        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
 
     @_dev.command(name="add")
     async def _add(self, ctx, user: nextcord.User):
@@ -66,7 +66,7 @@ class deveveloper(Cog):
 
         for dev in devlist:
             user = self.bot.get_user(int(dev))
-            lists += f'<:icon_developer:960643728140284004> | {user}\n'
+            lists += f'<:Developer:1087444095363989564> | {user}\n'
 
         await infoEmbed(self, ctx, lists)
 
