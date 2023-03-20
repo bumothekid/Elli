@@ -57,7 +57,7 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_invite:966028792890003547> Invite**\n\n> **Invite:** `Hier scheint wohl noch etwas zu fehlen.`"
+            f"**<:icon_commands:966028792890003547> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=8)"
         )
     
     @commands.command(name="support")
@@ -66,7 +66,16 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_support:966028792890003547> Support**\n\n> **Support:** `Hier scheint wohl noch etwas zu fehlen.`"
+            f"**<:icon_commands:966028792890003547> Support**\n\n> **Support:** [`🔗` Support](https://discord.gg/FWPExbfCTa)"
+        )
+    
+    @commands.command(name="vote")
+    @commands.cooldown(2, 20, commands.BucketType.user)
+    async def _vote(self, ctx):
+        await infoEmbed(
+            self,
+            ctx,
+            f"**<:icon_commands:966028792890003547> Vote**\n\n> **Vote:** `Hier scheint wohl noch etwas zu fehlen.`"
         )
 
 def setup(bot):
