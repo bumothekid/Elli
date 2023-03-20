@@ -2,7 +2,7 @@ import nextcord
 import chat_exporter
 import io
 from nextcord.ext import commands
-from nextcord.ext.commands import Cog
+from nextcord.ext.commands import Cog, Context
 from .utils.other import safeDict
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 from .utils.database import readOne, readAll, insert, update, delete
@@ -60,7 +60,7 @@ class ticket(Cog):
     @_ticket.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _delete(self, ctx, channel: nextcord.TextChannel, *, message_id):
+    async def ihateyoudelete(self, ctx, channel: nextcord.TextChannel, message_id:int):
         dbticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
 
         if dbticket is None:
