@@ -129,5 +129,6 @@ if __name__ == '__main__':
     load_dotenv()
     test_token = os.getenv("TEST_TOKEN")
     bot_token = os.getenv("TOKEN")
+    test = os.getenv("TEST")
 
-    bot.run(bot_token)
+    bot.run(test_token if test == "True" else bot_token)
