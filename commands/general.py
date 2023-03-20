@@ -15,7 +15,7 @@ class general(Cog):
     @commands.command(name="botinfo", aliases=['bot', 'info', 'stats'])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _botinfo(self, ctx):
-        version, uptime = readOne(columns="version, uptime", table="cursy")
+        version, uptime = readOne(columns="version, uptime", table="elli")
         timeUp = time() - float(uptime)
         days = timeUp / 86400
         hours = (timeUp / 3600) % 24
