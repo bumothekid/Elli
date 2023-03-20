@@ -17,7 +17,7 @@ class welcome(Cog):
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _welcome(self, ctx):
-        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> `-welcome channel remove`\n> `-welcome message <message>`\n> `-welcome picture set <picture>`\n> `-welcome picture remove`\n> `-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
+        await infoEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> `-welcome channel remove`\n> `-welcome message <message>`\n> `-welcome picture set <picture>`\n> `-welcome picture remove`\n> `-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
     @_welcome.group(name="channel", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -35,11 +35,11 @@ class welcome(Cog):
             picture = welcome[3] if welcome[3] is not None else "Keins"
             update(table="welcome", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            return await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+            return await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
         insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!", "null"])
 
-        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`")
+        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`")
 
     @_channel.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
@@ -52,7 +52,7 @@ class welcome(Cog):
 
         update(table="welcome", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
 
-        await successEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommenskanal zurückgesetzt**")
+        await successEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommenskanal zurückgesetzt**")
     
     @_welcome.command(name="message", aliases=["text", "msg"])
     @commands.has_permissions(manage_guild=True)
@@ -65,7 +65,7 @@ class welcome(Cog):
 
         picture = welcome[3] if welcome[3] is not None else "Keins"
         update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommensnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
     @_welcome.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -86,7 +86,7 @@ class welcome(Cog):
 
         message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
         update(table="welcome", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_joined:965033605707481128> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
     
     @_picture.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
@@ -98,13 +98,13 @@ class welcome(Cog):
             return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
 
         update(table="welcome", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbild zurückgesetzt**")
+        await successEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensbild zurückgesetzt**")
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show(self, ctx):
-        await infoEmbed(self, ctx, "**<:icon_member_joined:965033605707481128> Willkommensbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
+        await infoEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
     
     @Cog.listener()
     async def on_member_join(self, member):

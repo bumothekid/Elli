@@ -16,7 +16,7 @@ class giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _giveaway(self, ctx):
-        await infoEmbed(self, ctx, "**<a:giveaway:958492679749140510> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`")
+        await infoEmbed(self, ctx, "**<a:Giveaway:1087437215648456794> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`")
 
     @_giveaway.command(name="create", aliases=["start"])
     @commands.has_permissions(manage_guild=True)
@@ -156,7 +156,7 @@ class giveaways(Cog):
 
         embed = nextcord.Embed(
             title=anwsers[2],
-            description=f"Reagiere mit <a:giveaway:958492679749140510> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            description=f"Reagiere mit <a:Giveaway:1087437215648456794> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=anwsers[1])
         )
@@ -170,7 +170,7 @@ class giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>")
+        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>")
 
     @_giveaway.command(name="quick", aliases=["q", "quickstart"])
     @commands.has_permissions(manage_guild=True)
@@ -200,7 +200,7 @@ class giveaways(Cog):
 
         embed = nextcord.Embed(
             title=prize,
-            description=f"Reagiere mit <a:giveaway:958492679749140510> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            description=f"Reagiere mit <a:Giveaway:1087437215648456794> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=seconds)
         )
@@ -214,7 +214,7 @@ class giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, f"**<a:giveaway:958492679749140510> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {winner}\n> **Bis:** <t:{unix}:f>")
+        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {winner}\n> **Bis:** <t:{unix}:f>")
 
     @_giveaway.command(name="drop")
     @commands.has_permissions(manage_guild=True)
@@ -233,7 +233,7 @@ class giveaways(Cog):
 
         embed = nextcord.Embed(
             title=prize,
-            description=f"Reagiere mit <a:giveaway:958492679749140510>, um den Drop einzusammeln \n\n> Host: {ctx.author.mention}",
+            description=f"Reagiere mit <a:Giveaway:1087437215648456794>, um den Drop einzusammeln \n\n> Host: {ctx.author.mention}",
             color=ctx.author.color,
             timestamp=datetime.now()
         )
@@ -248,11 +248,11 @@ class giveaways(Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u.bot == False and r.message.id == message.id and r.emoji == emote, timeout=300)
         except asyncio.TimeoutError:
-            return await errorEmbed(self, channel, "<a:giveaway:958492679749140510> Drop wurde abgebrochen.**\n\n**> Drop nach 5 Minuten abgelaufen.")
+            return await errorEmbed(self, channel, "<a:Giveaway:1087437215648456794> Drop wurde abgebrochen.**\n\n**> Drop nach 5 Minuten abgelaufen.")
 
         embed = nextcord.Embed(
             title=prize,
-            description=f"**<a:giveaway:958492679749140510> Drop erhalten**\n\n> **Gewinner:** {user.mention}\n> **Preis:** {prize}",
+            description=f"**<a:Giveaway:1087437215648456794> Drop erhalten**\n\n> **Gewinner:** {user.mention}\n> **Preis:** {prize}",
             color=ctx.author.color
         )
 
@@ -279,7 +279,7 @@ class giveaways(Cog):
         if giveaway is None:
             return await errorEmbed(self, ctx, "Es wurde kein aktives Gewinnspiel mit dieser Nachrichten ID gefunden.")
 
-        await successEmbed(self, ctx, f"**<a:giveaway:958492679749140510> Das Giveaway wird in kürze beendet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {giveaway[6]}")
+        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Das Giveaway wird in kürze beendet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {giveaway[6]}")
         
         update(table="giveaways", columns="duration", where="guild_id message_id", values=["0", ctx.guild.id, message.id])
 
@@ -368,7 +368,7 @@ class giveaways(Cog):
 
             fields.append({"name": f"**{giveaway_price}**", "value": f"> **Channel:** {giveaway_channel_link}\n> **Nachricht:** {giveaway_message_link}\n> **Hoster:** {giveaway_hoster.mention}\n> **Gewinner:** {giveaway_winner}\n> **Bis:** <t:{unix}:f>", "inline": True})
         
-        await infoEmbed(self, ctx, "**<a:giveaway:958492679749140510> Aktive Giveaways**", fields=fields)
+        await infoEmbed(self, ctx, "**<a:Giveaway:1087437215648456794> Aktive Giveaways**", fields=fields)
 
     @Cog.listener()
     async def on_ready(self):

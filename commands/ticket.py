@@ -14,14 +14,14 @@ class ticket(Cog):
     @commands.group(name="ticket", aliases=["ticketsystem"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _ticket(self, ctx):
-        await infoEmbed(self, ctx, "**<:Ticket:959885507557470239> Ticket System**\n\n> `-ticket create <#channel> <@rolle> <text>`\n> `-ticket update <#channel> <messageid> <@rolle> <text>`\n> `-ticket delete <#channel> <messageid>`\n> `-ticket message <text>`\n> `-ticket list`\n> `-ticket log set <#channel>`\n> `-ticket log remove`\n\n> Variablen für custom Message: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`")
+        await infoEmbed(self, ctx, "**<:Ticket:1087437978873376798> Ticket System**\n\n> `-ticket create <#channel> <@rolle> <text>`\n> `-ticket update <#channel> <messageid> <@rolle> <text>`\n> `-ticket delete <#channel> <messageid>`\n> `-ticket message <text>`\n> `-ticket list`\n> `-ticket log set <#channel>`\n> `-ticket log remove`\n\n> Variablen für custom Message: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`")
 
     @_ticket.command(name="create", aliases=["new"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _create(self, ctx, channel: nextcord.TextChannel, role: nextcord.Role, *, text):
         embed = nextcord.Embed(
-            description="**<:Ticket:959885507557470239> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
+            description="**<:Ticket:1087437978873376798> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
             color=nextcord.Color.blurple()
         )
 
@@ -35,7 +35,7 @@ class ticket(Cog):
         if messages is None:
             insert(table="ticket_messages", columns="guild_id, text", values=[ctx.guild.id, "Hey {user_name}, es wird dir bald geholfen.\n\n**Ticket von {user_name}#{user_discriminator}**"])
 
-        await successEmbed(self, ctx, f"** <:Ticket:959885507557470239> Ticket erstellt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{ticket.id}/)\n> **Support Rolle:** {role.mention}")
+        await successEmbed(self, ctx, f"** <:Ticket:1087437978873376798> Ticket erstellt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{ticket.id}/)\n> **Support Rolle:** {role.mention}")
 
     @_ticket.command(name="update", aliases=["edit"])
     @commands.has_permissions(manage_guild=True)
@@ -47,7 +47,7 @@ class ticket(Cog):
             return await errorEmbed(self, ctx, "Dieses Ticket existiert nicht.")
 
         embed = nextcord.Embed(
-            description="**<:Ticket:959885507557470239> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
+            description="**<:Ticket:1087437978873376798> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
             color=nextcord.Color.blurple()
         )
 
@@ -55,7 +55,7 @@ class ticket(Cog):
         await ticket.edit(embed=embed)
 
         update(table="tickets", columns="text role_id", where="guild_id channel_id message_id", values=[text, role.id, ctx.guild.id, channel.id, message_id])
-        await infoEmbed(self, ctx,"** <:Ticket:959885507557470239> Ticket aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{ticket.id}/)\n> **Support Rolle:** {role.mention}")
+        await infoEmbed(self, ctx,"** <:Ticket:1087437978873376798> Ticket aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{ticket.id}/)\n> **Support Rolle:** {role.mention}")
     
     @_ticket.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -73,7 +73,7 @@ class ticket(Cog):
 
         role = ctx.guild.get_role(dbticket[3])
 
-        await successEmbed(self, ctx, f"**<:Ticket:959885507557470239> Ticket gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Support Rolle:** {role.mention}\n> **Text:** {dbticket[4]}")
+        await successEmbed(self, ctx, f"**<:Ticket:1087437978873376798> Ticket gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Support Rolle:** {role.mention}\n> **Text:** {dbticket[4]}")
 
     @_ticket.command(name="message", aliases=["setmessage"])
     @commands.has_permissions(manage_guild=True)
@@ -88,7 +88,7 @@ class ticket(Cog):
         
         text = text.replace("\\n", "\n")
 
-        await successEmbed(self, ctx, f"** <:Ticket:959885507557470239> Nachricht aktualisiert**\n\n> **Nachricht:**\n{text}")
+        await successEmbed(self, ctx, f"** <:Ticket:1087437978873376798> Nachricht aktualisiert**\n\n> **Nachricht:**\n{text}")
 
     @_ticket.command(name="list")
     @commands.has_permissions(manage_guild=True)
@@ -108,7 +108,7 @@ class ticket(Cog):
 
             fields.append({"name": f"Ticket {i}", "value": f"> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Support Rolle:** {role.mention}", "inline": True})
         
-        await infoEmbed(self, ctx, "**<:Ticket:959885507557470239> Tickets**\n\n", fields=fields)
+        await infoEmbed(self, ctx, "**<:Ticket:1087437978873376798> Tickets**\n\n", fields=fields)
 
     @_ticket.group(name="log", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -124,10 +124,10 @@ class ticket(Cog):
         if log is not None:
             update(table="ticket_logs", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            return await successEmbed(self, ctx, f"**<:Ticket:959885507557470239> Log Channel aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)")
+            return await successEmbed(self, ctx, f"**<:Ticket:1087437978873376798> Log Channel aktualisiert**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)")
 
         insert(table="ticket_logs", columns="guild_id, channel_id", values=[ctx.guild.id, channel.id])
-        await successEmbed(self, ctx, f"**<:Ticket:959885507557470239> Log Channel gesetzt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)")
+        await successEmbed(self, ctx, f"**<:Ticket:1087437978873376798> Log Channel gesetzt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)")
     
     @_log.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -139,7 +139,7 @@ class ticket(Cog):
             return await errorEmbed(self, ctx, "Es ist noch kein Ticket Logging gesetzt.")
 
         delete(table="ticket_logs", where="guild_id", values=[ctx.guild.id])
-        await successEmbed(self, ctx, "**<:Ticket:959885507557470239> Log Channel gelöscht**")
+        await successEmbed(self, ctx, "**<:Ticket:1087437978873376798> Log Channel gelöscht**")
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -202,7 +202,7 @@ class ticket(Cog):
             if log is None:
                 return
 
-            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:959885507557470239> Ticket erstellt**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{ticket.id}/{message.id})\n> **User:** {payload.member.mention}\n> **Support:** {role.mention}", color=nextcord.Color.green())
+            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:1087437978873376798> Ticket erstellt**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{ticket.id}/{message.id})\n> **User:** {payload.member.mention}\n> **Support:** {role.mention}", color=nextcord.Color.green())
 
         elif payload.emoji.name == "🔒":
             user = guild.get_member(open_ticket[4])
@@ -215,7 +215,7 @@ class ticket(Cog):
             await channel.set_permissions(user, overwrite=memberPerms)
 
             embed = nextcord.Embed(
-                description=f"**<:Ticket:959885507557470239> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                description=f"**<:Ticket:1087437978873376798> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
                 color=nextcord.Color.green()
             )
 
@@ -228,7 +228,7 @@ class ticket(Cog):
             if log is None:
                 return
 
-            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:959885507557470239> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}")
+            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:1087437978873376798> Ticket geschlossen**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}")
 
         elif payload.emoji.name == "🔓":
             user = guild.get_member(open_ticket[4])
@@ -241,7 +241,7 @@ class ticket(Cog):
             await channel.set_permissions(user, overwrite=memberPerms)
 
             embed = nextcord.Embed(
-                description=f"**<:Ticket:959885507557470239> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
+                description=f"**<:Ticket:1087437978873376798> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}",
                 color=nextcord.Color.green()
             )
 
@@ -253,7 +253,7 @@ class ticket(Cog):
             if log is None:
                 return
 
-            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:959885507557470239> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", color=nextcord.Color.green())
+            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:1087437978873376798> Ticket erneut geöffnet**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", color=nextcord.Color.green())
 
         elif payload.emoji.name == "❌":
             user = guild.get_member(open_ticket[4])
@@ -264,7 +264,7 @@ class ticket(Cog):
             if role not in payload.member.roles:
                 return await errorEmbed(self, channel, f"{payload.member.mention}, du hast keine Berechtigungen um dieses Ticket zu schließen**\n\n**> Du benötigst die Rolle {role.mention}")
 
-            await infoEmbed(self, channel, f"**<:Ticket:959885507557470239> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", color=nextcord.Color.red())
+            await infoEmbed(self, channel, f"**<:Ticket:1087437978873376798> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", color=nextcord.Color.red())
 
             delete(table="open_tickets", where="guild_id user_id", values=[payload.guild_id, payload.member.id])
 
@@ -274,7 +274,7 @@ class ticket(Cog):
             transcript = await chat_exporter.export(channel)
             transcript_file = nextcord.File(io.BytesIO(transcript.encode()), filename="transcript.html")
 
-            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:959885507557470239> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", file=transcript_file)
+            await infoEmbed(self, guild.get_channel(log[0]), f"**<:Ticket:1087437978873376798> Ticket wird gelöscht**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{payload.guild_id}/{open_ticket[1]}/{open_ticket[2]})\n> **User:** {user.mention}\n> **Support:** {role.mention}", file=transcript_file)
             await channel.delete()
 
             

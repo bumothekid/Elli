@@ -24,7 +24,7 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_stats:966088119378141194> {self.bot.user.name}'s aktuelle Statistiken**\n\n> **<:icon_globe:960643612872417280> Server:** `{len(self.bot.guilds)}`\n> **<:icon_member:960643575366955079> User:** `{sum(len(s.members) for s in self.bot.guilds)}`\n> **<:icon_server:960643654492491786> Latenz:** `{round(self.bot.latency * 1000)}ms`\n\n> **<:icon_clide:960643699279265843> CPU:** `{psutil.cpu_percent()}%`\n> **<:icon_folder:962093232701988925> RAM:** `{round(psutil.virtual_memory().percent)}%`\n> **<:icon_stopwatch:959548515799953488> Uptime:** `{round(days)}d {round(hours)}h {round(minutes)}m`\n\n> **<:icon_developer:960643728140284004> Version:** `{version}`\n> **<:icon_nextcord:960645392075210862> Nextcord:** `{nextcord.__version__}`\n> **<:icon_python:960645429257699398> Python:** `{platform.python_version()}`",
+            f"**<:Statistics:1087458133569445970> {self.bot.user.name}'s aktuelle Statistiken**\n\n> **<:Globe:1087448923834163342> Server:** `{len(self.bot.guilds)}`\n> **<:Member:1087452536295927808> User:** `{sum(len(s.members) for s in self.bot.guilds)}`\n> **<:Server:1087457941348700251> Latenz:** `{round(self.bot.latency * 1000)}ms`\n\n> **<:Clyde:1087435842785640448> CPU:** `{psutil.cpu_percent()}%`\n> **<:Folder:1087447065061240896> RAM:** `{round(psutil.virtual_memory().percent)}%`\n> **<:Stopwatch:1087458252750590073> Uptime:** `{round(days)}d {round(hours)}h {round(minutes)}m`\n\n> **<:Developer:1087444095363989564> Version:** `{version}`\n> **<:Nextcord:1087456587003740210> Nextcord:** `{nextcord.__version__}`\n> **<:Python:1087457407220850788> Python:** `{platform.python_version()}`",
             footer={"text": f"{self.bot.user.name} Bot | Powered by Nextcord", "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"})
         
     @commands.command(name="prefix", aliases=['setprefix'])
@@ -42,14 +42,14 @@ class general(Cog):
 
         if oldPrefix is None:
             insert(table="guilds", columns="guild_id, prefix", values=[ctx.guild.id, prefix])
-            return await successEmbed(self, ctx, f"**<:icon_commands:966028792890003547>  Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `-`")
+            return await successEmbed(self, ctx, f"**<:Commands:1087442278118871140>  Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `-`")
 
         if prefix == oldPrefix[0]:
             return await errorEmbed(ctx, f"Die Prefix darf nicht die selbe wie de alte sein `{oldPrefix[0]}`.")
 
         update(table="guilds", columns="prefix", where="guild_id", values=[prefix, ctx.guild.id])
 
-        await successEmbed(self, ctx, f"**<:icon_commands:966028792890003547> Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `{oldPrefix[0]}`")
+        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `{oldPrefix[0]}`")
 
     @commands.command(name="invite")
     @commands.cooldown(2, 20, commands.BucketType.user)
@@ -57,7 +57,7 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_commands:966028792890003547> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=8)"
+            f"**<:Commands:1087442278118871140> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=8)"
         )
     
     @commands.command(name="support")
@@ -66,7 +66,7 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_commands:966028792890003547> Support**\n\n> **Support:** [`🔗` Support](https://discord.gg/FWPExbfCTa)"
+            f"**<:Commands:1087442278118871140> Support**\n\n> **Support:** [`🔗` Support](https://discord.gg/FWPExbfCTa)"
         )
     
     @commands.command(name="vote")
@@ -75,7 +75,7 @@ class general(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:icon_commands:966028792890003547> Vote**\n\n> **Vote:** `Hier scheint wohl noch etwas zu fehlen.`"
+            f"**<:Commands:1087442278118871140> Vote**\n\n> **Vote:** `Hier scheint wohl noch etwas zu fehlen.`"
         )
 
 def setup(bot):

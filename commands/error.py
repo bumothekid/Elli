@@ -53,7 +53,7 @@ class errorhandler(Cog):
 
         else:
             # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
-            await errorEmbed(self, ctx, "<:icon_error_red:962068826311254177> Es ist ein kritischer Fehler aufgetreten.")
+            await errorEmbed(self, ctx, "<:Error:1087445963280486430> Es ist ein kritischer Fehler aufgetreten.")
             await errorLogging(self, ctx, error)
 
 

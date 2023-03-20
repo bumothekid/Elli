@@ -116,7 +116,7 @@ async def infoEmbed(
             raise ValueError("image is not a str")
 
         infoEmbed.set_image(url=image)
-
+    
     try:
         match type(ctx):
             case nextcord.Interaction:
@@ -343,7 +343,7 @@ async def errorLogging(bot, ctx: nextcord.Interaction, error: str):
 
     channel = bot.get_channel(botLoggingChannelID)
     errorEmbed = nextcord.Embed(
-        description=f"> **An error occurred**\n\n> **<:icon_globe:960643612872417280> Guild:** `{ctx.guild}`\n> **<:icon_reply:969871237062983740> Guild ID:** `{ctx.guild.id}`\n> **<:icon_clide:960643699279265843> Command:** `{ctx.message.content}`\n> **<:icon_reply:969871237062983740> Command Executer:** `{ctx.author}`\n> **<:icon_error_red:962068826311254177> Error:**\n```py{error}```",
+        description=f"> **An error occurred**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Error:1087445963280486430> Error:**\n```py{error}```",
         color=nextcord.Color.red()
     )
 
@@ -358,7 +358,7 @@ async def devLogging(bot, ctx: nextcord.Interaction, text: str):
         
     channel = bot.get_channel(botLoggingChannelID)
     embed = nextcord.Embed(
-        description=f"> **A developer command was used**\n\n> **<:icon_globe:960643612872417280> Guild:** `{ctx.guild}`\n> **<:icon_reply:969871237062983740> Guild ID:** `{ctx.guild.id}`\n> **<:icon_clide:960643699279265843> Command:** `{ctx.message.content}`\n> **<:icon_reply:969871237062983740> Command Executer:** `{ctx.author}`\n> **<:icon_tick:962067144877695016> Action:**\n```css\n{text}```",
+        description=f"> **A developer command was used**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Tick:1087458362410684476> Action:**\n```css\n{text}```",
         color=nextcord.Color.blurple()
     )
 
@@ -372,7 +372,7 @@ async def permissionError(bot, ctx: nextcord.Interaction):
         except Exception:
             return print("Error: Bot is not a bot or self")
 
-    emote = bot.get_emoji(962068826311254177)
+    emote = bot.get_emoji(1087445963280486430)
 
     permissionEmbed = nextcord.Embed(
         description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",

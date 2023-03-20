@@ -14,7 +14,7 @@ class automod(Cog):
     @commands.cooldown(2, 10, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
     async def _badword(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:icon_badword:970238990743658518> Bad Words**\n\n> `-badword add <word>`\n> `-badword remove <word>`\n> `-badword show`")
+        await infoEmbed(self.bot, ctx, "**<:BadWord:814817356001968141> Bad Words**\n\n> `-badword add <word>`\n> `-badword remove <word>`\n> `-badword show`")
 
     @_badword.command(name="add", aliases=["a"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -51,12 +51,12 @@ class automod(Cog):
 
         string = "".join(f"{word[0]}\n" for word in words)
 
-        await infoEmbed(self.bot, ctx, f"**<:icon_badword:970238990743658518> Bad Words**\n\n{string}")
+        await infoEmbed(self.bot, ctx, f"**<:BadWord:814817356001968141> Bad Words**\n\n{string}")
 
     @commands.group(name="ghostping", aliases=["ghost-ping", "ghost_ping"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _ghostping(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:icon_ghostping:970292783027986463> Anti-Ghostpings**\n\n> `-ghostping on`\n> `-ghostping off`")
+        await infoEmbed(self.bot, ctx, "**<:Ghostping:1087448502323384330> Anti-Ghostpings**\n\n> `-ghostping on`\n> `-ghostping off`")
     
     @_ghostping.command(name="on", aliases=["activate", "activ"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -81,7 +81,7 @@ class automod(Cog):
     @commands.group(name="linkblocker", aliases=["antilink", "anti-link", "link"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _linkblocker(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:icon_automod:967038254367006791> Link Blocker**\n\n> `-linkblocker on`\n> `-linkblocker off`")
+        await infoEmbed(self.bot, ctx, "**<:Automod:1087440612430717068> Link Blocker**\n\n> `-linkblocker on`\n> `-linkblocker off`")
 
     @_linkblocker.command(name="on", aliases=["activate", "activ"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -115,7 +115,7 @@ class automod(Cog):
             if not checkLinkOn(message.guild.id):
                 return
 
-            await infoEmbed(self.bot, message.channel, "**<:icon_automod:967038254367006791> Du darfst hier keine Links reinschicken.**")
+            await infoEmbed(self.bot, message.channel, "**<:Automod:1087440612430717068> Du darfst hier keine Links reinschicken.**")
 
             with contextlib.suppress(Exception):
                 return await message.delete()
@@ -128,7 +128,7 @@ class automod(Cog):
         if all(word[0].lower() not in message.content.lower() for word in words):
             return
         
-        await infoEmbed(self.bot, message.channel, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
+        await infoEmbed(self.bot, message.channel, "**<:Badword:1087441597622399056> Du darfst dieses Wort nicht sagen.**", delete_after=10)
         with contextlib.suppress(Exception):
             await message.delete()
 
@@ -147,7 +147,7 @@ class automod(Cog):
             if not checkLinkOn(message.guild.id):
                 return
 
-            await infoEmbed(self.bot, message.channel, "**<:icon_automod:967038254367006791> Du darfst hier keine Links reinschicken.**")
+            await infoEmbed(self.bot, message.channel, "**<:Automod:1087440612430717068> Du darfst hier keine Links reinschicken.**")
 
             with contextlib.suppress(Exception):
                 return await message.delete()
@@ -155,7 +155,7 @@ class automod(Cog):
         words = readAll("word", "badwords", "guild_id", [message.guild.id])
         
         if any(word[0].lower() in message.content.lower() for word in words):
-            await infoEmbed(self.bot, message.channel, "**<:icon_badword:970238990743658518> Du darfst dieses Wort nicht sagen.**")
+            await infoEmbed(self.bot, message.channel, "**<:BadWord:814817356001968141> Du darfst dieses Wort nicht sagen.**")
             with contextlib.suppress(Exception):
                 await message.delete()
 

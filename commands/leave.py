@@ -17,7 +17,7 @@ class leave(Cog):
     @commands.group(name="leave", invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _leave(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:icon_member_left:965034270622122044> Verlassnachrichten**\n\n> `-leave channel set <#channel>`\n> `-leave channel remove <#channel>`\n> `-leave message <message>`\n> `-leave picture set <picture>`\n> `-leave picture remove`\n> `-leave picture show`\n\n> Variablen für die Verlassnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
+        await infoEmbed(self.bot, ctx, "**<:MemberLeave:1087453384858157149> Verlassnachrichten**\n\n> `-leave channel set <#channel>`\n> `-leave channel remove <#channel>`\n> `-leave message <message>`\n> `-leave picture set <picture>`\n> `-leave picture remove`\n> `-leave picture show`\n\n> Variablen für die Verlassnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
 
     @_leave.group(name="channel", invoke_without_command=True)
     async def _channel(self, ctx):
@@ -34,11 +34,11 @@ class leave(Cog):
             picture = leave[3] if leave[3] is not None else "Keins"
             update(table="leave", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            return await successEmbed(self, ctx, f"**<:icon_member_left:965034270622122044> Verlasskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+            return await successEmbed(self, ctx, f"**<:MemberLeave:1087453384858157149> Verlasskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
         insert(table="leave", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, "Tschüss {user_name}#{user_discriminator} hoffentlich kommst du bald wieder!", "null"])
 
-        await successEmbed(self, ctx, f"**<:icon_member_left:965034270622122044> Verlasskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Tschüss {{user_name}}#{{user_discriminator}} hoffentlich kommst du bald wieder!\n> **Bild:** `Keins`")
+        await successEmbed(self, ctx, f"**<:MemberLeave:1087453384858157149> Verlasskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Tschüss {{user_name}}#{{user_discriminator}} hoffentlich kommst du bald wieder!\n> **Bild:** `Keins`")
     
     @_channel.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
@@ -51,7 +51,7 @@ class leave(Cog):
 
         update(table="leave", columns="channel_id", where="guild_id", values=["null", ctx.guild.id])
 
-        await successEmbed(self, ctx, "**<:icon_member_left:965034270622122044> Verlasskanal zurückgesetzt**")
+        await successEmbed(self, ctx, "**<:MemberLeave:1087453384858157149> Verlasskanal zurückgesetzt**")
 
     @_leave.command(name="message", aliases=["msg"])
     @commands.has_permissions(manage_guild=True)
@@ -64,7 +64,7 @@ class leave(Cog):
 
         picture = leave[3] if leave[3] is not None else "Keins"
         update(table="leave", columns="message", where="guild_id", values=[message, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_left:965034270622122044> Verlassnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(leave[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:MemberLeave:1087453384858157149> Verlassnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(leave[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
     @_leave.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -85,7 +85,7 @@ class leave(Cog):
 
         message = leave[2] if leave[2] is not None else "Tschüss {user_name}#{user_discriminator} hoffentlich kommst du bald wieder!"
         update(table="leave", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:icon_member_left:965034270622122044> Verlassbild aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(leave[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, f"**<:MemberLeave:1087453384858157149> Verlassbild aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(leave[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
     @_picture.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
@@ -97,13 +97,13 @@ class leave(Cog):
             return await errorEmbed(self.bot, ctx, "Es ist kein Verlasskanal gesetzt.")
 
         update(table="leave", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, "**<:icon_member_left:965034270622122044> Verlassbild zurückgesetzt**")
+        await successEmbed(self, ctx, "**<:MemberLeave:1087453384858157149> Verlassbild zurückgesetzt**")
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show(self, ctx):
-        await infoEmbed(self, ctx, "**<:icon_member_left:965034270622122044> Verlassbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
+        await infoEmbed(self, ctx, "**<:MemberLeave:1087453384858157149> Verlassbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
 
     @Cog.listener()
     async def on_member_remove(self, member):
