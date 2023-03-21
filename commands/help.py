@@ -34,7 +34,7 @@ async def calltimeout(bot, message):
 
 class HelpButtonView(nextcord.ui.View):
     def __init__(self, bot, disabled: bool = False, category: str = None):
-        super().__init__(timeout=10)
+        super().__init__(timeout=300)
         self.add_item(HelpButton(bot, disabled, category))
         self.bot = bot
         self.disabled = disabled
@@ -48,23 +48,23 @@ class HelpButtonView(nextcord.ui.View):
 class HelpButton(nextcord.ui.Select):
     def __init__(self, bot, disabled: bool, category: str = None):
         options = [
-            nextcord.SelectOption(label="Kategorien", emoji="<:Commands:1087442278118871140>", default=True if category == None else False),
-            nextcord.SelectOption(label="Generell", emoji="<:Discord:1087443793810301051>", default=True if category == "generell" else False),
-            nextcord.SelectOption(label="Nützlich", emoji="💡", default=True if category == "nützlich" else False),
-            nextcord.SelectOption(label="Moderation", emoji="<:Moderator:1087456158421352508>", default=True if category == "moderation" else False),
-            nextcord.SelectOption(label="Fun", emoji="<:Fun:1087447621582454926>", default=True if category == "fun" else False),
-            nextcord.SelectOption(label="Welcome", emoji="<:MemberJoin:1087453129198546964>", default=True if category == "welcome" else False),
-            nextcord.SelectOption(label="Leave", emoji="<:MemberLeave:1087453384858157149>", default=True if category == "leave" else False),
-            nextcord.SelectOption(label="Giveaway", emoji="<a:Giveaway:1087437215648456794>", default=True if category == "giveaway" else False),
-            nextcord.SelectOption(label="Ticket System", emoji="<:Ticket:1087437978873376798>", default=True if category == "ticket system" else False),
-            nextcord.SelectOption(label="Tempchannel", emoji="⏳", default=True if category == "tempchannel" else False),
-            nextcord.SelectOption(label="Reaction Roles", emoji="<:Roles:1087457575257255998>", default=True if category == "reaction roles" else False),
-            nextcord.SelectOption(label="Level System", emoji="🌟", default=True if category == "level system" else False),
-            nextcord.SelectOption(label="Bad Words", emoji="<:Badword:1087441597622399056>", default=True if category == "bad words" else False),
-            nextcord.SelectOption(label="Anti Ghostping", emoji="<:Ghostping:1087448502323384330>", default=True if category == "anti ghostping" else False),
-            nextcord.SelectOption(label="Link Blocker", emoji="<:Automod:1087440612430717068>", default=True if category == "link blocker" else False)
+            nextcord.SelectOption(label="Kategorien", emoji="<:Commands:1087442278118871140>", default=category is None,),
+            nextcord.SelectOption(label="Generell", emoji="<:Discord:1087443793810301051>", default=category == "generell"),
+            nextcord.SelectOption(label="Nützlich", emoji="💡", default=category == "nützlich"),
+            nextcord.SelectOption(label="Moderation", emoji="<:Moderator:1087456158421352508>", default=category == "moderation"),
+            nextcord.SelectOption(label="Fun", emoji="<:Fun:1087447621582454926>", default=category == "fun"),
+            nextcord.SelectOption(label="Welcome", emoji="<:MemberJoin:1087453129198546964>", default=category == "welcome"),
+            nextcord.SelectOption(label="Leave", emoji="<:MemberLeave:1087453384858157149>", default=category == "leave"),
+            nextcord.SelectOption(label="Giveaway", emoji="<a:Giveaway:1087437215648456794>", default=category == "giveaway"),
+            nextcord.SelectOption(label="Ticket System", emoji="<:Ticket:1087437978873376798>", default=category == "ticket system"),
+            nextcord.SelectOption(label="Tempchannel", emoji="⏳", default=category == "tempchannel"),
+            nextcord.SelectOption(label="Reaction Roles", emoji="<:Roles:1087457575257255998>", default=category == "reaction roles"),
+            nextcord.SelectOption(label="Level System", emoji="🌟", default=category == "level system"),
+            nextcord.SelectOption(label="Bad Words", emoji="<:Badword:1087441597622399056>", default=category == "bad words"),
+            nextcord.SelectOption(label="Anti Ghostping", emoji="<:Ghostping:1087448502323384330>", default=category == "anti ghostping"),
+            nextcord.SelectOption(label="Link Blocker", emoji="<:Automod:1087440612430717068>", default=category == "link blocker"),
         ]
-        
+
         super().__init__(placeholder="Wähle eine Kategorie", options=options, disabled=disabled)
         self.bot = bot
 
