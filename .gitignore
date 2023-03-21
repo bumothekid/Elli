@@ -6,7 +6,7 @@ assets/welcome/user_card*
 assets/leave/user_card*
 *.code-workspace
 .DS_Store
-.env
+database.db
 *.py[cod]
 *$py.class
 
