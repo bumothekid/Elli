@@ -1,4 +1,3 @@
-from itsdangerous import NoneAlgorithm
 import nextcord
 from nextcord.ext.commands import Cog
 from .utils.other import getPrefixFromDatabase
