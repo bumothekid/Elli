@@ -1,1 +1,1 @@
-Cursy
+# “Elli” Discord Bot
