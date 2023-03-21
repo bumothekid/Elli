@@ -7,7 +7,7 @@ from .utils.other import devCheck
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed, devLogging
 from .utils.database import readOne, update
 
-class deveveloper(Cog):
+class Developer(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -84,4 +84,4 @@ class deveveloper(Cog):
         await devLogging(self, ctx, f"{ctx.author} hat die Bot Version von {vers[0]} auf {version} gesetzt.")
 
 def setup(bot):
-    bot.add_cog(deveveloper(bot))
+    bot.add_cog(Developer(bot))
