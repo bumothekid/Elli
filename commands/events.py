@@ -1,8 +1,9 @@
 import nextcord
+import contextlib
 from nextcord.ext.commands import Cog
 from .utils.other import getPrefixFromDatabase
 from .utils.database import readOne, insert
-from .utils.embeds import infoEmbed
+from .utils.embeds import infoEmbed, errorEmbed
 
 class EventsCog(Cog):
     def __init__(self, bot):
@@ -32,16 +33,6 @@ class EventsCog(Cog):
                         f"**Left a guild**\n\n> **Name:** {guild.name}\n> **ID:** {guild.id}\n> **Owner:** {guild.owner.name}#{guild.owner.discriminator}\n\n> **Member:** {len(guild.members)}\n> **Icon:** [`📎`Link]({iconURL})\n> **Erstellt am:** {guild.created_at.strftime('%d.%m.%Y')}",
                         color=nextcord.Color.red()
         )
-
-    @Cog.listener()
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-
-        if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):
-            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`.")
-    
-
 
 
 def setup(bot):
