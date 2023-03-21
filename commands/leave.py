@@ -10,7 +10,7 @@ from .utils.image import memberCardImageProcessing
 from .utils.other import safeDict
 from PIL import Image
 
-class leave(Cog):
+class Leave(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -215,4 +215,4 @@ class ButtonView(ui.View):
         await ctx.send(embed=embed, file=pic)
 
 def setup(bot):
-    bot.add_cog(leave(bot))
+    bot.add_cog(Leave(bot))

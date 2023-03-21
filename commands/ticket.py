@@ -7,7 +7,7 @@ from .utils.other import safeDict
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 from .utils.database import readOne, readAll, insert, update, delete
 
-class ticket(Cog):
+class Ticket(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -284,4 +284,4 @@ class ticket(Cog):
         
 
 def setup(bot):
-    bot.add_cog(ticket(bot))
+    bot.add_cog(Ticket(bot))

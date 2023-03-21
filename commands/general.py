@@ -8,7 +8,7 @@ from time import time
 from .utils.embeds import errorEmbed, successEmbed, infoEmbed
 from .utils.database import readOne, insert, update
 
-class general(Cog):
+class General(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -79,4 +79,4 @@ class general(Cog):
         )
 
 def setup(bot):
-    bot.add_cog(general(bot))
+    bot.add_cog(General(bot))

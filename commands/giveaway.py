@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from .utils.embeds import infoEmbed, errorEmbed, successEmbed
 from .utils.database import delete, readAll, insert, readOne, update
 
-class giveaways(Cog):
+class Giveaways(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -481,4 +481,4 @@ class giveaways(Cog):
             delete(table="giveaways", where="guild_id message_id", values=[guild_id, message_id])            
 
 def setup(bot):
-    bot.add_cog(giveaways(bot))
+    bot.add_cog(Giveaways(bot))

@@ -9,7 +9,7 @@ from .utils.other import getPrefixFromDatabase, safeDict
 from .utils.models.LevelingUser import LevelingUser as User
 from .utils.models.EmbedField import EmbedField
 
-class levelsys(Cog):
+class LevelSys(Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -734,4 +734,4 @@ def addUserXP(guildid: int, userid: int, xp: int, cooldown: int) -> bool:
 
     
 def setup(bot):
-    bot.add_cog(levelsys(bot))
+    bot.add_cog(LevelSys(bot))

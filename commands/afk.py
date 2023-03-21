@@ -6,7 +6,7 @@ from .utils.database import readOne, readAll, insert, update, delete
 from .utils.embeds import errorEmbed, successEmbed
 from .utils.other import getPrefixFromDatabase
 
-class afk(Cog):
+class Afk(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -61,4 +61,4 @@ class afk(Cog):
 
 
 def setup(bot):
-    bot.add_cog(afk(bot))
+    bot.add_cog(Afk(bot))

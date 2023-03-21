@@ -5,7 +5,7 @@ from .utils.other import getPrefixFromDatabase
 from .utils.database import readOne, insert
 from .utils.embeds import infoEmbed
 
-class eventsCog(Cog):
+class EventsCog(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -46,4 +46,4 @@ class eventsCog(Cog):
 
 
 def setup(bot):
-    bot.add_cog(eventsCog(bot))
+    bot.add_cog(EventsCog(bot))

@@ -6,7 +6,7 @@ from nextcord.ext.commands import Cog
 from .utils.embeds import errorEmbed, infoEmbed, successEmbed
 from .utils.database import readOne, insert, delete
 
-class reactionrole(Cog):
+class ReactionRole(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -113,4 +113,4 @@ class reactionrole(Cog):
                 await member.remove_roles(role, reason="Reactionrole")
     
 def setup(bot):
-    bot.add_cog(reactionrole(bot))
+    bot.add_cog(ReactionRole(bot))

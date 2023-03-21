@@ -10,7 +10,7 @@ from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 from .utils.database import readOne, insert, update
 from PIL import Image
 
-class welcome(Cog):
+class Welcome(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -216,4 +216,4 @@ class ButtonView(ui.View):
         await ctx.send(embed=embed, file=pic)
 
 def setup(bot):
-    bot.add_cog(welcome(bot))
+    bot.add_cog(Welcome(bot))

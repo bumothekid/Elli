@@ -2,7 +2,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from .utils.embeds import errorEmbed, errorLogging
 
-class errorhandler(Cog):
+class ErrorHandler(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -59,4 +59,4 @@ class errorhandler(Cog):
 
 
 def setup(bot):
-    bot.add_cog(errorhandler(bot))
+    bot.add_cog(ErrorHandler(bot))

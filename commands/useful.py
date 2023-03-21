@@ -6,7 +6,7 @@ from nextcord.ext.commands import Cog
 from .utils.other import capString
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed, devLogging
 
-class useful(Cog):
+class Useful(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -67,4 +67,4 @@ class useful(Cog):
         await devLogging(self, ctx, f"{ctx.author} hat einen Bugreport gemeldet:\n> **{bug}**")
 
 def setup(bot):
-    bot.add_cog(useful(bot))
+    bot.add_cog(Useful(bot))

@@ -8,7 +8,7 @@ from .utils.embeds import successEmbed, errorEmbed, infoEmbed
 from .utils.other import messagePinned
 from datetime import datetime, timedelta
 
-class moderation(Cog):
+class Moderation(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -177,4 +177,4 @@ class moderation(Cog):
         await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} hat die Rolle {role} entzogen.**")
 
 def setup(bot):
-    bot.add_cog(moderation(bot))
+    bot.add_cog(Moderation(bot))

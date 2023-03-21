@@ -8,7 +8,7 @@ from nextcord.ext.commands import Cog
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
 from .utils.other import capString, checkLink
 
-class fun(Cog):
+class Fun(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -144,4 +144,4 @@ class fun(Cog):
     
 
 def setup(bot):
-    bot.add_cog(fun(bot))
+    bot.add_cog(Fun(bot))

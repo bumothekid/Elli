@@ -6,7 +6,7 @@ from .utils.other import checkLink, getPrefixFromDatabase
 from .utils.embeds import infoEmbed, errorEmbed, successEmbed
 from .utils.database import delete, insert, readOne, readAll, update
 
-class automod(Cog):
+class Automod(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -193,4 +193,4 @@ def checkLinkOn(guildid: int) -> bool:
     return enabled[0] == 1
 
 def setup(bot):
-    bot.add_cog(automod(bot))
+    bot.add_cog(Automod(bot))

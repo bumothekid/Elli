@@ -5,7 +5,7 @@ from .utils.other import safeDict
 from .utils.database import readOne, readAll, insert, update, delete
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 
-class tempchannel(Cog):
+class Tempchannel(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -109,4 +109,4 @@ class tempchannel(Cog):
 
 
 def setup(bot):
-    bot.add_cog(tempchannel(bot))
+    bot.add_cog(Tempchannel(bot))
