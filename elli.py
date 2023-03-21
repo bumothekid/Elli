@@ -72,7 +72,8 @@ async def load(ctx, ext):
 
     try:
         bot.load_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
-
+        
+        await bot.sync_all_application_commands()
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} geladen.")
         await successEmbed(bot, ctx, f"{ext} wurde geladen.")
     except Exception as e:
@@ -89,6 +90,7 @@ async def unload(ctx, ext):
     try:
         bot.unload_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
 
+        await bot.sync_all_application_commands()
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} entladen.")
         await successEmbed(bot, ctx, f"{ext} wurde deaktiviert.")
     except Exception as error:
@@ -109,11 +111,14 @@ async def reload(ctx, ext):
             except Exception as e:
                 await errorEmbed(bot, ctx, f"{extension} konnte nicht geladen werden.**\n```py\n{e}```** ")
 
+        await bot.sync_all_application_commands()
         await devLogging(bot, ctx, f"{ctx.author} hat alle Cogs neu geladen.")
         return await successEmbed(bot, ctx, "Alle Cogs wurden neu geladen.")
 
     try:
         bot.reload_extension(rawExt if "commands." in ext else f"commands.{rawExt}")
+
+        await bot.sync_all_application_commands()
         await devLogging(bot, ctx, f"{ctx.author} hat {ext} neu geladen.")
         await successEmbed(bot, ctx, f"{ext} wurde neu geladen.")
     except Exception as e:
