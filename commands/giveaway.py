@@ -125,9 +125,9 @@ class Giveaways(Cog):
                                 trys += 1
                                 continue
                         
-                        if round(anwser) < 120:
+                        if round(anwser) < 120 or round(anwser) > 1555200:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Die Zeit muss mindestens 120 Sekunden betragen`",
+                                description=question + f"\n\n> `Die Zeit muss zwischen mindestens 120 Sekunden und maximal 6 Monate sein`",
                                 color=nextcord.Color.blurple()
                             )
 
