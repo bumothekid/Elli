@@ -220,6 +220,12 @@ class Giveaways(Cog):
         if not minutes.isdigit():
             return await errorEmbed(self, ctx, "Die Zeitangabe muss in minuten angegeben sein.")
         
+        elif int(minutes) < 2:
+            return await errorEmbed(self, ctx, "Die Zeitangabe muss mindestens `2` Minuten betragen.")
+        
+        elif int(minutes) > 1555200:
+            return await errorEmbed(self, ctx, "Die Zeitangabe darf maximal `6` Monate betragen.")
+        
         if not winner.isdigit():
             return await errorEmbed(self, ctx, "Die Anzahl an Gewinnern muss eine ganze Zahl sein.")
 
