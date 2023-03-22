@@ -34,6 +34,28 @@ class EventsCog(Cog):
                         color=nextcord.Color.red()
         )
 
+    @Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):
+            with contextlib.suppress(IndexError):
+                argument = message.content.split(" ")[1]
+                prefixArgument = message.content.split(" ")[2] if len(message.content.split(" ")) > 2 else None
+                if argument == "prefix":
+                    if prefixArgument is None:
+                        await errorEmbed(self, message, f"Es fehlt ein benötigtes Argument.\n> **Beispiel:** <@{self.bot.user.id}> prefix -")
+                        return
+
+                    await self.bot.get_command("prefix").callback(self, message, prefixArgument)
+
+                return
+
+            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`.")
+    
+
+
 
 def setup(bot):
     bot.add_cog(EventsCog(bot))
