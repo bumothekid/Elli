@@ -25,7 +25,8 @@ class General(Cog):
             self,
             ctx,
             f"**<:Statistics:1087458133569445970> {self.bot.user.name}'s aktuelle Statistiken**\n\n> **<:Globe:1087448923834163342> Server:** `{len(self.bot.guilds)}`\n> **<:Member:1087452536295927808> User:** `{sum(len(s.members) for s in self.bot.guilds)}`\n> **<:Server:1087457941348700251> Latenz:** `{round(self.bot.latency * 1000)}ms`\n\n> **<:Clyde:1087435842785640448> CPU:** `{psutil.cpu_percent()}%`\n> **<:Folder:1087447065061240896> RAM:** `{round(psutil.virtual_memory().percent)}%`\n> **<:Stopwatch:1087458252750590073> Uptime:** `{round(days)}d {round(hours)}h {round(minutes)}m`\n\n> **<:Developer:1087444095363989564> Version:** `{version}`\n> **<:Nextcord:1087456587003740210> Nextcord:** `{nextcord.__version__}`\n> **<:Python:1087457407220850788> Python:** `{platform.python_version()}`",
-            footer={"text": f"{self.bot.user.name} Bot | Powered by Nextcord", "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"})
+            footer={"text": f"{self.bot.user.name} Bot | Powered by Nextcord", "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"},
+            thumbnail=self.bot.user.display_avatar.url)
         
     @commands.command(name="prefix", aliases=['setprefix'])
     @commands.cooldown(2, 20, commands.BucketType.user)
