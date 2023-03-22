@@ -423,7 +423,7 @@ class Giveaways(Cog):
                 await asyncio.sleep(5)
                 exists = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[payload.guild_id, payload.message_id])
                 if exists is not None:
-                    await self.giveawayTimer(guild_id=payload.guild_id, message_id=payload.message_id)
+                    asyncio.ensure_future(self.giveawayTimer(guild_id=payload.guild_id, message_id=payload.message_id))
 
     @Cog.listener()
     async def on_message_delete(self, message):
