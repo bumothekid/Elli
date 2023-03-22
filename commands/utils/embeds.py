@@ -18,7 +18,8 @@ async def infoEmbed(
     file: nextcord.File = None,
     delete_after: int = None,
     thumbnail: str = None,
-    image: str = None
+    image: str = None,
+    ephemeral: bool = False
     ) -> nextcord.Message:
     """ 
     Creates and sends an information embed
@@ -120,7 +121,12 @@ async def infoEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
+                if file is None:
+                    message = await ctx.response.send_message(content=content, embed=infoEmbed, delete_after=delete_after, ephemeral=ephemeral)
+
+                else:
+                    message = await ctx.response.send_message(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after, ephemeral=ephemeral)
+
                 return message
             case nextcord.ext.commands.context.Context:
                 message = await ctx.reply(content=content, embed=infoEmbed, view=view, file=file, delete_after=delete_after)
