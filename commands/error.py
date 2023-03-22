@@ -51,6 +51,9 @@ class ErrorHandler(Cog):
         elif isinstance(error, commands.UserInputError):
             await errorEmbed(self, ctx, "Du hast eine Falsche eingabe getätigt.")
 
+        elif isinstance(error, commands.MaxConcurrencyReached):
+            await errorEmbed(self, ctx, "Du benutzt diesen befehlt bereits.")
+
         else:
             # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
             await errorEmbed(self, ctx, "<:Error:1087445963280486430> Es ist ein kritischer Fehler aufgetreten.")
