@@ -19,6 +19,7 @@ class Giveaways(Cog):
         await infoEmbed(self, ctx, "**<a:Giveaway:1087437215648456794> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`")
 
     @_giveaway.command(name="create", aliases=["start"])
+    @commands.max_concurrency(1, commands.BucketType.user)
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def _create(self, ctx):
