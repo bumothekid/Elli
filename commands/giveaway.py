@@ -81,7 +81,7 @@ class Giveaways(Cog):
                     case 1:
                         await userAnwser.delete() 
                         timeRegex = re.compile(r'(?:(\d{1,5})(h|s|m|d))+?')
-                        timeDict = {"h": 3600, "m": 60, "d": 86400}
+                        timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
                         time = (userAnwser.content).lower()
 
@@ -116,6 +116,15 @@ class Giveaways(Cog):
                                 await message.edit(embed=embed)
                                 continue
                         
+                        if round(anwser) < 120:
+                            embed = nextcord.Embed(
+                                description=question + f"\n\n> `Die Zeit muss mindestens 120 Sekunden betragen`",
+                                color=nextcord.Color.blurple()
+                            )
+
+                            await message.edit(embed=embed)
+                            continue
+
                         anwser = round(anwser)
                     case 2:
                         await userAnwser.delete()
@@ -144,7 +153,7 @@ class Giveaways(Cog):
                             await message.edit(embed=embed)
                             continue
 
-                        elif int(userAnwser.content) >= 100:
+                        elif int(userAnwser.content) >= 100 or int(userAnwser.content) <= 0:
                             embed = nextcord.Embed(
                                 description=question + f"\n\n> `Die anzahl an Gewinnern darf nicht größer als 100 sein`",
                                 color=nextcord.Color.blurple()
