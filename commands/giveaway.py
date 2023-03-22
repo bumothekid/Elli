@@ -35,6 +35,7 @@ class Giveaways(Cog):
 
         anwsers = {}
         message = None
+        trys = 0
 
         for i, question in enumerate(questions):
             embed = nextcord.Embed(
@@ -51,10 +52,10 @@ class Giveaways(Cog):
                 try:
                     userAnwser = await self.bot.wait_for("message", timeout=120, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
-                    if message is not None:
-                        await message.delete()
-                    
-                    return await errorEmbed(self, ctx, "Du hast mehr als `2` Minuten gebraucht um zu antworten.\n\n> Der Giveaway startvorgang wurde abgebrochen.")
+                    return await errorEmbed(self, ctx, "Du hast länger als `2` Minuten gebraucht um zu antworten der Giveaway startvorgang wurde abgebrochen.")
+                
+                if trys == 3:
+                    return await errorEmbed(self, ctx, "`3` Fehlversuche; Der Giveaway startvorgang wurde abgebrochen.")
 
                 match i:
                     case 0:
@@ -70,7 +71,10 @@ class Giveaways(Cog):
                                 )
 
                                 await message.edit(embed=embed)
+                                trys += 1
                                 continue
+
+                            trys = 0
                         except:
                             embed = nextcord.Embed(
                                 description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
@@ -78,6 +82,7 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
                     case 1:
                         await userAnwser.delete() 
@@ -96,6 +101,7 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
                         for key, value in matches:
                             try:
@@ -107,6 +113,7 @@ class Giveaways(Cog):
                                 )
 
                                 await message.edit(embed=embed)
+                                trys += 1
                                 continue
                             except ValueError:
                                 embed = nextcord.Embed(
@@ -115,6 +122,7 @@ class Giveaways(Cog):
                                 )
 
                                 await message.edit(embed=embed)
+                                trys += 1
                                 continue
                         
                         if round(anwser) < 120:
@@ -124,8 +132,10 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
 
+                        trys = 0
                         anwser = round(anwser)
                     case 2:
                         await userAnwser.delete()
@@ -139,8 +149,10 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
                         else:
+                            trys = 0
                             anwser = userAnwser.content
                     case 3:
                         await userAnwser.delete()
@@ -152,6 +164,7 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
 
                         elif int(userAnwser.content) >= 100 or int(userAnwser.content) <= 0:
@@ -161,7 +174,10 @@ class Giveaways(Cog):
                             )
 
                             await message.edit(embed=embed)
+                            trys += 1
                             continue
+                        
+                        trys = 0
                         anwser = int(userAnwser.content)
                         await message.delete()
 
@@ -396,7 +412,7 @@ class Giveaways(Cog):
 
             if running:
                 for giveaway in running:
-                    await self.giveawayTimer(guild_id=i.id, message_id=giveaway[0])
+                    asyncio.ensure_future(self.giveawayTimer(guild_id=i.id, message_id=giveaway[0]))
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
