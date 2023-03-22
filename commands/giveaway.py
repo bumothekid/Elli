@@ -61,6 +61,15 @@ class Giveaways(Cog):
                         try:
                             channelid = re.findall(r"[0-9]+", userAnwser.content)[0]
                             anwser = self.bot.get_channel(int(channelid))
+
+                            if anwser == None:
+                                embed = nextcord.Embed(
+                                    description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
+                                    color=nextcord.Color.blurple()
+                                )
+
+                                await message.edit(embed=embed)
+                                continue
                         except:
                             embed = nextcord.Embed(
                                 description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
