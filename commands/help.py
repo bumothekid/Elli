@@ -22,6 +22,11 @@ class ClassHelp(commands.Cog):
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
+    @nextcord.slash_command(name="help", description="Zeigt dir alle Commands an")
+    async def _help(self, interaction):
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])[0]
+        await infoEmbed(self, interaction, f"**<:Commands:1087442278118871140> {self.bot.user.name}'s Command Kategorien**\n\n> Der Bot läuft noch auf Message Commands\n> Wir bitten deshalb darum den normalen Help Command `{prefix}help` zu nutzen.", ephemeral=True)
+
 
 async def calltimeout(bot, message):
     view = HelpButtonView(bot, True)
