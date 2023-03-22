@@ -201,7 +201,7 @@ class Giveaways(Cog):
 
         insert(table="giveaways", columns="guild_id, channel_id, message_id, start, duration, prize, winner, hoster_id", values=[ctx.guild.id, anwsers[0].id, message.id, time_(), anwsers[1], anwsers[2], anwsers[3], ctx.author.id])
 
-        emote = self.bot.get_emoji(958492679749140510)
+        emote = self.bot.get_emoji(1087437215648456794)
 
         await message.add_reaction(emote)
 
@@ -245,7 +245,7 @@ class Giveaways(Cog):
 
         insert(table="giveaways", columns="guild_id, channel_id, message_id, start, duration, prize, winner, hoster_id", values=[ctx.guild.id, channel.id, message.id, time_(), seconds, prize, winner, ctx.author.id])
 
-        emote = self.bot.get_emoji(958492679749140510)
+        emote = self.bot.get_emoji(1087437215648456794)
 
         await message.add_reaction(emote)
 
@@ -276,7 +276,7 @@ class Giveaways(Cog):
 
         message = await channel.send(embed=embed)
 
-        emote = self.bot.get_emoji(958492679749140510)
+        emote = self.bot.get_emoji(1087437215648456794)
 
         await message.add_reaction(emote)
 
@@ -335,7 +335,7 @@ class Giveaways(Cog):
         if giveaway is not None:
             return await errorEmbed(self, ctx, "Das Giveaway ist noch am laufen.**\n> **Du kannst mit `-giveaway end <#channel> <messageid>` das Gewinnspiel beenden.")
 
-        emote = self.bot.get_emoji(958492679749140510)
+        emote = self.bot.get_emoji(1087437215648456794)
         is_giveaway = any(reaction.emoji == emote for reaction in message.reactions)
 
         if not is_giveaway:
@@ -416,7 +416,7 @@ class Giveaways(Cog):
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        emote = self.bot.get_emoji(958492679749140510)
+        emote = self.bot.get_emoji(1087437215648456794)
         if payload.emoji == emote:
             guild = self.bot.get_guild(payload.guild_id)
             if payload.member == guild.me:
