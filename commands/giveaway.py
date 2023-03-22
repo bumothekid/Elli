@@ -81,7 +81,7 @@ class Giveaways(Cog):
                     case 1:
                         await userAnwser.delete() 
                         timeRegex = re.compile(r'(?:(\d{1,5})(h|s|m|d))+?')
-                        timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+                        timeDict = {"h": 3600, "m": 60, "d": 86400}
 
                         time = (userAnwser.content).lower()
 
