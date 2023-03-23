@@ -147,6 +147,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card1.png")
+
         await ctx.send(embed=embed, file=pic)
     
     @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="leavepic2")
@@ -159,6 +161,8 @@ class ButtonView(ui.View):
             description="**Bild 2**",
             color=nextcord.Color.blurple()
         )
+
+        embed.set_image(url="attachment://user_card2.png")
 
         await ctx.send(embed=embed, file=pic)
 
@@ -173,6 +177,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card3.png")
+
         await ctx.send(embed=embed, file=pic)
     
     @ui.button(style=ButtonStyle.primary, label="Bild 4", custom_id="leavepic4")
@@ -185,6 +191,8 @@ class ButtonView(ui.View):
             description="**Bild 4**",
             color=nextcord.Color.blurple()
         )
+
+        embed.set_image(url="attachment://user_card4.png")
 
         await ctx.send(embed=embed, file=pic)
 
@@ -199,6 +207,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card5.png")
+
         await ctx.send(embed=embed, file=pic)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 6", custom_id="leavepic6")
@@ -211,6 +221,8 @@ class ButtonView(ui.View):
             description="**Bild 6**",
             color=nextcord.Color.blurple()
         )
+
+        embed.set_image(url="attachment://user_card6.png")
 
         await ctx.send(embed=embed, file=pic)
 
