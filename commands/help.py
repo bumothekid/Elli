@@ -65,6 +65,7 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label="Tempchannel", emoji="⏳", default=category == "tempchannel"),
             nextcord.SelectOption(label="Reaction Roles", emoji="<:Roles:1087457575257255998>", default=category == "reaction roles"),
             nextcord.SelectOption(label="Level System", emoji="🌟", default=category == "level system"),
+            nextcord.SelectOption(label="Invite-Logger", emoji="📨", default=category == "invite-logger"),
             nextcord.SelectOption(label="Bad Words", emoji="<:Badword:1087441597622399056>", default=category == "bad words"),
             nextcord.SelectOption(label="Anti Ghostping", emoji="<:Ghostping:1087448502323384330>", default=category == "anti ghostping"),
             nextcord.SelectOption(label="Link Blocker", emoji="<:Automod:1087440612430717068>", default=category == "link blocker"),
@@ -186,9 +187,9 @@ class HelpButton(nextcord.ui.Select):
                         color=nextcord.Color.blurple()
                     )
 
-                case "Invite Logger":
+                case "Invite-Logger":
                     embed = nextcord.Embed(
-                        description="Soon!",
+                        description="**📨 Invite-Logger**\n\n> *Soon!*",
                         color=nextcord.Color.blurple()
                     )
 
