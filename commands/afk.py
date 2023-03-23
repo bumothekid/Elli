@@ -26,7 +26,7 @@ class Afk(Cog):
         else:
             insert(table="afk", columns="guild_id, user_id, time, reason", values=[ctx.guild.id, ctx.author.id, time(), reason])
 
-        await successEmbed(self, ctx, f"**<:icon_idle:965966637704564796> Du bist jetzt AFK**\n\n**Grund:** {reason}", color=nextcord.Color.dark_gold())
+        await successEmbed(self, ctx, f"**<:Idle:1087452184582561802> Du bist jetzt AFK**\n\n**Grund:** {reason}", color=nextcord.Color.dark_gold())
 
     @Cog.listener()
     async def on_message(self, message):
@@ -46,7 +46,7 @@ class Afk(Cog):
 
                 delete(table="afk", where="guild_id user_id", values=[message.guild.id, message.author.id])
 
-                return await successEmbed(self, message, f"**<:icon_online:965966580150313000> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}")
+                return await successEmbed(self, message, f"**<:Online:1087457380591206450> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}")
     
             if user[0] in [member.id for member in message.mentions]:
                 member = message.guild.get_member(user[0])
@@ -55,7 +55,7 @@ class Afk(Cog):
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
                 timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
 
-                return await successEmbed(self, message, f"**<:icon_idle:965966637704564796> {member.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", color=nextcord.Color.dark_gold())
+                return await successEmbed(self, message, f"**<:Idle:1087452184582561802> {member.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", color=nextcord.Color.dark_gold())
 
 
 def setup(bot):
