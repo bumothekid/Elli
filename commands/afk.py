@@ -34,6 +34,7 @@ class Afk(Cog):
             return
 
         users = readAll(columns="user_id, time, reason", table="afk", where="guild_id", values=[message.guild.id])
+
         if not users:
             return
 
@@ -47,14 +48,14 @@ class Afk(Cog):
 
                 return await successEmbed(self, message, f"**<:icon_online:965966580150313000> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}")
     
-            if f"<@{user[0]}>" in message.content or f"<@!{user[0]}>" in message.content:
-                user = message.guild.get_member(user[0])
+            if user[0] in [member.id for member in message.mentions]:
+                member = message.guild.get_member(user[0])
 
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
                 timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
 
-                return await successEmbed(self, message, f"**<:icon_idle:965966637704564796> {user.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", nextcord.Color.dark_gold())
+                return await successEmbed(self, message, f"**<:icon_idle:965966637704564796> {member.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", color=nextcord.Color.dark_gold())
 
 
 def setup(bot):
