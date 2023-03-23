@@ -148,6 +148,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card1.png")
+
         await ctx.send(embed=embed, file=pic)
     
     @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="welpic2")
@@ -161,6 +163,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card2.png")
+
         await ctx.send(embed=embed, file=pic)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 3", custom_id="welpic3")
@@ -171,8 +175,10 @@ class ButtonView(ui.View):
 
         embed = nextcord.Embed(
             description="**Bild 3**",
-            color=nextcord.Color.blurple()
+            color=nextcord.Color.blurple(),
         )
+
+        embed.set_image(url="attachment://user_card3.png")
 
         await ctx.send(embed=embed, file=pic)
     
@@ -187,6 +193,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card4.png")
+
         await ctx.send(embed=embed, file=pic)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 5", custom_id="welpic5")
@@ -200,6 +208,8 @@ class ButtonView(ui.View):
             color=nextcord.Color.blurple()
         )
 
+        embed.set_image(url="attachment://user_card5.png")
+
         await ctx.send(embed=embed, file=pic)
 
     @ui.button(style=ButtonStyle.primary, label="Bild 6", custom_id="welpic6")
@@ -212,6 +222,8 @@ class ButtonView(ui.View):
             description="**Bild 6**",
             color=nextcord.Color.blurple()
         )
+
+        embed.set_image(url="attachment://user_card6.png")
 
         await ctx.send(embed=embed, file=pic)
 
