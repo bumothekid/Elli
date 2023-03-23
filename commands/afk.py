@@ -4,7 +4,7 @@ from nextcord.ext.commands import Cog
 from time import time
 from .utils.database import readOne, readAll, insert, update, delete
 from .utils.embeds import errorEmbed, successEmbed
-from .utils.other import getPrefixFromDatabase
+from .utils.other import getPrefixFromDatabase, checkLink
 
 class Afk(Cog):
     def __init__(self, bot):
@@ -15,11 +15,8 @@ class Afk(Cog):
     async def _afk(self, ctx, *, reason="AFK"):
         is_afk = readOne(columns="reason", table="afk", where="guild_id user_id", values=[ctx.guild.id, ctx.author.id])
 
-        if "https://" in reason or "http://" in reason:
-            return await errorEmbed(ctx, "Es dürfen keine Links in deinem AFK-Status sein.")
-
-        if "discord." in reason or "discordapp." in reason:
-            return await errorEmbed(ctx, "Es dürfen keine Invites in deinem AFK-Status sein.")
+        if checkLink(reason):
+            return await errorEmbed(ctx, "Es dürfen keine Links oder Invites in deinem AFK-Status sein.")
 
         if len(reason) > 1000:
             return await errorEmbed(ctx, "Dein AFK-Status darf nicht länger als `1000` Zeichen sein.")
