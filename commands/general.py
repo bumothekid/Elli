@@ -63,7 +63,7 @@ class General(Cog):
         oldLanguage = getGuildLanguage(ctx.guild.id)
 
         if language == oldLanguage:
-            return await errorEmbed(ctx, f"The language can't be the same as the old one `{oldLanguage[0]}`.")
+            return await errorEmbed(self, ctx, f"The language can't be the same as the old one `{oldLanguage[0]}`.")
 
         updateGuildLanguage(ctx.guild.id, language)
 
