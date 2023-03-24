@@ -51,8 +51,8 @@ class EventsCog(Cog):
                     await self.bot.get_command("prefix").callback(self, message, prefixArgument)
 
                 return
-
-            await infoEmbed(self, message, f"> **Die Prefix für diesen Server ist:** `{getPrefixFromDatabase(self, message)[0]}`.")
+            
+            await infoEmbed(self, message, f"**<:Elli:1087732423074259106> {self.bot.user.name}**\n\n> **Server Prefix:** `{getPrefixFromDatabase(self, message)[0]}`\n> **Invite:** `{getPrefixFromDatabase(self, message)[0]}invite`\n> **[`🔗` Support](https://discord.gg/FWPExbfCTa)**\n> **Vote:** *Soon!*", thumbnail=self.bot.user.display_avatar.url, color=nextcord.Color.from_rgb(255, 255, 255))
     
 
 
