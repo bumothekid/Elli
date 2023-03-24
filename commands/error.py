@@ -45,7 +45,7 @@ class ErrorHandler(Cog):
             await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "messageNotFound"))
 
         elif isinstance(error, commands.CommandOnCooldown):
-            await errorEmbed(self, ctx,  getLocale(languageStrings, guildLocale, "commandOnCooldown"), f"{error.retry_after:,.2f}")
+            await errorEmbed(self, ctx,  getLocale(languageStrings, guildLocale, "commandOnCooldown", f"{error.retry_after:,.2f}"))
 
         elif isinstance(error, commands.NoPrivateMessage):
             await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noPrivateMessage"))
