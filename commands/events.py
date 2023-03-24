@@ -14,7 +14,7 @@ class EventsCog(Cog):
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[guild.id])
 
         if prefix is None:
-            insert(table="guilds", columns="guild_id, prefix", values=[guild.id, "-"])
+            insert(table="guilds", columns="guild_id, prefix, language", values=[guild.id, "-", "en"])
 
         iconURL = guild.icon.url if guild.icon is not None else ""
 
