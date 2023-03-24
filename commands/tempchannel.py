@@ -93,7 +93,7 @@ class Tempchannel(Cog):
                 if after.channel.id == tempchannel[1]:
                     memberPermissions = nextcord.PermissionOverwrite(manage_permissions=True, move_members=True, manage_channels=True)
 
-                    name = tempchannel[2].format_map(safeDict(user=member.name, anzahl=len(tempchannels) + 1))
+                    name = tempchannel[2].format_map(safeDict(user=member.name, amount=len(tempchannels) + 1))
 
                     tempchannel = await after.channel.clone(name=name, reason="Tempchannel erstellen")
 
