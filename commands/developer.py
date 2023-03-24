@@ -127,9 +127,9 @@ class Developer(Cog):
         await self.bot.wait_until_ready()
         result = readOne("statsChannel", "elli")
 
-        if result is None:
+        if result is None or result[0] is None:
             return
-        
+
         channelID, messageID = result[0].split(", ")
 
         channel = self.bot.get_channel(int(channelID))
