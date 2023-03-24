@@ -5,6 +5,7 @@ import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from time import time
+from .utils.language import getGuildLanguage, updateGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import errorEmbed, successEmbed, infoEmbed
 from .utils.database import readOne, insert, update
 
@@ -59,12 +60,12 @@ class General(Cog):
         if language not in ["de", "en"]:
             return await errorEmbed(self, ctx, "The only available languages are `de` (german) and `en` (english).")
 
-        oldLanguage = readOne(columns="language", table="guilds", where="guild_id", values=[ctx.guild.id])
+        oldLanguage = getGuildLanguage(ctx.guild.id)
 
-        if language == oldLanguage[0]:
+        if language == oldLanguage:
             return await errorEmbed(ctx, f"The language can't be the same as the old one `{oldLanguage[0]}`.")
 
-        update(table="guilds", columns="language", where="guild_id", values=[language, ctx.guild.id])
+        updateGuildLanguage(ctx.guild.id, language)
 
         await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Sprache set**\n\n> **Language:** `{language}`\n> **Old Language:** `{oldLanguage[0]}`")
 
