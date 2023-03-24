@@ -1,0 +1,19 @@
+{
+    "commandNotFound": "This command doesn't exist or is currently deactivated.",
+    "missingRequiredArgument": "A required argument is missing.",
+    "botMissingPermissions": "I'm missing the following permissions to use this command:\n> {0} ** ",
+    "botMissingPermission": "I'm missing the following permission to use this command:\n> {0} ** ",
+    "missingPermissions": "You're missing the following permissions to use this command:\n> {0} ** ",
+    "missingPermission": "I'm missing the following permission to use this command:\n> {0} ** ",
+    "notOwner": "Only developers can execute this command.",
+    "userNotFound": "I couldn't find this user.",
+    "channelNotFound": "I couldn't find this channel.",
+    "emojiNotFound": "I couldn't find this emoji.",
+    "roleNotFound": "I couldn't find this role.",
+    "messageNotFound": "I couldn't find this message.",
+    "commandOnCooldown": "The command is still on cooldown, try again in {0} seconds.",
+    "noPrivateMessage": "This command cannot be used in private messages.",
+    "userInputError": "You made an incorrect input.",
+    "maxConcurrencyReached": "You're already using this command.",
+    "criticalError": "<:Error:1087445963280486430> A critical error has occurred."
+}

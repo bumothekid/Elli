@@ -1,0 +1,19 @@
+{
+    "commandNotFound": "Dieser Befehl existiert nicht oder ist gerade deaktiviert.",
+    "missingRequiredArgument": "Es fehlt ein benötigtes Argument.",
+    "botMissingPermissions": "Mir fehlen folgende Berechtigungen um diesen Befehl zu nutzen:**\n> {0} **",
+    "botMissingPermission": "Mir fehlt die folgende Berechtigung um diesen Befehl zu nutzen:**\n> {0} **",
+    "missingPermissions": "Dir fehlen folgende Berechtigungen um diesen Befehl zu nutzen:**\n> {0} ** ",
+    "missingPermission": "Mir fehlt die folgende Berechtigung um diesen Befehl zu nutzen:**\n> {0} ** ",
+    "notOwner": "Nur die Developer können diesen Befehl ausführen.",
+    "userNotFound": "Ich konnte diesen User nicht finden.",
+    "channelNotFound": "Ich konnte diesen Channel nicht finden.",
+    "emojiNotFound": "Ich konnte dieses Emote nicht finden.",
+    "roleNotFound": "Ich konnte diese Rolle nicht finden.",
+    "messageNotFound": "Ich konnte diese Nachricht nicht finden.",
+    "commandOnCooldown": "Der Befehl ist noch auf Cooldown, versuche es in `{0}` Sekunden erneut.",
+    "noPrivateMessage": "Dieser Befehl kann nicht in Privaten Nachrichten verwendet werden.",
+    "userInputError": "Du hast eine falsche Eingabe getätigt.",
+    "maxConcurrencyReached": "Du benutzt diesen Befehl bereits.",
+    "criticalError": "<:Error:1087445963280486430> Es ist ein kritischer Fehler aufgetreten."
+}
