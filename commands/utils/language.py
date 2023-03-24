@@ -15,6 +15,15 @@ def getGuildLanguage(guild_id) -> str:
     
     return result[0]
 
+def updateGuildLanguage(guild_id, language: str):
+    result = readOne("language", "guilds", "guild_id", guild_id)
+
+    if result is None:
+        insert("guilds", "guild_id, prefix, language", [guild_id, "-", language])
+        return
+    
+    update("guilds", "language", "guild_id", [language, guild_id])
+
 def getLanguageStrings(cog: str):
     languageStrings = {}
 
