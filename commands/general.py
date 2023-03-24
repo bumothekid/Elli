@@ -67,7 +67,7 @@ class General(Cog):
 
         updateGuildLanguage(ctx.guild.id, language)
 
-        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Sprache set**\n\n> **Language:** `{language}`\n> **Old Language:** `{oldLanguage[0]}`")
+        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Sprache set**\n\n> **Language:** `{language}`\n> **Old Language:** `{oldLanguage}`")
 
     @commands.command(name="invite")
     @commands.cooldown(2, 20, commands.BucketType.user)
