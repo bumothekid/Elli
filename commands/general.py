@@ -52,6 +52,22 @@ class General(Cog):
 
         await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `{oldPrefix[0]}`")
 
+    @commands.command(name="language", aliases=['setlanguage', 'lang', 'setlang'])
+    @commands.cooldown(2, 20, commands.BucketType.user)
+    @commands.has_permissions(manage_guild=True)
+    async def _language(self, ctx, language):
+        if language not in ["de", "en"]:
+            return await errorEmbed(self, ctx, "The only available languages are `de` (german) and `en` (english).")
+
+        oldLanguage = readOne(columns="language", table="guilds", where="guild_id", values=[ctx.guild.id])
+
+        if language == oldLanguage[0]:
+            return await errorEmbed(ctx, f"The language can't be the same as the old one `{oldLanguage[0]}`.")
+
+        update(table="guilds", columns="language", where="guild_id", values=[language, ctx.guild.id])
+
+        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Sprache set**\n\n> **Language:** `{language}`\n> **Old Language:** `{oldLanguage[0]}`")
+
     @commands.command(name="invite")
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _invite(self, ctx):
