@@ -27,9 +27,9 @@ def updateGuildLanguage(guild_id, language: str):
 def getLanguageStrings(cog: str):
     languageStrings = {}
 
-    for file in os.listdir(f"language/{cog}"):
+    for file in os.listdir(f"./language/{cog}"):
         if file.endswith(".json"):
-            with open(f"language/{cog}/{file}", "r", encoding="utf-8") as f:
+            with open(f"./language/{cog}/{file}", "r", encoding="utf-8") as f:
                 languageStrings[file.replace(".json", "")] = json.load(f)
             
     return languageStrings
