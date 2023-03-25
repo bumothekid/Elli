@@ -13,7 +13,7 @@ class Autoroles(Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.group(name="autoroles", invoke_without_command=True)
+    @commands.group(name="autoroles", aliases=["autorole", "joinrole", "joinroles"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def autoroles(self, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
