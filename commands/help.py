@@ -14,19 +14,15 @@ class ClassHelp(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        global languageStrings
-        languageStrings = getLanguageStrings("help")
-
     @commands.command()
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def help(self, ctx):
-        guildLocale = getGuildLanguage(ctx.guild.id)
+        guildID = ctx.guild.id
+        guildLocale = getGuildLanguage(guildID)
         view = HelpButtonView(self.bot, language=guildLocale)
         message = await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "defaultMenu", self.bot.user.name), view=view)
         global prefix
-        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])[0]
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[guildID])[0]
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
@@ -96,7 +92,7 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label=invitelogger, emoji="📨", default=category == "invitelogger"),
             nextcord.SelectOption(label=badwords, emoji="<:Badword:1087441597622399056>", default=category == "badwords"),
             nextcord.SelectOption(label=antighostping, emoji="<:Ghostping:1087448502323384330>", default=category == "antighostping"),
-            nextcord.SelectOption(label=linkblocker, emoji="<:Automod:1087440612430717068>", default=category == "linkblocker"),
+            nextcord.SelectOption(label=linkblocker, emoji="<:Automod:1087440612430717068>", default=category == "linkblocker")
         ]
 
         super().__init__(placeholder=getLocale(languageStrings, language, "categoriesPlaceholder"), options=options, disabled=disabled)
@@ -248,4 +244,6 @@ class HelpButton(nextcord.ui.Select):
             view.message = message
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("help")
     bot.add_cog(ClassHelp(bot))
