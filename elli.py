@@ -29,7 +29,8 @@ extensions = [
     'commands.tempchannel',
     'commands.ticket',
     'commands.afk',
-    'commands.automod'
+    'commands.automod',
+    'commands.autoroles'
 ]
 
 @bot.event
