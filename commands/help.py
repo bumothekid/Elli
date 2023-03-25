@@ -4,43 +4,54 @@ from nextcord.ext import commands
 
 from .utils.embeds import infoEmbed
 from .utils.database import readOne
+from .utils.language import getLocale, getLanguageStrings, getGuildLanguage
 
 cache = []
 prefix = None
+languageStrings = {}
 
 class ClassHelp(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        global languageStrings
+        languageStrings = getLanguageStrings("help")
+
     @commands.command()
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def help(self, ctx):
-        view = HelpButtonView(self.bot)
-        message = await infoEmbed(self.bot, ctx, f"**<:Commands:1087442278118871140> {self.bot.user.name}'s Command Kategorien**\n\n> **<:Discord:1087443793810301051> Generell**\n> **💡 Nützlich**\n> **<:Moderator:1087456158421352508> Moderation**\n> **<:Fun:1087447621582454926> Fun**\n> **<:MemberJoin:1087453129198546964> Welcome**\n> **<:MemberLeave:1087453384858157149> Leave**\n> **<a:Giveaway:1087437215648456794> Giveaway**\n> **<:Ticket:1087437978873376798> Ticket System**\n> **⏳ Tempchannel**\n> **<:Roles:1087457575257255998> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:Badword:1087441597622399056> Bad Words**\n> **<:Ghostping:1087448502323384330> Anti Ghostping**\n> **<:Automod:1087440612430717068>  Link Blocker**", view=view)
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        view = HelpButtonView(self.bot, language=guildLocale)
+        message = await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "defaultMenu", self.bot.user.name), view=view)
         global prefix
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])[0]
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
-    @nextcord.slash_command(name="help", description="Zeigt dir alle Commands an")
+    @nextcord.slash_command(name="help", description_localizations={nextcord.Locale.en_GB: "Shows the help menu", nextcord.Locale.en_US: "Shows the help menu", "de": "Zeigt das Hilfemenü"})
     async def _help(self, interaction):
+        guildLocale = getGuildLanguage(interaction.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])[0]
-        await infoEmbed(self, interaction, f"**<:Commands:1087442278118871140> {self.bot.user.name}'s Command Kategorien**\n\n> Der Bot läuft noch auf Message Commands\n> Wir bitten deshalb darum den normalen Help Command `{prefix}help` zu nutzen.", ephemeral=True)
+        await infoEmbed(self, interaction, getLocale(languageStrings, guildLocale, "slashHelp", self.bot.user.name, prefix), ephemeral=True)
 
 
 async def calltimeout(bot, message):
-    view = HelpButtonView(bot, True)
+    guildLocale = getGuildLanguage(message.guild.id)
+
+    view = HelpButtonView(bot, guildLocale, True)
     embed = nextcord.Embed(
-                description=f"**<:Commands:1087442278118871140> {bot.user.name}'s Command Kategorien**\n\n> **<:Discord:1087443793810301051> Generell**\n> **💡 Nützlich**\n> **<:Moderator:1087456158421352508> Moderation**\n> **<:Fun:1087447621582454926> Fun**\n> **<:MemberJoin:1087453129198546964> Welcome**\n> **<:MemberLeave:1087453384858157149> Leave**\n> **<a:Giveaway:1087437215648456794> Giveaway**\n> **<:Ticket:1087437978873376798> Ticket System**\n> **⏳ Tempchannel**\n> **<:Roles:1087457575257255998> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:Badword:1087441597622399056> Bad Words**\n> **<:Ghostping:1087448502323384330> Anti Ghostping**\n> **<:Automod:1087440612430717068>  Link Blocker**",
+                description=getLocale(languageStrings, guildLocale, "defaultMenu", bot.user.name),
                 color=nextcord.Color.blurple()
     )
     message = await message.edit(embed=embed, view=view)
     view.message = message
 
 class HelpButtonView(nextcord.ui.View):
-    def __init__(self, bot, disabled: bool = False, category: str = None):
+    def __init__(self, bot, language: str, disabled: bool = False, category: str = "categories"):
         super().__init__(timeout=300)
-        self.add_item(HelpButton(bot, disabled, category))
+        self.add_item(HelpButton(bot, disabled, category, language=language))
         self.bot = bot
         self.disabled = disabled
 
@@ -51,163 +62,185 @@ class HelpButtonView(nextcord.ui.View):
         await calltimeout(self.bot, self.message)
 
 class HelpButton(nextcord.ui.Select):
-    def __init__(self, bot, disabled: bool, category: str = None):
+    def __init__(self, bot, disabled: bool, category: str = "categories", language: str = "en"):
+        categories = getLocale(languageStrings, language, "categories")
+        general = getLocale(languageStrings, language, "general")
+        useful = getLocale(languageStrings, language, "useful")
+        moderation = getLocale(languageStrings, language, "moderation")
+        fun = getLocale(languageStrings, language, "fun")
+        welcome = getLocale(languageStrings, language, "welcome")
+        leave = getLocale(languageStrings, language, "leave")
+        giveaway = getLocale(languageStrings, language, "giveaway")
+        ticketsystem = getLocale(languageStrings, language, "ticketsystem")
+        tempchannel = getLocale(languageStrings, language, "tempchannel")
+        reactionroles = getLocale(languageStrings, language, "reactionroles")
+        levelsystem = getLocale(languageStrings, language, "levelsystem")
+        invitelogger = getLocale(languageStrings, language, "invitelogger")
+        badwords = getLocale(languageStrings, language, "badwords")
+        antighostping = getLocale(languageStrings, language, "antighostping")
+        linkblocker = getLocale(languageStrings, language, "linkblocker")
+
         options = [
-            nextcord.SelectOption(label="Kategorien", emoji="<:Commands:1087442278118871140>", default=category is None,),
-            nextcord.SelectOption(label="Generell", emoji="<:Discord:1087443793810301051>", default=category == "generell"),
-            nextcord.SelectOption(label="Nützlich", emoji="💡", default=category == "nützlich"),
-            nextcord.SelectOption(label="Moderation", emoji="<:Moderator:1087456158421352508>", default=category == "moderation"),
-            nextcord.SelectOption(label="Fun", emoji="<:Fun:1087447621582454926>", default=category == "fun"),
-            nextcord.SelectOption(label="Welcome", emoji="<:MemberJoin:1087453129198546964>", default=category == "welcome"),
-            nextcord.SelectOption(label="Leave", emoji="<:MemberLeave:1087453384858157149>", default=category == "leave"),
-            nextcord.SelectOption(label="Giveaway", emoji="<a:Giveaway:1087437215648456794>", default=category == "giveaway"),
-            nextcord.SelectOption(label="Ticket System", emoji="<:Ticket:1087437978873376798>", default=category == "ticket system"),
-            nextcord.SelectOption(label="Tempchannel", emoji="⏳", default=category == "tempchannel"),
-            nextcord.SelectOption(label="Reaction Roles", emoji="<:Roles:1087457575257255998>", default=category == "reaction roles"),
-            nextcord.SelectOption(label="Level System", emoji="🌟", default=category == "level system"),
-            nextcord.SelectOption(label="Invite-Logger", emoji="📨", default=category == "invite-logger"),
-            nextcord.SelectOption(label="Bad Words", emoji="<:Badword:1087441597622399056>", default=category == "bad words"),
-            nextcord.SelectOption(label="Anti Ghostping", emoji="<:Ghostping:1087448502323384330>", default=category == "anti ghostping"),
-            nextcord.SelectOption(label="Link Blocker", emoji="<:Automod:1087440612430717068>", default=category == "link blocker"),
+            nextcord.SelectOption(label=categories, emoji="<:Commands:1087442278118871140>", default=category == "categories"),
+            nextcord.SelectOption(label=general, emoji="<:Discord:1087443793810301051>", default=category == "general"),
+            nextcord.SelectOption(label=useful, emoji="💡", default=category == "useful"),
+            nextcord.SelectOption(label=moderation, emoji="<:Moderator:1087456158421352508>", default=category == "moderation"),
+            nextcord.SelectOption(label=fun, emoji="<:Fun:1087447621582454926>", default=category == "fun"),
+            nextcord.SelectOption(label=welcome, emoji="<:MemberJoin:1087453129198546964>", default=category == "welcome"),
+            nextcord.SelectOption(label=leave, emoji="<:MemberLeave:1087453384858157149>", default=category == "leave"),
+            nextcord.SelectOption(label=giveaway, emoji="<a:Giveaway:1087437215648456794>", default=category == "giveaway"),
+            nextcord.SelectOption(label=ticketsystem, emoji="<:Ticket:1087437978873376798>", default=category == "ticketsystem"),
+            nextcord.SelectOption(label=tempchannel, emoji="⏳", default=category == "tempchannel"),
+            nextcord.SelectOption(label=reactionroles, emoji="<:Roles:1087457575257255998>", default=category == "reactionroles"),
+            nextcord.SelectOption(label=levelsystem, emoji="🌟", default=category == "levelsystem"),
+            nextcord.SelectOption(label=invitelogger, emoji="📨", default=category == "invitelogger"),
+            nextcord.SelectOption(label=badwords, emoji="<:Badword:1087441597622399056>", default=category == "badwords"),
+            nextcord.SelectOption(label=antighostping, emoji="<:Ghostping:1087448502323384330>", default=category == "antighostping"),
+            nextcord.SelectOption(label=linkblocker, emoji="<:Automod:1087440612430717068>", default=category == "linkblocker"),
         ]
 
-        super().__init__(placeholder="Wähle eine Kategorie", options=options, disabled=disabled)
+        super().__init__(placeholder=getLocale(languageStrings, language, "categoriesPlaceholder"), options=options, disabled=disabled)
         self.bot = bot
 
     async def callback(self, interaction):
+        global languageStrings
         if f"{interaction.message.id}|{interaction.user.id}" not in cache:
             return
         
-        view = HelpButtonView(self.bot, False, self.values[0].lower() if self.values[0] != "Kategorien" else None)
+
+        guildLocale = getGuildLanguage(interaction.guild.id)
+
+        category = self.values[0].lower()
+        if category == getLocale(languageStrings, guildLocale, "categories").lower():
+            category = "categories"
+        elif category == getLocale(languageStrings, guildLocale, "general").lower():
+            category = "general"
+        elif category == getLocale(languageStrings, guildLocale, "useful").lower():
+            category = "useful"
+        elif category == getLocale(languageStrings, guildLocale, "moderation").lower():
+            category = "moderation"
+        elif category == getLocale(languageStrings, guildLocale, "fun").lower():
+            category = "fun"
+        elif category == getLocale(languageStrings, guildLocale, "welcome").lower():
+            category = "welcome"
+        elif category == getLocale(languageStrings, guildLocale, "leave").lower():
+            category = "leave"
+        elif category == getLocale(languageStrings, guildLocale, "giveaway").lower():
+            category = "giveaway"
+        elif category == getLocale(languageStrings, guildLocale, "ticketsystem").lower():
+            category = "ticketsystem"
+        elif category == getLocale(languageStrings, guildLocale, "tempchannel").lower():
+            category = "tempchannel"
+        elif category == getLocale(languageStrings, guildLocale, "reactionroles").lower():
+            category = "reactionroles"
+        elif category == getLocale(languageStrings, guildLocale, "levelsystem").lower():
+            category = "levelsystem"
+        elif category == getLocale(languageStrings, guildLocale, "invitelogger").lower():
+            category = "invitelogger"
+        elif category == getLocale(languageStrings, guildLocale, "badwords").lower():
+            category = "badwords"
+        elif category == getLocale(languageStrings, guildLocale, "antighostping").lower():
+            category = "antighostping"
+        elif category == getLocale(languageStrings, guildLocale, "linkblocker").lower():
+            category = "linkblocker"
+
+        view = HelpButtonView(self.bot, guildLocale, False, category)
 
         with contextlib.suppress(Exception):
-            match self.values[0]:
-                case "Kategorien":
+            match category:
+                case "categories":
                     embed = nextcord.Embed(
-                        description=f"**<:Commands:1087442278118871140> {self.bot.user.name}'s Command Kategorien**\n\n> **<:Discord:1087443793810301051> Generell**\n> **💡 Nützlich**\n> **<:Moderator:1087456158421352508> Moderation**\n> **<:Fun:1087447621582454926> Fun**\n> **<:MemberJoin:1087453129198546964> Welcome**\n> **<:MemberLeave:1087453384858157149> Leave**\n> **<a:Giveaway:1087437215648456794> Giveaway**\n> **<:Ticket:1087437978873376798> Ticket System**\n> **⏳ Tempchannel**\n> **<:Roles:1087457575257255998> Reaction Roles**\n> **🌟 Level System**\n> **📨 Invite-Logger**\n> **<:Badword:1087441597622399056> Bad Words**\n> **<:Ghostping:1087448502323384330> Anti Ghostping**\n> **<:Automod:1087440612430717068>  Link Blocker**",
+                        description=getLocale(languageStrings, guildLocale, "defaultMenu", self.bot.user.name),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Generell":
+                case "general":
                     embed = nextcord.Embed(
-                        description=f"**<:Discord:1087443793810301051> Generelle Commands**\n\n> `{prefix}help`\n> <:Reply:1087438925632643082> Zeigt diese Hilfe an\n> `{prefix}prefix <prefix>`\n> <:Reply:1087438925632643082>  Ändert die Prefix von dem Bot\n> `{prefix}botinfo`\n> <:Reply:1087438925632643082> Zeigt Infos zu diesem Bot an\n> `{prefix}invite`\n> <:Reply:1087438925632643082> Zeigt einen Invite zu diesem Bot an\n> `{prefix}support`\n> <:Reply:1087438925632643082> Zeigt einen Support-Server an\n> `{prefix}vote`\n> <:Reply:1087438925632643082> Zeigt einen Vote-Link an",
+                        description=getLocale(languageStrings, guildLocale, "generalDescription", prefix),
                         color=nextcord.Color.blurple()
                         )
 
-                case "Nützlich":
+                case "useful":
                     embed = nextcord.Embed(
-                        description=f"**💡 Nützlich**\n\n> `{prefix}ping`\n> <:Reply:1087438925632643082> Zeigt den Ping an\n> `{prefix}userinfo <@user>`\n> <:Reply:1087438925632643082> Zeigt Infos zu einem User an\n> `{prefix}serverinfo`\n> <:Reply:1087438925632643082> Zeigt Infos zu diesem Server an\n> `{prefix}avatar <@user>`\n> <:Reply:1087438925632643082> Zeigt das Avatar eines Users an\n> `{prefix}bugreport <text>`\n> <:Reply:1087438925632643082> Sendet einen Bug Report an die Developer",
+                        description=getLocale(languageStrings, guildLocale, "usefulDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Moderation":
+                case "moderation":
                     embed = nextcord.Embed(
-                        description=f"**<:Moderator:1087456158421352508> Moderation**\n\n> `{prefix}clear <anzahl>`\n> <:Reply:1087438925632643082> Löscht eine bestimmte Anzahl von Nachrichten\n> `{prefix}ban <@user>`\n> <:Reply:1087438925632643082> Bannt einen User\n> `{prefix}kick <@user>`\n> <:Reply:1087438925632643082> Kickt einen User\n> `{prefix}mute <@user> <time>`\n> <:Reply:1087438925632643082> Mute einen User\n> `{prefix}unmute <@user>`\n> <:Reply:1087438925632643082> Unmute einen User\n> `{prefix}addrole <@user> <@rolle>`\n> <:Reply:1087438925632643082> Fügt eine Rolle einem User hinzu\n> `{prefix}removerole <@user> <@rolle>`\n> <:Reply:1087438925632643082> Entfernt eine Rolle eines Users",
+                        description=getLocale(languageStrings, guildLocale, "moderationDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Fun":
+                case "fun":
                     embed = nextcord.Embed(
-                        description=f"**<:Fun:1087447621582454926> Fun**\n\n> `{prefix}8ball <frage>`\n> <:Reply:1087438925632643082> Fragt eine Frage mit einem 8ball\n> `{prefix}cat`\n> <:Reply:1087438925632643082> Zeigt ein Bild von einer Katze\n> `{prefix}dog`\n> <:Reply:1087438925632643082> Zeigt ein Bild von einem Hund\n> `{prefix}reverse <text>`\n> <:Reply:1087438925632643082> Dreht den Text um den du angibst",
+                        description=getLocale(languageStrings, guildLocale, "funDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Welcome":
+                case "welcome":
                     embed = nextcord.Embed(
-                        description=f"**<:MemberJoin:1087453129198546964> Willkommensnachrichten**\n\n> `{prefix}welcome channel set <#channel>`\n> <:Reply:1087438925632643082> Setzt einen Willkommenskanal\n> `{prefix}welcome channel remove`\n> <:Reply:1087438925632643082> Entfernt den davor gesetzten Willkommenskanal\n> `{prefix}welcome message <message>`\n> <:Reply:1087438925632643082> Setzt eine neue Willkommensnachricht\n> `{prefix}welcome picture set <picture>`\n> <:Reply:1087438925632643082> Setzt ein Willkommensbild\n> `{prefix}welcome picture remove`\n> <:Reply:1087438925632643082> Entfernt das aktuelle Willkommensbild\n> `{prefix}welcome picture show`\n> <:Reply:1087438925632643082> Zeigt dir alle aktuell Verfügbaren Willkommensbilder\n\n> Variablen für die Willkommensnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
+                        description=getLocale(languageStrings, guildLocale, "welcomeDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Leave":
+                case "leave":
                     embed = nextcord.Embed(
-                        description=f"**<:MemberLeave:1087453384858157149> Verlassnachrichten**\n\n> `{prefix}leave channel set <#channel>`\n> <:Reply:1087438925632643082> Setzt einen Verlasskanal\n> `{prefix}leave channel remove`\n> <:Reply:1087438925632643082> Entfernt den davor gesetzten Verlasskanal\n> `{prefix}leave message <message>`\n> <:Reply:1087438925632643082> Setzt eine neue Verlassnachricht\n> `{prefix}leave picture set <picture>`\n> <:Reply:1087438925632643082> Setzt ein Verlassbild\n> `{prefix}leave picture remove`\n> <:Reply:1087438925632643082> Entfernt das aktuelle Verlassbild\n> `{prefix}leave picture show`\n> <:Reply:1087438925632643082> Zeigt dir alle aktuell Verfügbaren Verlassbilder\n\n> Variablen für die Verlassnachricht `{{user_mention}}`, `{{user_name}}`, `{{user_discriminator}}`, `{{guild_name}}`, `{{guild_membercount}}`\n> Du kannst eine Verlassnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Verlassnachricht ganz zu entfernen füge `_ _` als Nachricht ein",
+                        description=getLocale(languageStrings, guildLocale, "leaveDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Giveaway":
+                case "giveaway":
                     embed = nextcord.Embed(
-                        description=f"**<a:Giveaway:1087437215648456794> Giveaway Commands**\n\n> `{prefix}giveaway create`\n> <:Reply:1087438925632643082> Starten den start prozess für ein Giveaway\n> `{prefix}giveaway quick <#channel> <zeit> <winner> <preis>`\n> <:Reply:1087438925632643082> Erstellt ein Giveaway mit einem Befehl\n> `{prefix}giveaway drop <#channel> <preis>`\n> <:Reply:1087438925632643082> Erstellt einen Drop den die erste person erhält die Reagiert\n> `{prefix}giveaway end <#channel> <messageid>`\n> <:Reply:1087438925632643082> Beendet ein noch laufendes Giveaway\n> `{prefix}giveaway reroll <#channel> <messageid> <winner>`\n> <:Reply:1087438925632643082> Wählt ein neue Gewinner für das Giveaway\n> `{prefix}giveaway list`\n> <:Reply:1087438925632643082> Zeigt dir alle momentan laufenden Giveaways an",
+                        description=getLocale(languageStrings, guildLocale, "giveawayDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Ticket System":
+                case "ticketsystem":
                     embed = nextcord.Embed(
-                        description=f"**<:Ticket:1087437978873376798> Ticket System**\n\n> `{prefix}ticket create <#channel> <@rolle> <text>`\n> <:Reply:1087438925632643082> Erstellt ein neues Ticket wo User Reagieren können\n> `{prefix}ticket update <#channel> <messageid> <@rolle> <text>`\n> <:Reply:1087438925632643082> Setzt ein neuen Text für ein bereits erstelltes Ticket\n> `{prefix}ticket delete <#channel> <messageid>`\n> <:Reply:1087438925632643082> Löscht ein altes Ticket das nicht mehr gebraucht wird\n> `{prefix}ticket message <text>`\n> <:Reply:1087438925632643082> Setzt einen neuen Ticket öffnungs Text\n> `{prefix}ticket list`\n> <:Reply:1087438925632643082> Zeigt alle aktuellen Tickets an\n> `{prefix}ticket log set <#channel>`\n> <:Reply:1087438925632643082> Setzt einen Kanal für Ticket Protokollierung\n> `{prefix}ticket log remove`\n> <:Reply:1087438925632643082> Entfernt den Kanal für die Ticket Protokollierung\n\n> Variablen für die Ticket öffnungs Nachricht: `{{user_name}}` `{{user_discriminator}}` `{{user_mention}}` `{{ticket_link}}` `{{guild_name}}` `{{moderation_role}}`\n> Du kannst ein Ticket mit mehreren Zeilen erstellen mit `\\n`",
+                        description=getLocale(languageStrings, guildLocale, "ticketsystemDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Tempchannel":
+                case "tempchannel":
                     embed = nextcord.Embed(
-                        description=f"** `⏳`Tempchannel Commands**\n\n> `{prefix}tempchannel set <channel>`\n> <:Reply:1087438925632643082> Setzt ein Tempchannel Sprachkanal\n> `{prefix}tempchannel remove`\n> <:Reply:1087438925632643082> Entfernt den Sprachkanal als Tempchannel\n> `{prefix}tempchannel name <name>`\n> <:Reply:1087438925632643082> Setzt einen neuen standard Namen\n\n> Variablen für den Namen: `{{user}}`, `{{anzahl}}`",
+                        description=getLocale(languageStrings, guildLocale, "tempchannelDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Reaction Roles":
+                case "reactionroles":
                     embed = nextcord.Embed(
-                        description=f"**<:Roles:1087457575257255998> Reactionrole einrichtung**\n\n> `{prefix}rr create <#channel> <messageid> <emote> <@&rolle>`\n> <:Reply:1087438925632643082> Erstellt eine neue Reaction Role\n> `{prefix}rr delete <#channel> <messageid> <emote>`\n> <:Reply:1087438925632643082> Löscht eine bereits vorhandene Reaction Role",
+                        description=getLocale(languageStrings, guildLocale, "reactionrolesDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Level System":
+                case "levelsystem":
                     embed = nextcord.Embed(
-                        description="** Level System**\n\n"
-                                            f"> `{prefix}level <@user>`\n> <:Reply:1087438925632643082> Zeigt dir dein/das Level eines Users an\n"
-                                            f"> `{prefix}leaderboard`\n> <:Reply:1087438925632643082> Zeigt dir die Top 10 User\n\n"
-                                            f"> `{prefix}level settings`\n> <:Reply:1087438925632643082> Zeigt dir alle möglichen Einstellungen\n"
-                                            f"> `{prefix}level <on | off>`\n> <:Reply:1087438925632643082> Schaltet das Level Sytem an und aus\n"
-                                            f"> `{prefix}level xp <anzahl>`\n> <:Reply:1087438925632643082> Setzt eine XP anzahl per Nachricht\n"
-                                            f"> `{prefix}level cooldown <sekunden>`\n> <:Reply:1087438925632643082> Setzt den cooldown auf eine bestimmte Zeit\n\n"
-                                            f"> `{prefix}level message <text>`\n> <:Reply:1087438925632643082> Setzt die Nachricht für ein Level Up\n"
-                                            f"> `{prefix}level message`\n> <:Reply:1087438925632643082> Zeigt dir die aktuelle Level Up Nachricht\n"
-                                            f"> `{prefix}level ping <on | off>`\n> <:Reply:1087438925632643082> Schaltet den Ping @ ein und aus bei einem Level Up\n\n"
-                                            f"> `{prefix}level custom add <level> <text>`\n> <:Reply:1087438925632643082> Setzt eine custom Nachricht für ein bestimmtes Level\n"
-                                            f"> `{prefix}level custom remove <level>`\n> <:Reply:1087438925632643082>` Entfernt eine custom Nachricht für ein bestimmtes Level\n"
-                                            f"> `{prefix}level custom show <level>`\n> <:Reply:1087438925632643082> Zeigt dir die custom Nachricht von einem bestimmten Level\n"
-                                            f"> `{prefix}level custom show`\n> <:Reply:1087438925632643082> Zeigt dir alle custom Nachrichten\n\n"
-                                            f"> `{prefix}level roles add <level> <@rolle>`\n> <:Reply:1087438925632643082> Fügt eine Level Up Rolle zu einem bestimmten Level hinzu\n"
-                                            f"> `{prefix}level roles remove <level>`\n> <:Reply:1087438925632643082> Entfernt eine Level Up Rolle von einem bestimmten Level\n"
-                                            f"> `{prefix}level roles joinrole add <@rolle>`\n> <:Reply:1087438925632643082> Setzt eine Start Rolle für das Level System die bei dem ersten Level Up wieder weggenommen wird\n"
-                                            f"> `{prefix}level roles joinrole remove`\n> <:Reply:1087438925632643082> Entfernt diese Start Rolle wieder\n"
-                                            f"> `{prefix}level roles`\n> <:Reply:1087438925632643082> Zeigt alle Level an mit einer Level Up Rolle\n\n"
-                                            f"> `{prefix}level blacklist add <@rolle | #channel>`\n> <:Reply:1087438925632643082> Fügt einen Kanal oder eine Rolle der Blacklist hinzu\n"
-                                            f"> `{prefix}level blacklist remove <@rolle | #channel>`\n> <:Reply:1087438925632643082> Entfernt eine Rolle oder einen Kanal von der Blacklist\n"
-                                            f"> `{prefix}level blacklist`\n> <:Reply:1087438925632643082> Zeigt alle Rollen und Kanäle die auf einer Blacklist stehen\n\n"
-                                            f"> `{prefix}level modifylevel add <level> <@user>`\n> <:Reply:1087438925632643082> Füge eine bestimmte anzahl an Leveln einem User hinzu\n"
-                                            f"> `{prefix}level modifylevel remove <level> <@user>`\n> <:Reply:1087438925632643082> Entfernte eine bestimmte anzahl an Leveln von einem User\n"
-                                            f"> `{prefix}level modifyxp add <xp> <@user>`\n> <:Reply:1087438925632643082> Füge eine bestimmte anzahl an XP einem User hinzu\n"
-                                            f"> `{prefix}level modifyxp remove <xp> <@user>`\n> <:Reply:1087438925632643082> Entferne eine bestimmte anzahl an XP von einem User\n\n"
-                                            f"> `{prefix}level reset <@user>`\n> <:Reply:1087438925632643082> Setzte einen User komplett zurück\n"
-                                            f"> `{prefix}level reset level`\n> <:Reply:1087438925632643082> Setze alle Level zurück\n"
-                                            f"> `{prefix}level reset settings`\n> <:Reply:1087438925632643082> Setzte alle Einstellungen zurück\n"
-                                            f"> `{prefix}level reset all`\n> <:Reply:1087438925632643082> Setze alles zurück\n\n"
-                                            "> Variablen für die Level Up Nachricht:\n"
-                                            "> `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{level}`, `{xp_needed}`, `{level_next}` und `{role}` für custom Nachrichten\n\n"
-                                            "> Du kannst eine Level Up Nachricht mit mehreren erstellen mit `\\n`\n"
-                                            "> Um die Level Up Nachricht zu entfernen füge `off` als Nachricht ein.",
+                        description=getLocale(languageStrings, guildLocale, "levelsystemDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Invite-Logger":
+                case "invitelogger":
                     embed = nextcord.Embed(
-                        description="**📨 Invite-Logger**\n\n> *Soon!*",
+                        description=getLocale(languageStrings, guildLocale, "inviteloggerDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Bad Words":
+                case "badwords":
                     embed = nextcord.Embed(
-                        description=f"**<:Badword:1087441597622399056> Bad Words**\n\n> `{prefix}badword add <word>`\n> <:Reply:1087438925632643082> Fügt ein Wort der Blacklist hinzu\n> `{prefix}badword remove <word>`\n> <:Reply:1087438925632643082> Entfernt ein Wort von der Blacklist\n> `{prefix}badword show`\n> <:Reply:1087438925632643082> Zeigt dir alle Wörter auf der Blacklist",
+                        description=getLocale(languageStrings, guildLocale, "badwordsDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Anti Ghostping":
+                case "antighostping":
                     embed = nextcord.Embed(
-                        description=f"**<:Ghostping:1087448502323384330> Anti-Ghostpings**\n\n> `{prefix}ghostping on`\n> <:Reply:1087438925632643082> Schaltet die Anti Ghostping Erkenn Funktion ein\n> `{prefix}ghostping off`\n> <:Reply:1087438925632643082> Schaltet die Anti Ghostping Erkenn Funktion aus",
+                        description=getLocale(languageStrings, guildLocale, "antighostpingDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
-                case "Link Blocker":
+                case "linkblocker":
                     embed = nextcord.Embed(
-                        description=f"**<:Automod:1087440612430717068> Link Blocker**\n\n> `{prefix}linkblocker on`\n> <:Reply:1087438925632643082> Schaltet den Linkblocker ein\n> `{prefix}linkblocker off`\n> <:Reply:1087438925632643082> Schaltet den Link Blocker aus",
+                        description=getLocale(languageStrings, guildLocale, "linkblockerDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
             
