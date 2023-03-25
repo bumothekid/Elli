@@ -1,0 +1,12 @@
+{
+    "autorolesHelp": "** Autoroles**\n\n> `{0}autoroles add <@role>`\n> `{0}autoroles remove <@role>`\n> `{0}autoroles show`",
+    "userRoleHigher": "You can't add that role as autorole.",
+    "botRoleHigher": "I can't add this role as autorole.",
+    "maxAutoroles": "You can't add more than 9 autoroles.",
+    "roleAlreadyAdded": "This role is already added as autorole.",
+    "roleNotAdded": "This role isn't added as autorole.",
+    "roleAdded": "The role `{0}` was added as autorole.",
+    "roleRemoved": "The role `{0}` was removed as autorole.",
+    "noAutoroles": "There are no autoroles.",
+    "roleList": "**Your autoroles:**\n\n{0}"
+}
