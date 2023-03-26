@@ -21,7 +21,7 @@ class Useful(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "pingDescription", round(self.bot.latency * 1000))
+            getLocale(languageStrings, guildLocale, "pingDescription", self.bot.user.name, round(self.bot.latency * 1000))
         )
 
     @commands.command(name="userinfo", aliases=["user", "ui"])
