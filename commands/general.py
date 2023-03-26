@@ -9,6 +9,7 @@ from .utils.language import getGuildLanguage, updateGuildLanguage, getLanguageSt
 from .utils.embeds import errorEmbed, successEmbed, infoEmbed
 from .utils.database import readOne, insert, update
 
+languageStrings = {}
 class General(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -16,6 +17,7 @@ class General(Cog):
     @commands.command(name="botinfo", aliases=['bot', 'info', 'stats'])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _botinfo(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         version, uptime = readOne(columns="version, uptime", table="elli")
         timeUp = time() - float(uptime)
         days = timeUp / 86400
@@ -25,57 +27,65 @@ class General(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:Statistics:1087458133569445970> {self.bot.user.name}'s aktuelle Statistiken**\n\n> **<:Globe:1087448923834163342> Server:** `{len(self.bot.guilds)}`\n> **<:Member:1087452536295927808> User:** `{sum(len(s.members) for s in self.bot.guilds)}`\n> **<:Server:1087457941348700251> Latenz:** `{round(self.bot.latency * 1000)}ms`\n\n> **<:Clyde:1087435842785640448> CPU:** `{psutil.cpu_percent()}%`\n> **<:Folder:1087447065061240896> RAM:** `{round(psutil.virtual_memory().percent)}%`\n> **<:Stopwatch:1087458252750590073> Uptime:** `{round(days)}d {round(hours)}h {round(minutes)}m`\n\n> **<:Developer:1087444095363989564> Version:** `{version}`\n> **<:Nextcord:1087456587003740210> Nextcord:** `{nextcord.__version__}`\n> **<:Python:1087457407220850788> Python:** `{platform.python_version()}`",
-            footer={"text": f"{self.bot.user.name} Bot | Powered by Nextcord", "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"},
+            getLocale(languageStrings, guildLocale, "botinfoDescription", self.bot.user.name, len(self.bot.guilds), sum(len(s.members) for s in self.bot.guilds), round(self.bot.latency * 1000), psutil.cpu_percent(), round(psutil.virtual_memory().percent), round(days), round(hours), round(minutes), version, nextcord.__version__, platform.python_version(), platform.system(), platform.release(), platform.machine(), platform.processor(), platform.version(), platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release, platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release),
+            footer={"text": getLocale(languageStrings, guildLocale, "botinfoFooter", self.bot.user.name), "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"},
             thumbnail=self.bot.user.display_avatar.url)
         
     @commands.command(name="prefix", aliases=['setprefix'])
     @commands.cooldown(2, 20, commands.BucketType.user)
     @commands.has_permissions(manage_guild=True)
     async def _prefix(self, ctx, prefix):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if "<:" in prefix or "<a:" in prefix or "<@" in prefix or "<#" in prefix:
-            return await errorEmbed(self, ctx, "Es dürfen keine Markierungen oder Emotes in der Prefix sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noMentionsOrEmotesInPrefix"))
+        
         if len(prefix) > 4:
-            return await errorEmbed(self, ctx, "Die Prefix darf nicht länger als 4 Zeichen lang sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixTooLong"))
+        
         if "`" in prefix:
-            return await errorEmbed(self, ctx, "Die Prefix darf kein ` enthalten.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noBackticksInPrefix"))
 
         oldPrefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])
 
         if oldPrefix is None:
             insert(table="guilds", columns="guild_id, prefix", values=[ctx.guild.id, prefix])
-            return await successEmbed(self, ctx, f"**<:Commands:1087442278118871140>  Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `-`")
+            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSet", prefix, "-"))
 
         if prefix == oldPrefix[0]:
-            return await errorEmbed(ctx, f"Die Prefix darf nicht die selbe wie de alte sein `{oldPrefix[0]}`.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSameAsOld", oldPrefix[0]))
 
         update(table="guilds", columns="prefix", where="guild_id", values=[prefix, ctx.guild.id])
 
-        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Prefix gesetzt**\n\n> **Prefix:** `{prefix}`\n> **Alte Prefix:** `{oldPrefix[0]}`")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
 
     @commands.command(name="language", aliases=['setlanguage', 'lang', 'setlang'])
     @commands.cooldown(2, 20, commands.BucketType.user)
     @commands.has_permissions(manage_guild=True)
     async def _language(self, ctx, language):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if language not in ["de", "en"]:
-            return await errorEmbed(self, ctx, "The only available languages are `de` (german) and `en` (english).")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "onlyAvailableLanguages", language, "de (german), en (english)"))
 
         oldLanguage = getGuildLanguage(ctx.guild.id)
 
         if language == oldLanguage:
-            return await errorEmbed(self, ctx, f"The language can't be the same as the old one `{oldLanguage[0]}`.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "languageSameAsOld", oldLanguage))
 
         updateGuildLanguage(ctx.guild.id, language)
 
-        await successEmbed(self, ctx, f"**<:Commands:1087442278118871140> Sprache set**\n\n> **Language:** `{language}`\n> **Old Language:** `{oldLanguage}`")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "languageSet", language, oldLanguage))
 
     @commands.command(name="invite")
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _invite(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         await infoEmbed(
             self,
             ctx,
-            f"**<:Commands:1087442278118871140> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=8)"
+            getLocale(languageStrings, guildLocale, "inviteDescription", self.bot.user.id),
         )
     
     @commands.command(name="support")
@@ -93,8 +103,10 @@ class General(Cog):
         await infoEmbed(
             self,
             ctx,
-            f"**<:Commands:1087442278118871140> Vote**\n\n> **Vote:** `Hier scheint wohl noch etwas zu fehlen.`"
+            f"**<:Commands:1087442278118871140> Vote**\n\n> **Vote:** [`🔗` Vote]()"
         )
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("general")
     bot.add_cog(General(bot))

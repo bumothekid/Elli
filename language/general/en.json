@@ -1,0 +1,13 @@
+{
+    "botinfoDescription": "**<:Statistics:1087458133569445970> {0}'s current statistics**\n\n> **<:Globe:1087448923834163342> Server:** `{1}`\n> **<:Member:1087452536295927808> User:** `{2}`\n> **<:Server:1087457941348700251> Latency:** `{3}ms`\n\n> **<:Clyde:1087435842785640448> CPU:** `{4}%`\n> **<:Folder:1087447065061240896> RAM:** `{5}%`\n> **<:Stopwatch:1087458252750590073> Uptime:** `{6}d {7}h {8}m`\n\n> **<:Developer:1087444095363989564> Version:** `{9}`\n> **<:Nextcord:1087456587003740210> Nextcord:** `{10}`\n> **<:Python:1087457407220850788> Python:** `{11}`",
+    "botinfoFooter": "{0} Bot | Powered by Nextcord",
+    "noMentionsOrEmotesInPrefix": "It is not allowed to use mentions or emotes in the prefix.",
+    "prefixTooLong": "The prefix can not be longer than 4 characters.",
+    "noBackticksInPrefix": "It is not allowed to have the ` character in the prefix.",
+    "prefixSameAsOld": "The prefix is already set to `{0}`.",
+    "prefixSet": "**<:Commands:1087442278118871140>  Prefix set**\n\n> **Prefix:** `{0}`\n> **Old prefix:** `{1}`",
+    "onlyAvailableLanguage": "The language `{0}` is not available.**\n> The available languages are: `{1}`** ",
+    "languageSameAsOld": "The language is already set to `{0}`.",
+    "languageSet": "**<:Commands:1087442278118871140> Language set**\n\n> **Language:** `{0}`\n> **Old language:** `{1}`",
+    "inviteDescription": "**<:Commands:1087442278118871140> Invite**\n\n> **Recommended:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=8)"
+}
