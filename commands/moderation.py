@@ -4,6 +4,7 @@ import nextcord
 
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog, BucketType
+from .utils.database import readOne
 from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
 from .utils.other import messagePinned
@@ -18,80 +19,94 @@ class Moderation(Cog):
     @commands.command(name="moderation", aliases=["mod"])
     @commands.cooldown(2, 10, BucketType.user)
     async def _moderation(self, ctx):
-        await infoEmbed(self.bot, ctx, "**<:Moderator:1087456158421352508> Moderations Befehle**\n\n> `-clear <anzahl>`\n> `> kick <@user> <grund>`\n> `-ban <@user> <grund>`\n> `-addrole <@user> <@rolle>`\n> `-removerole <@user> <@rolle>`")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        prefix = readOne("prefix", "guilds", "guild_id", ctx.guild.id)[0]
+
+        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "moderationDescription", prefix))
 
     @commands.command(name="clear", aliases=["clr", "clean"])
     @commands.has_permissions(manage_messages=True)
     @commands.cooldown(2, 10, BucketType.user)
     async def _clear(self, ctx, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "clearAtLeastOne"))
+        
         if amount > 200:
-            return await errorEmbed(self.bot, ctx, "Du kannst maximal 200 Nachrichten löschen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "clearMax200"))
 
         await ctx.channel.purge(limit=amount + 1, check=messagePinned)
-        await successEmbed(self.bot, ctx.channel, f"**<:Moderator:1087456158421352508> {amount} Nachrichten gelöscht.**", delete_after=10)
+        await successEmbed(self.bot, ctx.channel, getLocale(languageStrings, guildLocale, "clearSuccess", amount), delete_after=10)
     
     @commands.command(name="kick", aliases=["k"])
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_guild_permissions(kick_members=True)
     @commands.cooldown(5, 10, BucketType.user)
     async def _kick(self, ctx, member: nextcord.Member, *, reason: str = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if reason is None:
-            reason = "Kein Grund angegeben."
+            reason = getLocale(languageStrings, guildLocale, "noReason")
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, "Du kannst dich nicht selbst kicken.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, "Ich kann mich nicht selbst kicken.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht kicken.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu kicken.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickBotHigherRole"))
 
         await member.kick(reason=reason)
-        await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} wurde gekickt.**")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickSuccess", member))
 
     @commands.command(name="ban", aliases=["b"])
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_guild_permissions(ban_members=True)
     @commands.cooldown(5, 10, BucketType.user)
     async def _ban(self, ctx, member: nextcord.Member, *, reason: str = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if reason is None:
-            reason = "Kein Grund angegeben."
+            reason = getLocale(languageStrings, guildLocale, "noReason")
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, "Du kannst dich nicht selbst bannen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, "Ich kann mich nicht selbst bannen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht bannen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu bannen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banBotHigherRole"))
 
         await member.ban(reason=reason)
-        await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} wurde gebannt.**")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banSuccess", member))
 
     @commands.command(name="mute", aliases=["timeout"])
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_guild_permissions(moderate_members=True)
     @commands.cooldown(5, 10, BucketType.user)
     async def _mute(self, ctx, member: nextcord.Member, *, time: str):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, "Du kannst dich nicht selbst muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, "Ich kann mich nicht selbst muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteBotHigherRole"))
 
         timeRegex = re.compile(r'(?:(\d{1,5})(d|h|m|s))+?')
         timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -100,80 +115,104 @@ class Moderation(Cog):
         seconds = 0
 
         if not matches:
-            return await errorEmbed(self.bot, ctx, "Bitte gib eine gültige Zeitangabe an. `<s | m | h | d>`")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTime"))
 
         for key, value in matches:    
             try:
                 seconds += timeDict[value] * float(key)
             except KeyError:
-                await errorEmbed(self.bot, ctx, f"`{value}` ist kein gültiger Wert. `<s | m | h | d>`")
+                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTimeUnit"))
                 continue
             except ValueError:
-                await errorEmbed(self.bot, ctx, f"`{key}` ist keine ganze Zahl.")
+                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTimeValue"))
                 continue
             except Exception as e:
                 print(e)
-                await errorEmbed(self.bot, ctx, "Ein unbekannter Fehler ist aufgetreten.")
+                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteUnknownError"))
                 continue
 
         if seconds < 30:
-            return await errorEmbed(self.bot, ctx, "Du musst mindestens `30` Sekunden muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteMin30"))
 
         if seconds > 28 * 86400:
-            return await errorEmbed(self.bot, ctx, "Du kannst maximal `28` Tage muten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteMax28"))
 
         now = datetime.utcnow()
         unixnow = datetime.now()
-        await member.timeout(timeout=now + timedelta(seconds=seconds), reason=f"Mute von {ctx.author}")
-        await successEmbed(self.bot, ctx, f"{member} wurde bis <t:{int(mktime((unixnow + timedelta(seconds=seconds)).timetuple()))}:R> (<t:{int(mktime((unixnow + timedelta(seconds=seconds)).timetuple()))}:f>) gemutet.")
+        await member.timeout(timeout=now + timedelta(seconds=seconds), reason=f"Mute | {ctx.author}")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteSuccess", member, int(mktime((unixnow + timedelta(seconds=seconds)).timetuple()))))
 
     @commands.command(name="unmute", aliases=["untimeout"])
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_guild_permissions(moderate_members=True)
     @commands.cooldown(5, 10, BucketType.user)
-    async def _unmute(self, ctx, member: nextcord.Member, *, reason: str = None):
+    async def _unmute(self, ctx, member: nextcord.Member):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, "Du kannst dich nicht selbst entmuten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, "Ich kann mich nicht selbst entmuten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteBot"))
+        
+        if not member.is_timed_out:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteNotMuted"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Du kannst diesen User nicht unmuten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, "Ich habe nicht genug Berechtigungen um diesen User zu entmuten.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteBotHigherRole"))
 
-        await member.timeout(timeout=None, reason=f"Unmute von {ctx.author}")
-        await successEmbed(self.bot, ctx, f"{member} wurde entmutet.")
+        await member.timeout(timeout=None, reason=f"Unmute | {ctx.author}")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteSuccess", member))
 
     @commands.command(name="addrole", aliases=["addr"])
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_guild_permissions(manage_roles=True)
     @commands.cooldown(2, 20, BucketType.user)
     async def _addrole(self, ctx, member: nextcord.Member, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        if member == ctx.author:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleYourself"))
+        
+        if member == self.bot.user:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleBot"))
+
         if role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht geben.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleHigherRole"))
 
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht geben.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleBotHigherRole"))
+        
+        if role in member.roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleAlreadyHasRole"))
 
         await member.add_roles(role)
-        await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} hat die Rolle {role} erhalten.**")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleSuccess", member, role))
     
     @commands.command(name="removerole", aliases=["remr"])
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_guild_permissions(manage_roles=True)
     @commands.cooldown(2, 20, BucketType.user)
     async def _removerole(self, ctx, member: nextcord.Member, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        if member == ctx.author:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleYourself"))
+        
+        if member == self.bot.user:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleBot"))
+        
         if role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht entziehen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleHigherRole"))
 
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht entziehen.")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleBotHigherRole"))
 
         await member.remove_roles(role)
-        await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} hat die Rolle {role} entzogen.**")
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleSuccess", member, role))
 
 def setup(bot):
     global languageStrings
