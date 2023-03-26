@@ -5,9 +5,11 @@ import requests
 
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
 from .utils.other import capString, checkLink
 
+languageStrings = {}
 class Fun(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,66 +17,79 @@ class Fun(Cog):
     @commands.command(name="ssp", aliases=["rsp", "rps"])
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _ssp(self, ctx, choice: str = None):
-        botchoice = random.choice(["stein", "schere", "papier"])
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        stone = getLocale(languageStrings, guildLocale, "stone")
+        scissors = getLocale(languageStrings, guildLocale, "scissors")
+        paper = getLocale(languageStrings, guildLocale, "paper")
+
+        if choice is not None and choice.lower() not in [stone, scissors, paper]:
+            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
+            return
+
+        botchoice = random.choice([stone, scissors, paper])
 
         if choice is None:
             i = 0
 
-            await infoEmbed(self.bot, ctx, "Wähle `Stein`, `Schere` oder `Papier`")
+            await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
 
             while i < 3:
                 try:
                     anwser = await self.bot.wait_for('message', timeout=60.0, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
-                    await errorEmbed(self.bot, ctx, "Der Befehl wurde abgebrochen, da du zu lange zum antwortet gebraucht hast.")
+                    await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspTimeout"))
                     break
                 
-                if anwser.content.lower() not in ["stein", "schere", "papier"]:
+                if anwser.content.lower() not in [stone.lower(), scissors.lower(), paper.lower()]:
                     if i == 3:
-                        await errorEmbed(self.bot, ctx, "Du hast `3` Versuche verbraucht der befehl wird abgebrochen.")
+                        await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspThreeTries"))
                         break
-                    await errorEmbed(self.bot, ctx, "Bitte wähle `Stein`, `Schere` oder `Papier`")
+
+                    await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
                     continue
             
                 choice = anwser.content
                 break
         
-        choice = choice.lower()
+        choice = capString(choice)
         
         if choice == botchoice:
-            await successEmbed(self.bot, ctx, f"**Unentschieden!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.light_gray())
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspDraw", choice, botchoice), color=nextcord.Color.light_gray())
         
-        elif choice == "stein" and botchoice == "schere":
-            await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+        elif choice == stone and botchoice == scissors:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
         
-        elif choice == "stein" and botchoice == "papier":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
+        elif choice == stone and botchoice == paper:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
-        elif choice == "schere" and botchoice == "stein":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
+        elif choice == scissors and botchoice == stone:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
-        elif choice == "schere" and botchoice == "papier":
-            await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+        elif choice == scissors and botchoice == paper:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
         
-        elif choice == "papier" and botchoice == "stein":
-            await successEmbed(self.bot, ctx, f"**Du hast gewonnen!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`")
+        elif choice == paper and botchoice == stone:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
 
-        elif choice == "papier" and botchoice == "schere":
-            await successEmbed(self.bot, ctx, f"**Du hast verloren!**\n\n> **Deine Wahl:** `{capString(choice)}`\n> **Bot Wahl:** `{capString(botchoice)}`", color=nextcord.Color.red())
+        elif choice == paper and botchoice == scissors:
+            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
         else:
-            await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
+            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspUnexpectedOutcome"))
     
     @commands.command(name="8ball", aliases=["8b", "ask"])
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _8ball(self, ctx, *, question: str):
-        anwsers = ["Ja", "Sicher", "100%", "Vielleicht", "Eher weniger", "Joa", "Lieber nicht", "Nein"]
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        anwsers = [getLocale(languageStrings, guildLocale, "yes"), getLocale(languageStrings, guildLocale, "safe"), "100%", getLocale(languageStrings, guildLocale, "maybe"), getLocale(languageStrings, guildLocale, "notReally"), getLocale(languageStrings, guildLocale, "yeah"), getLocale(languageStrings, guildLocale, "betterNot"), getLocale(languageStrings, guildLocale, "no"), getLocale(languageStrings, guildLocale, "nope"), getLocale(languageStrings, guildLocale, "never"), getLocale(languageStrings, guildLocale, "notAtAll"), getLocale(languageStrings, guildLocale, "notSure"), getLocale(languageStrings, guildLocale, "noWay")]
 
         if checkLink(ctx.message.content):
-            await errorEmbed(self.bot, ctx, "Du kannst keine Links in deine Frage schreiben.")
+            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "noLinksQuestion"))
             return
-
-        await successEmbed(self.bot, ctx, f"**8ball**\n\n> **Antwort:** *{random.choice(anwsers)}*\n\n> **Frage:** `{question}`")
+        
+        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "8ballSuccess", random.choice(anwsers), question))
                 
     @commands.command(name="cat", aliases=["kitty", "kitten"])
     @commands.cooldown(5, 30, commands.BucketType.user)
@@ -84,8 +99,8 @@ class Fun(Cog):
                 r = requests.get("https://aws.random.cat/meow")
                 r.raise_for_status()
             except requests.exceptions.RequestException as e:
-                await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
-                return
+                raise commands.CommandError(e)
+            
             data = r.json()
 
             await successEmbed(self.bot, ctx, f"**Kitty**\n\n> **URL:** [`📎` Link]({data['file']})", image=data['file'])
@@ -98,8 +113,8 @@ class Fun(Cog):
                 r = requests.get("https://random.dog/woof.json")
                 r.raise_for_status()
             except requests.exceptions.RequestException as e:
-                await errorEmbed(self.bot, ctx, "Es ist ein Fehler aufgetreten.")
-                return
+                raise commands.CommandError(e)
+            
             data = r.json()
 
             if data['url'].endswith(".mp4"):
@@ -109,7 +124,7 @@ class Fun(Cog):
 
     # TODO: Fix meme command
 
-    @commands.command(name="meme", aliases=["memes"])
+    @commands.command(name="meme", aliases=["memes"], enabled=False)
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _meme(self, ctx):
         await errorEmbed(self.bot, ctx, "Der Meme befehl ist momentan deaktiviert.")
@@ -134,14 +149,18 @@ class Fun(Cog):
     @commands.command(name="reverse")
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _reverse(self, ctx, *, text: str):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         reverse = text[::-1]
 
         if checkLink(text) or checkLink(reverse):
-            return await errorEmbed(self.bot, ctx, "Es dürfen keine Links in deinem Text sein")
-
-        await infoEmbed(self.bot, ctx, f"**Umgekehter Text von {ctx.author}**\n\n> **Text:** {reverse}")
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "noLinksText"))
+        
+        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "reverseSuccess", ctx.author, reverse))
 
     
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("fun")
     bot.add_cog(Fun(bot))
