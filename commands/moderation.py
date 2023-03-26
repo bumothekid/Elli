@@ -4,9 +4,12 @@ import nextcord
 
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog, BucketType
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
 from .utils.other import messagePinned
 from datetime import datetime, timedelta
+
+languageStrings = {}
 
 class Moderation(Cog):
     def __init__(self, bot):
@@ -152,9 +155,7 @@ class Moderation(Cog):
         if role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht geben.")
 
-        bot = ctx.guild.get_member(self.bot.user.id)
-
-        if role.position >= bot.top_role.position or member.top_role.position >= bot.top_role.position or role.name == "@everyone":
+        if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
             return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht geben.")
 
         await member.add_roles(role)
@@ -168,13 +169,13 @@ class Moderation(Cog):
         if role.position >= ctx.author.top_role.position:
             return await errorEmbed(self.bot, ctx, f"Du kannst {member.mention} diese Rolle nicht entziehen.")
 
-        bot = ctx.guild.get_member(self.bot.user.id)
-
-        if role.position >= bot.top_role.position or member.top_role.position >= bot.top_role.position:
+        if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
             return await errorEmbed(self.bot, ctx, f"Ich kann {member.mention} diese Rolle nicht entziehen.")
 
         await member.remove_roles(role)
         await successEmbed(self.bot, ctx, f"**<:Moderator:1087456158421352508> {member} hat die Rolle {role} entzogen.**")
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("moderation")
     bot.add_cog(Moderation(bot))
