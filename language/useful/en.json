@@ -1,5 +1,5 @@
 {
-    "pingDescription": "**{0}'s latency\n\n> **Latency:** `{1}`ms",
+    "pingDescription": "**{0}'s latency**\n\n> **Latency:** `{1}`ms",
     "userinfoDescription": "**{0}'s userinfo**\n\n> **User name:** `{1}`\n> **User ID: `{2}`**\n> **Status: `{3}`**\n\n> **Avatar: [`📎` Link](4)**\n> **Joined: **<t:{5}:R>\n> **Created: <t:{6}:R>**",
     "serverinfoDescription": "**{0}'s serverinfo**\n\n> **Server name:** `{1}`\n> **Server ID: `{2}`**\n> **Server owner: `{3}`**\n\n> **Verification level: `{4}`**\n> **Boost level: `{5}`**\n> **Boost count: `{6}`**\n\n> **Member: `{7}`**\n> **Server icon:** [`📎` Link]({8})\n> **Server created: <t:{9}:R>**",
     "bugTooShort": "The bug report needs to be at least 10 characters long.",
