@@ -12,7 +12,7 @@ class ErrorHandler(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         languageStrings = getLanguageStrings("error")
 
-        if isinstance(error, commands.CommandNotFound):
+        if isinstance(error, (commands.CommandNotFound, commands.DisabledCommand)):
             await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "commandNotFound"))
 
         elif isinstance(error, commands.MissingRequiredArgument):
