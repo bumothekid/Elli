@@ -4,7 +4,10 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 
 from .utils.other import capString
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed, devLogging
+
+languageStrings = {}
 
 class Useful(Cog):
     def __init__(self, bot):
@@ -13,34 +16,39 @@ class Useful(Cog):
     @commands.command(name="ping", aliases=["latency"])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _ping(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         await infoEmbed(
             self,
             ctx,
-            f"**{self.bot.user.name}'s Latenz**\n\n> **Latenz: `{round(self.bot.latency * 1000)}ms`**"
+            getLocale(languageStrings, guildLocale, "pingDescription", round(self.bot.latency * 1000))
         )
 
     @commands.command(name="userinfo", aliases=["user", "ui"])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _userinfo(self, ctx, member: nextcord.Member = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if member is None:
             member = ctx.author
 
         await infoEmbed(
             self,
             ctx,
-            f"**{member.name}'s Userinfo**\n\n> **User Name:** `{member}`\n> **User ID: `{member.id}`**\n> **Status: `{capString(str(member.status))}`**\n\n> **Avatar: [`📎` Link]({member.display_avatar.url})**\n> **Gejoint: **<t:{int(member.joined_at.timestamp())}:R>\n> **Erstellt: <t:{int(member.created_at.timestamp())}:R>**",
+            getLocale(languageStrings, guildLocale, "userinfoDescription", member.name, member, member.id, capString(str(member.status)), member.display_avatar.url, int(member.joined_at.timestamp()), int(member.created_at.timestamp())),
             thumbnail=member.display_avatar.url
         )
 
     @commands.command(name="serverinfo", aliases=["server", "si"])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _serverinfo(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         iconURL = ctx.guild.icon.url if ctx.guild.icon is not None else ""
 
         await infoEmbed(
             self,
             ctx,
-            f"**{ctx.guild.name}'s Serverinfo**\n\n> **Server Name:** `{ctx.guild.name}`\n> **Server ID: `{ctx.guild.id}`**\n> **Server Owner: `{ctx.guild.owner}`**\n\n> **Verifikations Stufe: `{capString(str(ctx.guild.verification_level))}`**\n> **Boost Stufe: `{ctx.guild.premium_tier}`**\n> **Boost Anzahl: `{ctx.guild.premium_subscription_count}`**\n\n> **Mitglieder: `{len(ctx.guild.members)}`**\n> **Server Icon:** [`📎` Link]({iconURL})\n> **Server Erstellt: <t:{int(ctx.guild.created_at.timestamp())}:R>**",
+            getLocale(languageStrings, guildLocale, "serverinfoDescription", ctx.guild.name, ctx.guild.id, ctx.guild.owner, capString(str(ctx.guild.verification_level)), ctx.guild.premium_tier, ctx.guild.premium_subscription_count, len(ctx.guild.members), iconURL, int(ctx.guild.created_at.timestamp())),
             thumbnail=iconURL
         )
     
@@ -60,11 +68,16 @@ class Useful(Cog):
     @commands.command(name="bug", aliases=['bugreport', "report"])
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _bug(self, ctx, *, bug):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if len(bug) < 10:
-            return await errorEmbed(self, ctx, "Der Bugreport muss mindestens 10 Zeichen lang sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "bugTooShort"))
         
-        await successEmbed(self, ctx, f"**<:icon_bug:966028792890003547> Bugreport**\n\n> **Bugreport:** `{bug}`")
+
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "bugReported", bug))
         await devLogging(self, ctx, f"{ctx.author} hat einen Bugreport gemeldet:\n> **{bug}**")
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("useful")
     bot.add_cog(Useful(bot))
