@@ -10,6 +10,8 @@ cache = []
 prefix = None
 languageStrings = {}
 
+# Todo!: Pick a emote for autoroles category
+
 class ClassHelp(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -71,6 +73,7 @@ class HelpButton(nextcord.ui.Select):
         tempchannel = getLocale(languageStrings, language, "tempchannel")
         reactionroles = getLocale(languageStrings, language, "reactionroles")
         levelsystem = getLocale(languageStrings, language, "levelsystem")
+        autoroles = getLocale(languageStrings, language, "autoroles")
         invitelogger = getLocale(languageStrings, language, "invitelogger")
         badwords = getLocale(languageStrings, language, "badwords")
         antighostping = getLocale(languageStrings, language, "antighostping")
@@ -89,6 +92,7 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label=tempchannel, emoji="⏳", default=category == "tempchannel"),
             nextcord.SelectOption(label=reactionroles, emoji="<:Roles:1087457575257255998>", default=category == "reactionroles"),
             nextcord.SelectOption(label=levelsystem, emoji="🌟", default=category == "levelsystem"),
+            nextcord.SelectOption(label=autoroles, default=category == "autoroles"),
             nextcord.SelectOption(label=invitelogger, emoji="📨", default=category == "invitelogger"),
             nextcord.SelectOption(label=badwords, emoji="<:Badword:1087441597622399056>", default=category == "badwords"),
             nextcord.SelectOption(label=antighostping, emoji="<:Ghostping:1087448502323384330>", default=category == "antighostping"),
@@ -131,6 +135,8 @@ class HelpButton(nextcord.ui.Select):
             category = "reactionroles"
         elif category == getLocale(languageStrings, guildLocale, "levelsystem").lower():
             category = "levelsystem"
+        elif category == getLocale(languageStrings, guildLocale, "autoroles").lower():
+            category = "autoroles"
         elif category == getLocale(languageStrings, guildLocale, "invitelogger").lower():
             category = "invitelogger"
         elif category == getLocale(languageStrings, guildLocale, "badwords").lower():
@@ -213,6 +219,12 @@ class HelpButton(nextcord.ui.Select):
                 case "levelsystem":
                     embed = nextcord.Embed(
                         description=getLocale(languageStrings, guildLocale, "levelsystemDescription", prefix),
+                        color=nextcord.Color.blurple()
+                    )
+
+                case "autoroles":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "autorolesDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
