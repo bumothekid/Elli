@@ -4,12 +4,14 @@ import os
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from nextcord import ui, ButtonStyle
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.image import memberCardImageProcessing
 from .utils.other import safeDict
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
 from .utils.database import readOne, insert, update
 from PIL import Image
 
+languageStrings = {}
 class Welcome(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -17,55 +19,61 @@ class Welcome(Cog):
     @commands.group(name="welcome", aliases=["wel"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _welcome(self, ctx):
-        await infoEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensnachrichten**\n\n> `-welcome channel set <#channel>`\n> `-welcome channel remove`\n> `-welcome message <message>`\n> `-welcome picture set <picture>`\n> `-welcome picture remove`\n> `-welcome picture show`\n\n> Variablen für die Willkommensnachricht `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> Du kannst eine Willkommensnachricht mit mehreren Zeilen erstellen mit `\\n`\n> Um die Willkommensnachricht ganz zu entfernen füge `_ _` als Nachricht ein")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeDescription", prefix))
 
     @_welcome.group(name="channel", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _channel(self, ctx):
-        await errorEmbed(self, ctx, "Es fehlt ein benötigtes Argument.")
+        raise commands.MissingRequiredArgument
 
     @_channel.command(name="set", aliases=["add", "update"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set(self, ctx, channel: nextcord.TextChannel):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is not None:
-            message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
-            picture = welcome[3] if welcome[3] is not None else "Keins"
+            picture = welcome[3] if welcome[3] is not None else "None"
             update(table="welcome", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            return await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommenskanal aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
 
-        insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!", "null"])
+            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), picture))
 
-        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommenskanal gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** Willkommen auf {{guild_name}} {{user_mention}},\\n du bist unser `{{guild_membercount}}`tes Mitglied!\n> **Bild:** `Keins`")
+        insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "null"])
+
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "None"))
 
     @_channel.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         channel = readOne(columns="channel_id", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if channel is None:
-            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelNotSet"))
 
         update(table="welcome", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
 
-        await successEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommenskanal zurückgesetzt**")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelRemoved"))
     
     @_welcome.command(name="message", aliases=["text", "msg"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _message(self, ctx, *, message):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is None or welcome[1] is None:
-            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelNotSet"))
 
-        picture = welcome[3] if welcome[3] is not None else "Keins"
+        picture = welcome[3] if welcome[3] is not None else "None"
         update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommensnachricht aktualisiert**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeMessageSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
 
     @_welcome.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -76,35 +84,40 @@ class Welcome(Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _set2(self, ctx, picture):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            return await errorEmbed(self, ctx, "Es ist kein Bild mit dieser Nummer vorhanden. <1-6>")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomePictureNotValid"))
 
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is None or welcome[1] is None:
-            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelNotSet"))
 
-        message = welcome[2] if welcome[2] is not None else "Willkommen auf {guild_name} {user_mention},\\n du bist unser `{guild_membercount}`tes Mitglied!"
+        message = welcome[2] if welcome[2] is not None else getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}")
         update(table="welcome", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
-        await successEmbed(self, ctx, f"**<:MemberJoin:1087453129198546964> Willkommensnachricht gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{self.bot.get_channel(welcome[1]).id}/)\n> **Nachricht:** {message}\n> **Bild:** `{picture}`")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomePictureSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
     
     @_picture.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove2(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is None or welcome[1] is None:
-            return await errorEmbed(self, ctx, "Es ist kein Willkommenskanal gesetzt.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelNotSet"))
 
         update(table="welcome", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensbild zurückgesetzt**")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomePictureRemoved"))
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _show(self, ctx):
-        await infoEmbed(self, ctx, "**<:MemberJoin:1087453129198546964> Willkommensbilder**\n\n> **Du kannst dir die Bilder anschauen mit den jeweiligen Knöpfen**", view=ButtonView())
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomePictureShow"), view=ButtonView())
     
     @Cog.listener()
     async def on_member_join(self, member):
@@ -119,7 +132,9 @@ class Welcome(Cog):
         card = None
 
         if welcome[3] is not None:
-            img = await memberCardImageProcessing(member, Image.open(f"assets/welcome/card{welcome[3]}.png"), "Willkommen!")
+            guildLocale = getGuildLanguage(member.guild.id)
+
+            img = await memberCardImageProcessing(member, Image.open(f"assets/welcome/card{welcome[3]}.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
             img.save(f"assets/welcome/user_card{welcome[3]}.png")
 
             card = nextcord.File(f"assets/welcome/user_card{welcome[3]}.png")
@@ -137,14 +152,15 @@ class ButtonView(ui.View):
     def __init__(self):
         super().__init__(timeout=600)
 
-    @ui.button(style=ButtonStyle.primary, label="Bild 1", custom_id="welpic1")
+    @ui.button(style=ButtonStyle.primary, label="1", custom_id="welpic1")
     async def _picture1(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card1.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card1.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card1.png")
         pic = nextcord.File("assets/welcome/user_card1.png")
 
         embed = nextcord.Embed(
-            description="**Bild 1**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "1"),
             color=nextcord.Color.blurple()
         )
 
@@ -152,14 +168,15 @@ class ButtonView(ui.View):
 
         await ctx.send(embed=embed, file=pic)
     
-    @ui.button(style=ButtonStyle.primary, label="Bild 2", custom_id="welpic2")
+    @ui.button(style=ButtonStyle.primary, label="2", custom_id="welpic2")
     async def _picture2(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card2.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card2.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card2.png")
         pic = nextcord.File("assets/welcome/user_card2.png")
 
         embed = nextcord.Embed(
-            description="**Bild 2**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "2"),
             color=nextcord.Color.blurple()
         )
 
@@ -167,14 +184,15 @@ class ButtonView(ui.View):
 
         await ctx.send(embed=embed, file=pic)
 
-    @ui.button(style=ButtonStyle.primary, label="Bild 3", custom_id="welpic3")
+    @ui.button(style=ButtonStyle.primary, label="3", custom_id="welpic3")
     async def _picture3(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card3.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card3.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card3.png")
         pic = nextcord.File("assets/welcome/user_card3.png")
 
         embed = nextcord.Embed(
-            description="**Bild 3**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "3"),
             color=nextcord.Color.blurple(),
         )
 
@@ -182,14 +200,15 @@ class ButtonView(ui.View):
 
         await ctx.send(embed=embed, file=pic)
     
-    @ui.button(style=ButtonStyle.primary, label="Bild 4", custom_id="welpic4")
+    @ui.button(style=ButtonStyle.primary, label="4", custom_id="welpic4")
     async def _picture4(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card4.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card4.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card4.png")
         pic = nextcord.File("assets/welcome/user_card4.png")
 
         embed = nextcord.Embed(
-            description="**Bild 4**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "4"),
             color=nextcord.Color.blurple()
         )
 
@@ -197,14 +216,15 @@ class ButtonView(ui.View):
 
         await ctx.send(embed=embed, file=pic)
 
-    @ui.button(style=ButtonStyle.primary, label="Bild 5", custom_id="welpic5")
+    @ui.button(style=ButtonStyle.primary, label="5", custom_id="welpic5")
     async def _picture5(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card5.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card5.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card5.png")
         pic = nextcord.File("assets/welcome/user_card5.png")
 
         embed = nextcord.Embed(
-            description="**Bild 5**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "5"),
             color=nextcord.Color.blurple()
         )
 
@@ -212,14 +232,15 @@ class ButtonView(ui.View):
 
         await ctx.send(embed=embed, file=pic)
 
-    @ui.button(style=ButtonStyle.primary, label="Bild 6", custom_id="welpic6")
+    @ui.button(style=ButtonStyle.primary, label="6", custom_id="welpic6")
     async def _picture6(self, _, ctx):
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card6.png"), "Willkommen!")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/welcome/card6.png"), getLocale(languageStrings, guildLocale, "welcomeCardTitle"))
         card.save("assets/welcome/user_card6.png")
         pic = nextcord.File("assets/welcome/user_card6.png")
 
         embed = nextcord.Embed(
-            description="**Bild 6**",
+            description=getLocale(languageStrings, guildLocale, "welcomePicture", "6"),
             color=nextcord.Color.blurple()
         )
 
@@ -228,4 +249,6 @@ class ButtonView(ui.View):
         await ctx.send(embed=embed, file=pic)
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("welcome")
     bot.add_cog(Welcome(bot))

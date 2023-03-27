@@ -1,0 +1,14 @@
+{
+    "welcomeDescription": "**<:MemberJoin:1087453129198546964> Welcome Messages**\n\n> `{0}welcome channel set <#channel>`\n> `{0}welcome channel remove`\n> `{0}welcome message <message>`\n> `{0}welcome picture set <picture>`\n> `{0}welcome picture remove`\n> `{0}welcome picture show`\n\n> Variables for welcome message: `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{guild_name}`, `{guild_membercount}`\n> You can create a welcome message with multiple lines using `\\n`\n> To completely remove the welcome message, add `_ _` as the message",
+    "welcomeDefaultMessage": "Welcome {0} to {1}! We are now {2} members!",
+    "welcomeChannelSet": "**<:MemberJoin:1087453129198546964> Welcome channel set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** {2}\n> **Picture:** `{3}`",
+    "welcomeChannelNotSet": "No welcome channel is set.",
+    "welcomeChannelRemove": "**<:MemberJoin:1087453129198546964> Welcome channel removed**",
+    "welcomeMessageSet": "**<:MemberJoin:1087453129198546964> Welcome message set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** `{1}`\n> **Picture:** `{2}`",
+    "welcomePictureInvalid": "The picture is invalid. Please try again. <1 - 6>",
+    "welcomePictureSet": "**<:MemberJoin:1087453129198546964> Welcome picture set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** `{1}`\n> **Picture:** `{2}`",
+    "welcomePictureRemove": "**<:MemberJoin:1087453129198546964> Welcome picture removed**",
+    "welcomePictureShow": "**<:MemberJoin:1087453129198546964> Welcome pictures**\n\n> **You can view the pictures below.**",
+    "welcomeCardTitle": "Welcome!",
+    "welcomePicture": "**Picture {0}**"
+}
