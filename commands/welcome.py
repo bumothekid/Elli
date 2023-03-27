@@ -40,11 +40,11 @@ class Welcome(Cog):
             update(table="welcome", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
 
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), picture))
+            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), picture))
 
-        insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "null"])
+        insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "null"])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "None"))
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "None"))
 
     @_channel.command(name="remove", aliases=["delete", "reset"])
     @commands.has_permissions(manage_guild=True)
@@ -73,12 +73,12 @@ class Welcome(Cog):
         picture = welcome[3] if welcome[3] is not None else "None"
         update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeMessageSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeDefaultMessageSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
 
     @_welcome.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _picture(self, ctx):
-        await errorEmbed(self, ctx, "Es fehlt ein benötigtes Argument.")
+        raise commands.MissingRequiredArgument
 
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
@@ -94,7 +94,7 @@ class Welcome(Cog):
         if welcome is None or welcome[1] is None:
             return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelNotSet"))
 
-        message = welcome[2] if welcome[2] is not None else getLocale(languageStrings, guildLocale, "welcomeMessage", "{user_mention}", "{guild_name}", "{guild_membercount}")
+        message = welcome[2] if welcome[2] is not None else getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}")
         update(table="welcome", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
         await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomePictureSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
     
