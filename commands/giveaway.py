@@ -533,5 +533,5 @@ class Giveaways(Cog):
 
 def setup(bot):
     global languageStrings
-    languageStrings = getLanguageStrings("giveaways")
+    languageStrings = getLanguageStrings("giveaway")
     bot.add_cog(Giveaways(bot))
