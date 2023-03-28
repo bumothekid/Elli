@@ -1,24 +1,3 @@
-<style>
-    img {
-        z-index: -1;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        opacity: 0.95;
-        filter: brightness(0.3);
-    }
-
-    * {
-        color: #ffffff;
-        /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
-    }
-</style>
-
-<img src="https://cdn.discordapp.com/attachments/933131984799141918/1090309244957507666/ellibannergithub.jpg">
-
 ### Invite Elli to your server [here](https://discord.com/oauth2/authorize?client_id=1086789440044806174&scope=bot&permissions=279138790647).
 ### Join the Support Server [here](https://discord.gg/FWPExbfCTa).
 # 🤖 Elli Discord Bot
