@@ -7,8 +7,10 @@ from nextcord.ext.commands import Cog
 from time import time as time_, mktime
 from datetime import datetime, timedelta
 from .utils.embeds import infoEmbed, errorEmbed, successEmbed
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.database import delete, readAll, insert, readOne, update
 
+languageStrings = {}
 class Giveaways(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -16,21 +18,26 @@ class Giveaways(Cog):
     @commands.group(name="giveaway", aliases=["gv"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _giveaway(self, ctx):
-        await infoEmbed(self, ctx, "**<a:Giveaway:1087437215648456794> Giveaway Commands**\n\n> `-giveaway create`\n> `-giveaway quick <#channel> <zeit in minuten> <winner> <preis>`\n> `-giveaway drop <#channel> <preis>`\n> `-giveaway end <#channel> <messageid>`\n> `-giveaway reroll <#channel> <messageid> <winner>`\n> `-giveaway list`")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
+
+        await infoEmbed(self, ctx, getLocale(guildLocale, "giveawayDescription", prefix))
 
     @_giveaway.command(name="create", aliases=["start"])
     @commands.max_concurrency(1, commands.BucketType.user)
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(1, 20, commands.BucketType.user)
     async def _create(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, "Du kannst nur `9` Giveaways gleichzeitig starten.")
+            return await errorEmbed(self, ctx, getLocale(guildLocale, "giveawayLimit"))
 
         questions = [
-            f"Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> In welchem Channel soll das Giveaway stattfinden?\n> **Beispiel:** {ctx.channel.mention}",
-            "Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> Wie lange soll das Giveaway gehen? `<m | h | d>`\n> **Beispiel:** `1d 5h 30m`",
-            "Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> Was soll der Preis sein?",
-            "Bevor wir das Giveaway starten können musst du ein paar fragen beantworten\n\n> Wie viele Gewinner soll es geben?"
+            getLocale(guildLocale, "giveawayQuestionChannel", ctx.channel.mention),
+            getLocale(guildLocale, "giveawayQuestionTime"),
+            getLocale(guildLocale, "giveawayQuestionPrize"),
+            getLocale(guildLocale, "giveawayQuestionWinner")
         ]
 
         anwsers = {}
@@ -52,10 +59,10 @@ class Giveaways(Cog):
                 try:
                     userAnwser = await self.bot.wait_for("message", timeout=120, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
-                    return await errorEmbed(self, ctx, "Du hast länger als `2` Minuten gebraucht um zu antworten der Giveaway startvorgang wurde abgebrochen.")
+                    return await errorEmbed(self, ctx, "giveawayTimeout")
                 
                 if trys == 3:
-                    return await errorEmbed(self, ctx, "`3` Fehlversuche; Der Giveaway startvorgang wurde abgebrochen.")
+                    return await errorEmbed(self, ctx, getLocale(guildLocale, "giveawayFails"))
 
                 match i:
                     case 0:
@@ -66,7 +73,7 @@ class Giveaways(Cog):
 
                             if anwser == None:
                                 embed = nextcord.Embed(
-                                    description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
+                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayChannelNotFound"),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -77,7 +84,7 @@ class Giveaways(Cog):
                             trys = 0
                         except:
                             embed = nextcord.Embed(
-                                description=question + "\n\n> `Ich konnte diesen Channel nicht finden bitte versuche erneut`",
+                                description=question + "\n\n> " + getLocale(languageStrings, guildLocale, "giveawayChannelNotFound"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -96,7 +103,7 @@ class Giveaways(Cog):
 
                         if not matches:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Ungültige Zeitangabe`",
+                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeInvalid"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -108,7 +115,7 @@ class Giveaways(Cog):
                                 anwser += timeDict[value] * float(key)
                             except KeyError:
                                 embed = nextcord.Embed(
-                                    description=question + f"\n\n> `{value} ist ein ungültiger Zeitschlüssel`\n> `< s | m | h | d> sind gültige Zeitschlüssel`",
+                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeValueInvalid", value),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -117,7 +124,7 @@ class Giveaways(Cog):
                                 continue
                             except ValueError:
                                 embed = nextcord.Embed(
-                                    description=question + f"\n\n> `{key} ist keine ganze Zahl`",
+                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeKeyInvalid", key),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -127,7 +134,7 @@ class Giveaways(Cog):
                         
                         if round(anwser) < 120 or round(anwser) > 1555200:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Die Zeit muss zwischen mindestens 120 Sekunden und maximal 6 Monate sein`",
+                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeBetween"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -141,10 +148,10 @@ class Giveaways(Cog):
                         await userAnwser.delete()
 
                         if userAnwser.content == '':
-                            anwser = "Nichts!"
+                            anwser = getLocale(guildLocale, "giveawayNoPrize")
                         elif len(userAnwser.content) > 150:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Der Preis darf aus maximal 150 Zeichen bestehen`",
+                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayCharLimit"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -159,7 +166,7 @@ class Giveaways(Cog):
 
                         if not userAnwser.content.isdigit():
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Die anzahl an gewinnern muss eine ganze Zahl sein`",
+                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayWholeNumber"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -169,7 +176,7 @@ class Giveaways(Cog):
 
                         elif int(userAnwser.content) >= 100 or int(userAnwser.content) <= 0:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> `Die anzahl an Gewinnern darf nicht größer als 100 sein`",
+                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayWinnerLimit"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -191,11 +198,11 @@ class Giveaways(Cog):
 
         embed = nextcord.Embed(
             title=anwsers[2],
-            description=f"Reagiere mit <a:Giveaway:1087437215648456794> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            description=getLocale(languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=anwsers[1])
         )
-        embed.set_footer(text=f"{anwsers[3]} Gewinner | Endet")
+        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayFooter", anwsers[3]))
 
         message = await anwsers[0].send(embed=embed)
 
@@ -205,35 +212,33 @@ class Giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{anwsers[0].id}/{message.id}/)\n> **Gewinner:** {anwsers[3]}\n> **Bis:** <t:{unix}:f>")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, anwsers[0].id, message.id, anwsers[2], anwsers[3], unix))
 
     @_giveaway.command(name="quick", aliases=["q", "quickstart"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _quick(self, ctx, channel: nextcord.TextChannel, minutes, winner, *, prize):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, "Du kannst nur `9` Giveaways gleichzeitig starten.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
 
         if len(prize) > 150:
-            return await errorEmbed(self, ctx, "Der Preis darf aus maximal `150` Zeichen bestehen.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayCharLimit"))
 
         if not minutes.isdigit():
-            return await errorEmbed(self, ctx, "Die Zeitangabe muss in minuten angegeben sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayTimeInMinutes"))
         
-        elif int(minutes) < 2:
-            return await errorEmbed(self, ctx, "Die Zeitangabe muss mindestens `2` Minuten betragen.")
-        
-        elif int(minutes) > 1555200:
-            return await errorEmbed(self, ctx, "Die Zeitangabe darf maximal `6` Monate betragen.")
+        elif int(minutes) < 2 or int(minutes) > 1555200:
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayTimeBetween"))
         
         if not winner.isdigit():
-            return await errorEmbed(self, ctx, "Die Anzahl an Gewinnern muss eine ganze Zahl sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWholeNumber"))
 
         elif int(winner) >= 100:
-            return await errorEmbed(self, ctx, "Die anzahl an Gewinnern darf nicht größer als `100` sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWinnerLimit"))
 
         if prize == "":
-            return await errorEmbed(self, ctx, "Du musst einen Gewinn angeben.")
+            prize = getLocale(languageStrings, guildLocale, "giveawayNoPrize")
 
         seconds = int(minutes) * 60
         now = datetime.now()
@@ -241,11 +246,11 @@ class Giveaways(Cog):
 
         embed = nextcord.Embed(
             title=prize,
-            description=f"Reagiere mit <a:Giveaway:1087437215648456794> um Teilzunehmen\n\n> Endet: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {ctx.author.mention}",
+            description=getLocale(languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=seconds)
         )
-        embed.set_footer(text=f"{winner} Gewinner | Endet")
+        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayFooter", winner))
 
         message = await channel.send(embed=embed)
 
@@ -255,30 +260,27 @@ class Giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {winner}\n> **Bis:** <t:{unix}:f>")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, channel.id, message.id, prize, winner, unix))
 
     @_giveaway.command(name="drop")
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _drop(self, ctx, channel: nextcord.TextChannel, *, prize):
-        if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            embed = nextcord.Embed(
-                description="Du kannst nur **9** Giveaways gleichzeitig starten",
-                color=nextcord.Color.dark_red()
-            )
+        guildLocale = getGuildLanguage(ctx.guild.id)
 
-            return await ctx.reply(embed=embed)
+        if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
 
         if len(prize) > 150:
-            return await errorEmbed(self, ctx, "Der Preis darf aus maximal `150` Zeichen bestehen.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayCharLimit"))
 
         embed = nextcord.Embed(
             title=prize,
-            description=f"Reagiere mit <a:Giveaway:1087437215648456794>, um den Drop einzusammeln \n\n> Host: {ctx.author.mention}",
+            description=getLocale(languageStrings, guildLocale, "giveawayDrop"),
             color=ctx.author.color,
             timestamp=datetime.now()
         )
-        embed.set_footer(text=f"Drop von {ctx.author.name}")
+        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayDrop", ctx.author.name))
 
         message = await channel.send(embed=embed)
 
@@ -289,11 +291,11 @@ class Giveaways(Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u.bot == False and r.message.id == message.id and r.emoji == emote, timeout=300)
         except asyncio.TimeoutError:
-            return await errorEmbed(self, channel, "<a:Giveaway:1087437215648456794> Drop wurde abgebrochen.**\n\n**> Drop nach 5 Minuten abgelaufen.")
-
+            return await errorEmbed(self, channel, getLocale(languageStrings, guildLocale, "giveawayDropTimeout"))
+        
         embed = nextcord.Embed(
             title=prize,
-            description=f"**<a:Giveaway:1087437215648456794> Drop erhalten**\n\n> **Gewinner:** {user.mention}\n> **Preis:** {prize}",
+            description=getLocale(languageStrings, guildLocale, "giveawayDropEnd", user.mention, prize),
             color=ctx.author.color
         )
 
@@ -301,7 +303,7 @@ class Giveaways(Cog):
 
         await successEmbed(self,
                             channel,
-                            f"Herzlichen Glückwunsch, {user.mention} hat den Drop eingesammelt und {prize} gewonnen\n> Es waren `{sum(member.status!=nextcord.Status.offline and not member.bot for member in ctx.guild.members)}` andere User online",
+                            getLocale(languageStrings, guildLocale, "giveawayDropSuccess", user.mention, prize, sum(member.status!=nextcord.Status.offline and not member.bot for member in ctx.guild.members)),
                             color=ctx.author.color
         )
         
@@ -310,6 +312,7 @@ class Giveaways(Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _end(self, ctx, channel: nextcord.TextChannel, message):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         try:
             message = await channel.fetch_message(message)
         except:
@@ -318,9 +321,9 @@ class Giveaways(Cog):
         giveaway = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[ctx.guild.id, message.id])
 
         if giveaway is None:
-            return await errorEmbed(self, ctx, "Es wurde kein aktives Gewinnspiel mit dieser Nachrichten ID gefunden.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNotFound"))
 
-        await successEmbed(self, ctx, f"**<a:Giveaway:1087437215648456794> Das Giveaway wird in kürze beendet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id}/)\n> **Gewinner:** {giveaway[6]}")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayEnd", ctx.guild.id, channel.id, message.id, giveaway[6]))
         
         update(table="giveaways", columns="duration", where="guild_id message_id", values=["0", ctx.guild.id, message.id])
 
@@ -328,24 +331,25 @@ class Giveaways(Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _rerroll(self, ctx, channel: nextcord.TextChannel, message, winners):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         try:
             message = await channel.fetch_message(message)
         except:
             raise commands.MessageNotFound(argument=message)
 
         if not winners.isdigit():
-            return await errorEmbed(self, ctx, "Die anzahl an gewinnern muss eine ganze Zahl sein.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWholeNumber"))
 
         giveaway = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[ctx.guild.id, message.id])
 
         if giveaway is not None:
-            return await errorEmbed(self, ctx, "Das Giveaway ist noch am laufen.**\n> **Du kannst mit `-giveaway end <#channel> <messageid>` das Gewinnspiel beenden.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayStillRunning"))
 
         emote = self.bot.get_emoji(1087437215648456794)
         is_giveaway = any(reaction.emoji == emote for reaction in message.reactions)
 
         if not is_giveaway:
-            return await errorEmbed(self, ctx, "Diese Nachricht ist kein Giveaway.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNotFound"))
 
         guild = self.bot.get_guild(ctx.guild.id)
         winner_list = []
@@ -370,14 +374,14 @@ class Giveaways(Cog):
             entries.pop(entries.index(winner))
 
         if not winner_list:
-            return await errorEmbed(self, ctx, "Es konnte kein Gewinner entschieden werden.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNoWinnerSmall"))
 
         winners = ', '.join(winner_list)
 
         if len(winner_list) > 1:
-            string = f"Herzlichen Glückwunsch, {winners} haben {message.embeds[0].title} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+            string = getLocale(languageStrings, guildLocale, "giveawayWinner", winners, message.embeds[0].title, len(backupEntries))
         else:
-            string = f"Herzlichen Glückwunsch, {winners} hat {message.embeds[0].title} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+            string = getLocale(languageStrings, guildLocale, "giveawayWinners", winners, message.embeds[0].title, len(backupEntries))
 
         embed = nextcord.Embed(
             description=string,
@@ -390,10 +394,11 @@ class Giveaways(Cog):
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 20, commands.BucketType.user)
     async def _list(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         giveaways = readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])
 
         if not giveaways:
-            return await errorEmbed(self, ctx, "Es wurden keine aktiven Giveaways gefunden.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNoActive"))
 
         fields = []
 
@@ -407,9 +412,11 @@ class Giveaways(Cog):
             start = datetime.fromtimestamp(giveaway[3])
             unix = int(mktime((start + timedelta(seconds=giveaway[4])).timetuple()))
 
-            fields.append({"name": f"**{giveaway_price}**", "value": f"> **Channel:** {giveaway_channel_link}\n> **Nachricht:** {giveaway_message_link}\n> **Hoster:** {giveaway_hoster.mention}\n> **Gewinner:** {giveaway_winner}\n> **Bis:** <t:{unix}:f>", "inline": True})
+            value = getLocale(languageStrings, guildLocale, "giveawayField", giveaway_channel_link, giveaway_message_link, giveaway_hoster.mention, giveaway_winner, unix)
+            fields.append({"name": f"**{giveaway_price}**", "value": value, "inline": True})
         
-        await infoEmbed(self, ctx, "**<a:Giveaway:1087437215648456794> Aktive Giveaways**", fields=fields)
+        
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayList"), fields=fields)
 
     @Cog.listener()
     async def on_ready(self):
@@ -460,6 +467,7 @@ class Giveaways(Cog):
 
         if giveaway is not None:
             guild = self.bot.get_guild(guild_id)
+            guildLocale = getGuildLanguage(guild_id)
             channel = self.bot.get_channel(giveaway[0])
             message = await channel.fetch_message(message_id)
             host = guild.get_member(giveaway[2])
@@ -486,17 +494,19 @@ class Giveaways(Cog):
                 entries.pop(entries.index(winner))
 
             if not winner_list:
+                
                 embed = nextcord.Embed(
                     title=giveaway[3],
-                    description=f"Es konnten keine Gewinner entschieden werden\n\n> Endete: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {host.mention}",
+                    description=getLocale(languageStrings, guildLocale, "giveawayNoWinnerBig", unix, host.mention),
                     color=host.color,
                     timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
                 )
-                embed.set_footer(text=f"{giveaway[1]} Gewinner | Endete")
+
+                embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
 
                 await message.edit(embed=embed)
 
-                await errorEmbed(self, channel, "Es konnte kein Gewinner entschieden werden.")
+                await errorEmbed(self, channel, getLocale(languageStrings, guildLocale, "giveawayNoWinnerSmall"))
 
                 return delete(table="giveaways", where="guild_id message_id", values=[guild_id, message_id])
 
@@ -504,22 +514,24 @@ class Giveaways(Cog):
 
             embed = nextcord.Embed(
                 title=giveaway[3],
-                description=f"Gewinner: {winners}\n\n> Endete: <t:{unix}:R> (<t:{unix}:f>)\n> Host: {host.mention}",
+                description=getLocale(languageStrings, guildLocale, "giveawayEnded", winners, unix, host.mention),
                 color=host.color,
                 timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
             )
-            embed.set_footer(text=f"{giveaway[1]} Gewinner | Endete")
+            embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
 
             await message.edit(embed=embed)
 
             if len(winner_list) > 1:
-                string = f"Herzlichen Glückwunsch, {winners} haben {giveaway[3]} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+                string = getLocale(languageStrings, guildLocale, "giveawayWinners", winners, giveaway[3], len(backupEntries))
             else:
-                string = f"Herzlichen Glückwunsch, {winners} hat {giveaway[3]} gewonnen\n> `{len(backupEntries)}` gültige Teilnehmer"
+                string = getLocale(languageStrings, guildLocale, "giveawayWinner", winners, giveaway[3], len(backupEntries))
 
             await successEmbed(self, channel, string, color=host.color)
 
             delete(table="giveaways", where="guild_id message_id", values=[guild_id, message_id])            
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("giveaways")
     bot.add_cog(Giveaways(bot))
