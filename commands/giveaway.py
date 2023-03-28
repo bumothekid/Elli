@@ -21,7 +21,7 @@ class Giveaways(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
 
-        await infoEmbed(self, ctx, getLocale(guildLocale, "giveawayDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayDescription", prefix))
 
     @_giveaway.command(name="create", aliases=["start"])
     @commands.max_concurrency(1, commands.BucketType.user)
@@ -31,13 +31,13 @@ class Giveaways(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, getLocale(guildLocale, "giveawayLimit"))
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
 
         questions = [
-            getLocale(guildLocale, "giveawayQuestionChannel", ctx.channel.mention),
-            getLocale(guildLocale, "giveawayQuestionTime"),
-            getLocale(guildLocale, "giveawayQuestionPrize"),
-            getLocale(guildLocale, "giveawayQuestionWinner")
+            getLocale(languageStrings, guildLocale, "giveawayQuestionChannel", ctx.channel.mention),
+            getLocale(languageStrings, guildLocale, "giveawayQuestionTime"),
+            getLocale(languageStrings, guildLocale, "giveawayQuestionPrize"),
+            getLocale(languageStrings, guildLocale, "giveawayQuestionWinner")
         ]
 
         anwsers = {}
@@ -62,7 +62,7 @@ class Giveaways(Cog):
                     return await errorEmbed(self, ctx, "giveawayTimeout")
                 
                 if trys == 3:
-                    return await errorEmbed(self, ctx, getLocale(guildLocale, "giveawayFails"))
+                    return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayFails"))
 
                 match i:
                     case 0:
@@ -148,7 +148,7 @@ class Giveaways(Cog):
                         await userAnwser.delete()
 
                         if userAnwser.content == '':
-                            anwser = getLocale(guildLocale, "giveawayNoPrize")
+                            anwser = getLocale(languageStrings, guildLocale, "giveawayNoPrize")
                         elif len(userAnwser.content) > 150:
                             embed = nextcord.Embed(
                                 description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayCharLimit"),
