@@ -1,5 +1,5 @@
 {
-    "defaultMenu": "**<:Commands:1087442278118871140> {0}'s command categories**\n\n> **<:Discord:1087443793810301051> General**\n> **💡 Useful**\n> **<:Moderator:1087456158421352508> Moderation**\n> **<:Fun:1087447621582454926> Fun**\n> **<:MemberJoin:1087453129198546964> Welcome**\n> **<:MemberLeave:1087453384858157149> Leave**\n> **<a:Giveaway:1087437215648456794> Giveaway**\n> **<:Ticket:1087437978873376798> Ticket System**\n> **⏳ Tempchannel**\n> **<:Roles:1087457575257255998> Reaction Roles**\n> **🌟 Level System**\n> ** Autoroles**\n> **📨 Invite-Logger**\n> **<:Badword:1087441597622399056> Bad Words**\n> **<:Ghostping:1087448502323384330> Anti Ghostping**\n> **<:Automod:1087440612430717068> Link Blocker**",
+    "defaultMenu": "**<:Commands:1087442278118871140> {0}'s command categories**\n\n> **<:Discord:1087443793810301051> General**\n> **💡 Useful**\n> **<:Moderator:1087456158421352508> Moderation**\n> **<:Fun:1087447621582454926> Fun**\n> **<:MemberJoin:1087453129198546964> Welcome**\n> **<:MemberLeave:1087453384858157149> Leave**\n> **<a:Giveaway:1087437215648456794> Giveaway**\n> **<:Ticket:1087437978873376798> Ticket System**\n> **⏳ Tempchannel**\n> **<:Roles:1087457575257255998> Reaction Roles**\n> **🌟 Level System**\n> **<:autoroles:1090725070323859506> Autoroles**\n> **📨 Invite-Logger**\n> **<:Badword:1087441597622399056> Bad Words**\n> **<:Ghostping:1087448502323384330> Anti Ghostping**\n> **<:Automod:1087440612430717068> Link Blocker**",
     "slashHelp": "**<:Commands:1087442278118871140> {0}'s command categories**\n\n> The bot is currently still running on message commands.\n> Therefore, we kindly ask you to use the regular help command `{1}help`.",
     "categoriesPlaceholder": "Choose a category",
     "categories": "Categories",
@@ -26,7 +26,7 @@
     "levelsystem": "Level System",
     "levelsystemDescription": "**🌟 Level System**\n\n> `{0}level <@user>`\n> <:Reply:1087438925632643082> Shows you the level of a user\n> `{0}leaderboard`\n> <:Reply:1087438925632643082> Shows you the top 10 users\n\n> `{0}level settings`\n> <:Reply:1087438925632643082> Shows you all possible settings for the level system",
     "autoroles": "Autoroles",
-    "autorolesDescription": "** Autoroles**\n\n> `{0}autorole add <@role>`\n> <:Reply:1087438925632643082> Adds a new autorole\n> `{0}autorole remove <@role>`\n> <:Reply:1087438925632643082> Removes a autorole\n> `{0}autorole list`\n> <:Reply:1087438925632643082> Shows you all autoroles",
+    "autorolesDescription": "**<:autoroles:1090725070323859506> Autoroles**\n\n> `{0}autorole add <@role>`\n> <:Reply:1087438925632643082> Adds a new autorole\n> `{0}autorole remove <@role>`\n> <:Reply:1087438925632643082> Removes a autorole\n> `{0}autorole show`\n> <:Reply:1087438925632643082> Shows you all autoroles",
     "invitelogger": "Invite-Logger",
     "inviteloggerDescription": "**📨 Invite-Logger**\n\n> *Soon!*",
     "badwords": "Bad Words",

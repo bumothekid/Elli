@@ -1,5 +1,5 @@
 {
-    "autorolesHelp": "** Autoroles**\n\n> `{0}autoroles add <@role>`\n> `{0}autoroles remove <@role>`\n> `{0}autoroles show`",
+    "autorolesHelp": "**<:autoroles:1090725070323859506> Autoroles**\n\n> `{0}autoroles add <@role>`\n> `{0}autoroles remove <@role>`\n> `{0}autoroles show`",
     "userRoleHigher": "You can't add that role as autorole.",
     "botRoleHigher": "I can't add this role as autorole.",
     "maxAutoroles": "You can't add more than 9 autoroles.",

@@ -10,8 +10,6 @@ cache = []
 prefix = None
 languageStrings = {}
 
-# Todo!: Pick a emote for autoroles category
-
 class ClassHelp(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -28,7 +26,7 @@ class ClassHelp(commands.Cog):
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
-    @nextcord.slash_command(name="help", description_localizations={nextcord.Locale.en_GB: "Shows the help menu", nextcord.Locale.en_US: "Shows the help menu", "de": "Zeigt das Hilfemenü"})
+    @nextcord.slash_command(name="help", description_localizations={nextcord.Locale.en_GB: "Shows the help menu", nextcord.Locale.en_US: "Shows the help menu", nextcord.Locale.de: "Zeigt das Hilfemenü"})
     async def _help(self, interaction):
         guildLocale = getGuildLanguage(interaction.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])[0]
@@ -92,7 +90,7 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label=tempchannel, emoji="⏳", default=category == "tempchannel"),
             nextcord.SelectOption(label=reactionroles, emoji="<:Roles:1087457575257255998>", default=category == "reactionroles"),
             nextcord.SelectOption(label=levelsystem, emoji="🌟", default=category == "levelsystem"),
-            nextcord.SelectOption(label=autoroles, default=category == "autoroles"),
+            nextcord.SelectOption(label=autoroles, emoji="<:autoroles:1090725070323859506>", default=category == "autoroles"),
             nextcord.SelectOption(label=invitelogger, emoji="📨", default=category == "invitelogger"),
             nextcord.SelectOption(label=badwords, emoji="<:Badword:1087441597622399056>", default=category == "badwords"),
             nextcord.SelectOption(label=antighostping, emoji="<:Ghostping:1087448502323384330>", default=category == "antighostping"),
