@@ -6,7 +6,7 @@
     "noBackticksInPrefix": "Die Prefix darf kein ` enthalten.",
     "prefixSameAsOld": "Die Prefix `{0}` ist bereits die aktuelle Prefix.",
     "prefixSet": "**<:Commands:1087442278118871140>  Prefix gesetzt**\n\n> **Prefix:** `{0}`\n> **Alte Prefix:** `{1}`",
-    "onlyAvailableLanguage": "Die Sprache `{0}` ist nicht verfügbar.**\n> Die verfügbaren Sprachen sind: `{1}`** ",
+    "onlyAvailableLanguages": "Die Sprache `{0}` ist nicht verfügbar.**\n> Die verfügbaren Sprachen sind: `{1}`** ",
     "languageSameAsOld": "Die Sprache `{0}` ist bereits die aktuelle Sprache.",
     "languageSet": "**<:Commands:1087442278118871140> Sprache gesetzt**\n\n> **Sprache:** `{0}`\n> **Alte Sprache:** `{1}`",
     "inviteDescription": "**<:Commands:1087442278118871140> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=8)"

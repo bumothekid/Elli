@@ -6,7 +6,7 @@
     "noBackticksInPrefix": "It is not allowed to have the ` character in the prefix.",
     "prefixSameAsOld": "The prefix is already set to `{0}`.",
     "prefixSet": "**<:Commands:1087442278118871140>  Prefix set**\n\n> **Prefix:** `{0}`\n> **Old prefix:** `{1}`",
-    "onlyAvailableLanguage": "The language `{0}` is not available.**\n> The available languages are: `{1}`** ",
+    "onlyAvailableLanguages": "The language `{0}` is not available.**\n> The available languages are: `{1}`** ",
     "languageSameAsOld": "The language is already set to `{0}`.",
     "languageSet": "**<:Commands:1087442278118871140> Language set**\n\n> **Language:** `{0}`\n> **Old language:** `{1}`",
     "inviteDescription": "**<:Commands:1087442278118871140> Invite**\n\n> **Recommended:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=8)"
