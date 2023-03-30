@@ -1,0 +1,20 @@
+{
+    "ticketsystemDescription": "**<:Ticket:1087437978873376798> Ticket System**\n\n> `{0}ticket create <#channel> <@role> <text>`\n> `{0}ticket update <#channel> <messageid> <@role> <text>`\n> `{0}ticket delete <#channel> <messageid>`\n> `{0}ticket message <text>`\n> `{0}ticket list`\n> `{0}ticket log set <#channel>`\n> `{0}ticket log remove`\n\n> Variables for custom message: `{user_name}` `{user_discriminator}` `{user_mention}` `{ticket_link}` `{guild_name}` `{moderation_role}`\n> You can create a ticket with multiple lines using `\\n`",
+    "ticketMessage": "Hey {0}, you will be assisted soon.\n\n**Ticket by {1}#{2}**",
+    "ticketCreated": "**<:Ticket:1087437978873376798> Ticket created**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Support Role:** {3}",
+    "ticketNotFound": "No ticket was found.",
+    "ticketUpdated": "**<:Ticket:1087437978873376798> Ticket updated**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Support Role:** {3}",
+    "ticketDeleted": "**<:Ticket:1087437978873376798> Ticket deleted**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Support Role:** {2}\n> **Text:** {3}",
+    "ticketMessageUpdated": "** <:Ticket:1087437978873376798> Message updated**\n\n> **Message:**\n{0}",
+    "ticketList": "> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Support Role:** {3}",
+    "ticketLogSet": "**<:Ticket:1087437978873376798> Log channel set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)",
+    "ticketLogNotFound": "No log channel has been set yet.",
+    "ticketLogRemoved": "**<:Ticket:1087437978873376798> Log channel removed**",
+    "ticketAlreadyOpen": "You already have a ticket open on {0}.",
+    "userTicketCreated": "**<:Ticket:1087437978873376798> Ticket created**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **User:** {3}\n> **Support:** {4}",
+    "userTicketClosed": "**<:Ticket:1087437978873376798> Ticket closed**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **User:** {3}\n> **Support:** {4}",
+    "userTicketReopened": "**<:Ticket:1087437978873376798> Ticket reopened**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **User:** {3}\n> **Support:** {4}",
+    "userTicketCloseNoPermission": "{0}, you do not have permission to close this ticket**\n\n**> You need the {1} role",
+    "userTicketDeleted": "**<:Ticket:1087437978873376798> Ticket will be deleted**\n\n> **Ticket:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **User:** {3}\n> **Support:** {4}"
+}
+    
