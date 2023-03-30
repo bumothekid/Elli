@@ -38,5 +38,5 @@ def checkLink(text: str) -> bool:
 
     return "discord." in text or "discordapp." in text
 
-async def connectionTimeout(bot, ctx, error):
-    await errorEmbed(bot, ctx, f"Connection Timeout. Please try again later. ({error})")
+async def connectionTimeout(bot, ctx):
+    await errorEmbed(bot, ctx, "Connection Timeout. Please try again later.")

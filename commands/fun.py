@@ -99,7 +99,7 @@ class Fun(Cog):
                 r = requests.get("https://aws.random.cat/meow", timeout=10)
                 r.raise_for_status()
             except requests.exceptions.ConnectTimeout as e:
-                return await connectionTimeout(self.bot, ctx, e)
+                return await connectionTimeout(self.bot, ctx)
             except requests.exceptions.RequestException as e:
                 raise commands.CommandError(e)
             
@@ -115,7 +115,7 @@ class Fun(Cog):
                 r = requests.get("https://random.dog/woof.json", timeout=10)
                 r.raise_for_status()
             except requests.exceptions.ConnectTimeout as e:
-                return await connectionTimeout(self.bot, ctx, e)
+                return await connectionTimeout(self.bot, ctx)
             except requests.exceptions.RequestException as e:
                 raise commands.CommandError(e)
             
