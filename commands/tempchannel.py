@@ -4,7 +4,9 @@ from nextcord.ext.commands import Cog
 from .utils.other import safeDict
 from .utils.database import readOne, readAll, insert, update, delete
 from .utils.embeds import infoEmbed, successEmbed, errorEmbed
+from .utils.language import getLanguageStrings, getGuildLanguage, getLocale
 
+languageStrings = {}
 class Tempchannel(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -12,12 +14,17 @@ class Tempchannel(Cog):
     @commands.group(name="tempchannel", invoke_without_command=True, aliases=['temp'])
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _tempchannel(self, ctx):
-        await infoEmbed(self, ctx, "** `⏳`Tempchannel Commands**\n\n> `-tempchannel set <channel>`\n> `-tempchannel remove`\n> `-tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
+        
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelDescription", prefix))
 
     @_tempchannel.command(name="add", aliases=['create', 'set'])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _add(self, ctx, channel: nextcord.VoiceChannel):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
         if channel not in ctx.guild.voice_channels:
             raise commands.ChannelNotFound(channel)
 
@@ -25,37 +32,40 @@ class Tempchannel(Cog):
 
         if tempchannel is not None:
             update(table="tempchannels", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
+            
+            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelSet", channel.name, tempchannel[2]))
 
-            return await successEmbed(self, ctx, f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{channel.name}`\n> **Name:** `{tempchannel[2]}`")
-
-        insert(table="tempchannels", columns="guild_id, channel_id, name", values=[ctx.guild.id, channel.id, "⏳ {user}"])
-
-        await successEmbed(self, ctx, f"** `⏳`Tempchannel erstellt**\n\n> **Channel:** `{channel.name}`\n> **Name:** `⏳ {{name}}`")
+        insert(table="tempchannels", columns="guild_id, channel_id, name", values=[ctx.guild.id, channel.id, "⏳ {name}"])
+        
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelSet", channel.name, "⏳ {name}"))
 
     @_tempchannel.command(name="remove", aliases=['delete', 'del'])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _remove(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            return await errorEmbed(self, ctx, "Es existiert noch kein Tempchannel auf diesem Server.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNotSet"))
 
         update(table="tempchannels", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
-
-        await successEmbed(self, ctx, f"** `⏳`Tempchannel entfernt**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{tempchannel[2]}`")
+        
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelRemoved", tempchannel[1], tempchannel[2]))
 
     @_tempchannel.command(name="name", aliases=['setname'])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _name(self, ctx, *, name):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            return await errorEmbed(self, ctx, "Es existiert noch kein Tempchannel auf diesem Server.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNotSet"))
 
         update(table="tempchannels", columns="name", where="guild_id", values=[name, ctx.guild.id])
-        await successEmbed(self, ctx, f"** `⏳`Tempchannel aktualisiert**\n\n> **Channel:** `{tempchannel[1]}`\n> **Name:** `{name}`")
+        
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNameSet", tempchannel[1], name))
 
     @Cog.listener()
     async def on_ready(self):
@@ -86,7 +96,7 @@ class Tempchannel(Cog):
                     if len(before.channel.members) == 0:
                         delete(table="open_tempchannels", where="guild_id channel_id", values=[member.guild.id, before.channel.id])
 
-                        await before.channel.delete(reason="Tempchannel leer")
+                        await before.channel.delete(reason="Tempchannel empty")
 
         if tempchannel is not None:
             if after.channel:
@@ -109,4 +119,6 @@ class Tempchannel(Cog):
 
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("tempchannel")
     bot.add_cog(Tempchannel(bot))

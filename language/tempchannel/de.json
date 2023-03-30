@@ -1,0 +1,7 @@
+{
+    "tempchannelDescription": "**`⏳` Tempchannel Commands**\n\n> `{0}tempchannel set <channel>`\n> `{0}tempchannel remove`\n> `{0}tempchannel name <name>`\n\n> Variablen für den Namen: `{user}`, `{anzahl}`",
+    "tempchannelSet": "**`⏳` Tempchannel gesetzt**\n\n> **Channel:** `{0}`\n> **Name:** `{1}`",
+    "tempchannelNotSet": "Es ist noch kein Tenmpchannel gesetzt.",
+    "tempchannelRemoved": "**`⏳` Tempchannel entfernt**\n\n> **Channel:** `{0}`\n> **Name:** `{1}`",
+    "tempchannelNameSet": "**`⏳` Tempchannel Name geändert**\n\n> **Channel:** `{0}`\n> **Name:** `{1}`",
+}
