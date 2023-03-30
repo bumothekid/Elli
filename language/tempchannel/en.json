@@ -1,5 +1,5 @@
 {
-    "tempchannelDescription": "**`⏳` Tempchannel commands**\n\n> `{0}tempchannel set <channel>`\n> `{0}tempchannel remove`\n> `{0}tempchannel name <name>`\n\n> Variables for the name: `{{user}}`, `{{count}}`",
+    "tempchannelDescription": "**`⏳` Tempchannel commands**\n\n> `{0}tempchannel set <channel>`\n> `{0}tempchannel remove`\n> `{0}tempchannel name <name>`\n\n> Variables for the name: `{{user}}`, `{{amount}}`",
     "tempchannelSet": "**`⏳` Tempchannel set**\n\n> **Channel:** `{0}`\n> **Name:** `{1}`",
     "tempchannelNotSet": "No tempchannel has been set yet.",
     "tempchannelRemoved": "**`⏳` Tempchannel removed**\n\n> **Channel:** `{0}`\n> **Name:** `{1}`",
