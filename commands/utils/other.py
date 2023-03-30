@@ -2,6 +2,7 @@ import nextcord
 from re import I, findall
 from .database import readOne, insert
 from string import capwords
+from .embeds import errorEmbed
 
 class safeDict(dict):
     def __missing__(self, key):
@@ -36,3 +37,6 @@ def checkLink(text: str) -> bool:
         return True
 
     return "discord." in text or "discordapp." in text
+
+async def connectionTimeout(bot, ctx, error):
+    await errorEmbed(bot, ctx, f"Connection Timeout. Please try again later. ({error})")

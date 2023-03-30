@@ -7,7 +7,7 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
-from .utils.other import capString, checkLink
+from .utils.other import capString, checkLink, connectionTimeout
 
 languageStrings = {}
 class Fun(Cog):
@@ -96,8 +96,10 @@ class Fun(Cog):
     async def _cat(self, ctx):
         async with ctx.channel.typing():
             try:
-                r = requests.get("https://aws.random.cat/meow")
+                r = requests.get("https://aws.random.cat/meow", timeout=10)
                 r.raise_for_status()
+            except requests.exceptions.ConnectTimeout as e:
+                return await connectionTimeout(self.bot, ctx, e)
             except requests.exceptions.RequestException as e:
                 raise commands.CommandError(e)
             
@@ -110,8 +112,10 @@ class Fun(Cog):
     async def _dog(self, ctx):
         async with ctx.channel.typing():
             try:
-                r = requests.get("https://random.dog/woof.json")
+                r = requests.get("https://random.dog/woof.json", timeout=10)
                 r.raise_for_status()
+            except requests.exceptions.ConnectTimeout as e:
+                return await connectionTimeout(self.bot, ctx, e)
             except requests.exceptions.RequestException as e:
                 raise commands.CommandError(e)
             
