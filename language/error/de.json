@@ -4,7 +4,7 @@
     "botMissingPermissions": "Mir fehlen folgende Berechtigungen um diesen Befehl zu nutzen:**\n> {0} **",
     "botMissingPermission": "Mir fehlt die folgende Berechtigung um diesen Befehl zu nutzen:**\n> {0} **",
     "missingPermissions": "Dir fehlen folgende Berechtigungen um diesen Befehl zu nutzen:**\n> {0} ** ",
-    "missingPermission": "Mir fehlt die folgende Berechtigung um diesen Befehl zu nutzen:**\n> {0} ** ",
+    "missingPermission": "Dir fehlt die folgende Berechtigung um diesen Befehl zu nutzen:**\n> {0} ** ",
     "notOwner": "Nur die Developer können diesen Befehl ausführen.",
     "userNotFound": "Ich konnte diesen User nicht finden.",
     "channelNotFound": "Ich konnte diesen Channel nicht finden.",
