@@ -5,7 +5,9 @@ from nextcord.ext import commands
 from nextcord.ext.commands import Cog
 from .utils.embeds import errorEmbed, infoEmbed, successEmbed
 from .utils.database import readOne, insert, delete
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 
+languageStrings = {}
 class ReactionRole(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -13,16 +15,20 @@ class ReactionRole(Cog):
     @commands.group(name="rr", aliases=["reactionrole"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _rr(self, ctx):
-        await infoEmbed(self, ctx, "**<:Roles:1087457575257255998> Reactionrole einrichtung**\n\n> `-rr create <#channel> <messageid> <emote> <@&rolle>`\n> `-rr delete <#channel> <messageid> <emote>`")
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        prefix = readOne("prefix", "guilds", "guild_id", ctx.guild.id)[0]
+        
+        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDescription", prefix))
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _create(self, ctx, channel: nextcord.TextChannel, message, reaction: str, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
         if exists is not None:
-            return await errorEmbed(self, ctx, "Du hast bereits eine Reactionrole mit diesem Emote bei dieser Nachricht.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleAlreadyExists"))
 
         if "<:" in reaction:
             reaction_id = re.findall(r"[0-9]+", reaction)[0]
@@ -49,16 +55,17 @@ class ReactionRole(Cog):
                 raise commands.EmojiNotFound(argument=reaction)
 
         insert(table="reactionroles", columns="guild_id, channel_id, message_id, reaction, role_id", values=[ctx.guild.id, channel.id, message.id, reaction, role.id])
-        await successEmbed(self, ctx, f"**<:Roles:1087457575257255998> Die Reactionrole wurde eingerichtet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleCreated", ctx.guild.id, channel.id, message.id, reaction, role.mention))
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     async def _delete(self, ctx, channel: nextcord.TextChannel, message, reaction: str):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
         if exists is None:
-            return await errorEmbed(self, ctx, "Du hast keine Reactionrole mit diesem Emote bei dieser Nachricht.")
+            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDoesntExist"))
         
         try:
             message = await self.bot.get_channel(channel.id).fetch_message(message)
@@ -77,7 +84,8 @@ class ReactionRole(Cog):
             raise commands.EmojiNotFound(argument=reaction)
         
         delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id,message.id, str(reaction)])
-        await successEmbed(self, ctx, f"**<:Roles:1087457575257255998> Die Reactionrole wurde entfernt**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/{message.id})\n> **Emote:** {reaction}\n> **Rolle:** {role.mention}")
+        
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDeleted", ctx.guild.id, channel.id, message.id, reaction, role.mention))
 
 
     @Cog.listener()
@@ -113,4 +121,6 @@ class ReactionRole(Cog):
                 await member.remove_roles(role, reason="Reactionrole")
     
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("reactionrole")
     bot.add_cog(ReactionRole(bot))

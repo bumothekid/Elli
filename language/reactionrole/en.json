@@ -1,0 +1,7 @@
+{
+    "reactionroleDescription": "**<:Roles:1087457575257255998> Reactionrole setup**\n\n> `-rr create <#channel> <messageid> <emote> <@role>`\n> `-rr delete <#channel> <messageid> <emote>`",
+    "reactionroleAlreadyExists": "There is a already a existing reaction role with this emote on this message.",
+    "reactionroleCreated": "**<:Roles:1087457575257255998> The reactionrole was set up**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **Emote:** {3}\n> **Role:** {4}",
+    "reactionroleDoesntExist": "There is no reactionrole with this emote on this message.",
+    "reactionroleDeleted": "**<:Roles:1087457575257255998> Die Reactionrole wurde gelöscht**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2})\n> **Emote:** {3}"
+}
