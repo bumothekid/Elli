@@ -45,6 +45,7 @@ async def on_ready():
 
 @tasks.loop(seconds=100)
 async def statusTask():
+    await bot.wait_until_ready()
     User = sum(len(s.members) for s in bot.guilds)
     await bot.change_presence(
         activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {User} User",
@@ -135,5 +136,5 @@ if __name__ == '__main__':
     bot_token = os.getenv("TOKEN")
     test = os.getenv("TEST")
 
-    bot.run(test_token if test == "True" else bot_token)
     statusTask.start()
+    bot.run(test_token if test == "True" else bot_token)
