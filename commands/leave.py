@@ -77,7 +77,7 @@ class Leave(Cog):
     @_leave.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _picture(self, ctx):
-        raise commands.MissingRequiredArgument
+        raise commands.MissingRequiredArgument(ctx.command)
     
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)

@@ -26,7 +26,7 @@ class Welcome(Cog):
     @_welcome.group(name="channel", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _channel(self, ctx):
-        raise commands.MissingRequiredArgument
+        raise commands.MissingRequiredArgument(ctx.command)
 
     @_channel.command(name="set", aliases=["add", "update"])
     @commands.has_permissions(manage_guild=True)
@@ -79,7 +79,7 @@ class Welcome(Cog):
     @_welcome.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def _picture(self, ctx):
-        raise commands.MissingRequiredArgument
+        raise commands.MissingRequiredArgument(ctx.command)
 
     @_picture.command(name="set", aliases=["add", "update", "select"])
     @commands.has_permissions(manage_guild=True)
