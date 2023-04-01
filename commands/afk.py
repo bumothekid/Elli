@@ -5,7 +5,9 @@ from time import time
 from .utils.database import readOne, readAll, insert, update, delete
 from .utils.embeds import errorEmbed, successEmbed
 from .utils.other import getPrefixFromDatabase, checkLink
+from .utils.language import getGuildLanguage, getLocale, getLanguageStrings
 
+languageStrings = {}
 class Afk(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -13,20 +15,21 @@ class Afk(Cog):
     @commands.command(name="afk", aliases=["away"], invoke_without_command=True)
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def _afk(self, ctx, *, reason="AFK"):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         is_afk = readOne(columns="reason", table="afk", where="guild_id user_id", values=[ctx.guild.id, ctx.author.id])
 
         if checkLink(reason):
-            return await errorEmbed(ctx, "Es dürfen keine Links oder Invites in deinem AFK-Status sein.")
+            return await errorEmbed(self, ctx, getLocale(guildLocale, "afk", "linkInReason"))
 
-        if len(reason) > 1000:
-            return await errorEmbed(ctx, "Dein AFK-Status darf nicht länger als `1000` Zeichen sein.")
+        if len(reason) > 150:
+            return await errorEmbed(self, ctx, getLocale(guildLocale, "afk", "reasonTooLong"))
 
         if is_afk is not None:
             update(table="afk", columns="reason", where="guild_id user_id", values=[reason, ctx.guild.id, ctx.author.id])
         else:
             insert(table="afk", columns="guild_id, user_id, time, reason", values=[ctx.guild.id, ctx.author.id, time(), reason])
 
-        await successEmbed(self, ctx, f"**<:Idle:1087452184582561802> Du bist jetzt AFK**\n\n**Grund:** {reason}", color=nextcord.Color.dark_gold())
+        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "afkSet", reason), color=nextcord.Color.dark_gold())
 
     @Cog.listener()
     async def on_message(self, message):
@@ -40,23 +43,28 @@ class Afk(Cog):
 
         for user in users:
             if user[0] == message.author.id:
+                guildLocale = getGuildLanguage(message.guild.id)
+                
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
+                timeUp = getLocale(languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
 
                 delete(table="afk", where="guild_id user_id", values=[message.guild.id, message.author.id])
 
-                return await successEmbed(self, message, f"**<:Online:1087457380591206450> Du bist nicht mehr AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}")
+                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "afkRemoved", timeUp, user[2]))
     
             if user[0] in [member.id for member in message.mentions]:
+                guildLocale = getGuildLanguage(message.guild.id)
                 member = message.guild.get_member(user[0])
 
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = f"`{int(hours)} Stunde(n), {int(minutes)} Minuten und {int(seconds)} Sekunden`" if hours >= 1 else f"`{int(minutes)} Minuten und {int(seconds)} Sekunden`"
+                timeUp = getLocale(languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
 
-                return await successEmbed(self, message, f"**<:Idle:1087452184582561802> {member.mention} ist AFK**\n\n**Länge:** {timeUp}\n**Grund:** {user[2]}", color=nextcord.Color.dark_gold())
+                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "afkMention", member.mention, timeUp, user[2]), color=nextcord.Color.dark_gold())
 
 
 def setup(bot):
+    global languageStrings
+    languageStrings = getLanguageStrings("afk")
     bot.add_cog(Afk(bot))
