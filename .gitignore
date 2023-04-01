@@ -7,6 +7,7 @@ assets/leave/user_card*
 *.code-workspace
 .DS_Store
 database.db
+cool\ readme.md
 *.py[cod]
 *$py.class
 
