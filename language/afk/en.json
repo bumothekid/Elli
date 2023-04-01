@@ -1,0 +1,9 @@
+{
+    "linkInReason": "Links are not allowed in your AFK status.",
+    "reasonTooLong": "Your AFK status cannot be longer than 150 characters.",
+    "afkSet": "**<:Idle:1087452184582561802> You are now AFK**\n\n**Reason:** {0}",
+    "timeUpHours": "`{int(0)} hour(s), {int(1)} minute(s), and {int(2)} second(s)`",
+    "timeUp": "`{int(0)} minute(s) and {int(1)} second(s)`",
+    "afkRemoved": "**<:Online:1087457380591206450> You are no longer AFK**\n\n**Duration:** {0}\n**Reason:** {1}",
+    "isAfk": "**<:Idle:1087452184582561802> {0} is AFK**\n\n**Duration:** {1}\n**Reason:** {2}"
+}
