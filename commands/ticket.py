@@ -160,11 +160,6 @@ class Ticket(Cog):
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        # TODO! : Rework complete ticket system.
-        # !
-        # !
-        # !
-        
         if payload.member is None:
             return
 
@@ -176,9 +171,10 @@ class Ticket(Cog):
             return
 
         db_ticket = readOne(columns="*", table="tickets", where="guild_id message_id", values=[payload.guild_id, payload.message_id])
-        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id user_id", values=[payload.guild_id, payload.user_id])
+        user_open_ticket = readOne(columns="*", table="open_tickets", where="guild_id user_id", values=[payload.guild_id, payload.user_id])
+        open_ticket = readOne(columns="*", table="open_tickets", where="guild_id channel_id", values=[payload.guild_id, payload.channel_id])
         ticket_message = readOne(columns="*", table="ticket_messages", where="guild_id", values=[payload.guild_id])
-
+        
         if db_ticket is None and open_ticket is None:
             return
 
@@ -191,7 +187,7 @@ class Ticket(Cog):
         guildLocale = getGuildLanguage(guild.id)
 
         if payload.emoji == emote:
-            if open_ticket is not None:
+            if user_open_ticket is not None:
                 await message.remove_reaction(emote, payload.member)
                 
                 return await errorEmbed(self, payload.member, getLocale(languageStrings, guildLocale, "ticketAlreadyOpen", guild.name))
