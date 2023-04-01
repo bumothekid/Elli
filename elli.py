@@ -4,7 +4,7 @@ import asyncio
 import nextcord
 from time import time
 from dotenv import load_dotenv
-from nextcord.ext import commands
+from nextcord.ext import commands, tasks
 from commands.utils.database import update
 from nextcord.ext.commands.errors import NotOwner
 from commands.utils.embeds import successEmbed, errorEmbed, devLogging
@@ -43,25 +43,23 @@ async def on_ready():
     print(bot.user.id)
     print('═════◥◣◈◢◤═════')
 
-    await statusTask()
-
+@tasks.loop(seconds=100)
 async def statusTask():
-    while True:
-        User = sum(len(s.members) for s in bot.guilds)
-        await bot.change_presence(
-            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {User} User",
-                                    url="https://www.twitch.tv/twitch")
-        )
-        await asyncio.sleep(100)
-        servers = list(bot.guilds)
-        await bot.change_presence(
-            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {len(servers)} Server",
-                                    url="https://www.twitch.tv/twitch"))
-        await asyncio.sleep(100)
-        await bot.change_presence(
-            activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name="💕-help | -invite Invite",
-                                    url="https://www.twitch.tv/twitch"))
-        await asyncio.sleep(100)
+    User = sum(len(s.members) for s in bot.guilds)
+    await bot.change_presence(
+        activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {User} User",
+                                url="https://www.twitch.tv/twitch")
+    )
+    await asyncio.sleep(100)
+    servers = list(bot.guilds)
+    await bot.change_presence(
+        activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name=f"💕-help | {len(servers)} Server",
+                                url="https://www.twitch.tv/twitch"))
+    await asyncio.sleep(100)
+    await bot.change_presence(
+        activity=nextcord.Activity(type=nextcord.ActivityType.streaming, name="💕-help | -invite Invite",
+                                url="https://www.twitch.tv/twitch"))
+    await asyncio.sleep(100)
 
 @bot.command()
 async def load(ctx, ext):
@@ -138,3 +136,4 @@ if __name__ == '__main__':
     test = os.getenv("TEST")
 
     bot.run(test_token if test == "True" else bot_token)
+    statusTask.start()
