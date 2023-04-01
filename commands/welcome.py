@@ -36,11 +36,12 @@ class Welcome(Cog):
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
         if welcome is not None:
+            message = welcome[2] if welcome[2] is not None else getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}")
             picture = welcome[3] if welcome[3] is not None else "None"
             update(table="welcome", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
 
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), picture))
+            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "welcomeChannelSet", ctx.guild.id, channel.id, message, picture))
 
         insert(table="welcome", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "welcomeDefaultMessage", "{user_mention}", "{guild_name}", "{guild_membercount}"), "null"])
 
