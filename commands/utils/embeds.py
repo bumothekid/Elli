@@ -158,7 +158,8 @@ async def successEmbed(
     file: nextcord.File = None,
     delete_after: int = None,
     thumbnail: str = None,
-    image: str = None
+    image: str = None,
+    ephemeral: bool = False
     ) -> nextcord.Message:
     """ 
     Creates and sends an successed embed
@@ -257,7 +258,12 @@ async def successEmbed(
     try:
         match type(ctx):
             case nextcord.Interaction:
-                message = await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
+                if file is None:
+                    message = await ctx.response.send_message(content=content, embed=successEmbed, delete_after=delete_after, ephemeral=ephemeral)
+
+                else:
+                    message = await ctx.response.send_message(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after, ephemeral=ephemeral)
+
                 return message
             case nextcord.ext.commands.context.Context:
                 message = await ctx.reply(content=content, embed=successEmbed, view=view, file=file, delete_after=delete_after)
@@ -311,7 +317,13 @@ async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message |
     try:
         match type(ctx):
             case nextcord.Interaction:
-                await ctx.reply(embed=errorEmbed, file=file)
+                if file is None:
+                    message = await ctx.response.send_message(embed=errorEmbed)
+
+                else:
+                    message = await ctx.response.send_message(embed=errorEmbed, file=file)
+
+                return message
             case nextcord.ext.commands.context.Context:
                 await ctx.reply(embed=errorEmbed, file=file)
             case nextcord.message.Message:
@@ -387,7 +399,7 @@ async def permissionError(bot, ctx: nextcord.Interaction):
     
     match type(ctx):
         case nextcord.Interaction:
-            await ctx.message.add_reaction(emote)
+            pass
         case nextcord.ext.commands.context.Context:
             await ctx.message.add_reaction(emote)
         case nextcord.message.Message:
@@ -396,5 +408,5 @@ async def permissionError(bot, ctx: nextcord.Interaction):
             print(type(ctx))
             print("Error: Unknown interaction")
 
-    await ctx.author.create_dm()
-    await ctx.author.dm_channel.send(embed=permissionEmbed)
+    await ctx.user.create_dm()
+    await ctx.user.dm_channel.send(embed=permissionEmbed)
