@@ -1,11 +1,11 @@
 {
-    "badwordDescription": "**<:BadWord:814817356001968141> Bad Words**\n\n> `{0}badword add <word>`\n> `{0}badword remove <word>`\n> `{0}badword show`",
+    "badwordDescription": "**<:Badword:1087441597622399056> Bad Words**\n\n> `{0}badword add <word>`\n> `{0}badword remove <word>`\n> `{0}badword show`",
     "badwordAlreadyExists": "`{0}` is already on the bad word list.",
     "badwordAdded": "`{0}` has been added to the bad word list.",
     "badwordDoesntExist": "`{0}` is not on the bad word list.",
     "badwordRemoved": "`{0}` has been removed from the bad word list.",
     "badwordNoWords": "There are no bad words for this server yet.",
-    "badwordList": "**<:BadWord:814817356001968141> Bad Words:**\n\n{0}",
+    "badwordList": "**<:Badword:1087441597622399056> Bad Words:**\n\n{0}",
     "ghostpingAlreadyOn": "Anti-Ghostping is already enabled.",
     "ghostpingOn": "Anti-Ghostping has been enabled.",
     "ghostpingAlreadyOff": "Anti-Ghostping is already disabled.",
@@ -15,6 +15,6 @@
     "linkblockerAlreadyOff": "Link blocker is already disabled.",
     "linkblockerOff": "Link blocker has been disabled.",
     "linkblockerMessage": "**<:Automod:1087440612430717068> You are not allowed to post links here.**",
-    "badwordMessage": "**<:BadWord:814817356001968141> You are not allowed to say this word.**",
+    "badwordMessage": "**<:Badword:1087441597622399056> You are not allowed to say this word.**",
     "ghostpingMessage": "**<:Ghostping:1087448502323384330> {0} ghost pinged {1}.**"
 }
