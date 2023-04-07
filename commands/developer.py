@@ -20,7 +20,7 @@ class Developer(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
+        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
 
     @_dev.command(name="add")
     async def _add(self, ctx, user: nextcord.User):
@@ -121,6 +121,28 @@ class Developer(Cog):
         msg = await channel.send(embed=embed)
 
         update("elli", "statsChannel", values=f"{channel.id}, {msg.id}")
+        
+    @_dev.command(name="getAllServers", aliases=["getServers"])
+    async def getAllServers(self, ctx):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
+        
+        serverlist = ''
+        for guild in self.bot.guilds:
+            invite = await guild.invites()
+            
+            if invite is None or len(invite) == 0:
+                serverlist += f'{guild.name} | {guild.id} | Invite\n'
+                continue
+                
+            serverlist += f'{guild.name} | {guild.id} | {invite[0]}\n'
+        
+        if len(serverlist) > 2000:
+            for i in range(0, len(serverlist), 2000):
+                await ctx.send(f"```{serverlist[i:i+2000]}```")
+                
+        else:
+            await ctx.send(f"```{serverlist}\n```")
 
     @tasks.loop(minutes=5)
     async def updateStatsLoop(self):
