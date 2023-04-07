@@ -10,5 +10,5 @@
     "languageSameAsOld": "Die Sprache `{0}` ist bereits die aktuelle Sprache.",
     "languageSet": "**<:Commands:1087442278118871140> Sprache gesetzt**\n\n> **Sprache:** `{0}`\n> **Alte Sprache:** `{1}`",
     "inviteDescription": "**<:Commands:1087442278118871140> Invite**\n\n> **Empfohlen:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=279138790647)\n> **Admin:** [`🔗` Invite](https://discord.com/oauth2/authorize?client_id={0}&scope=bot&permissions=8)",
-    "privacyDescription": "**<:Commands:1087442278118871140> Datenschutz**\n\n> **[`🔗` Datenschutzerklärung](https://github.com/bumothekid/Elli-Privacy/blob/master/PRIVACY.md)**"
+    "privacyDescription": "**<:Commands:1087442278118871140> Datenschutz**\n\n> **Datenschutzerklärung:** [`🔗` Datenschutzerklärung](https://github.com/bumothekid/Elli-Privacy/blob/master/PRIVACY.md)"
 }
