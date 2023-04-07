@@ -105,6 +105,17 @@ class General(Cog):
             ctx,
             f"**<:Commands:1087442278118871140> Vote**\n\n> **Vote:** [`🔗` Vote]()"
         )
+        
+    @commands.command(name="privacy", aliases=['tos', 'terms', 'termsandconditions', 'datenschutz', 'datenschutzerklärung'])
+    @commands.cooldown(2, 20, commands.BucketType.user)
+    async def _privacy(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        await infoEmbed(
+            self,
+            ctx,
+            getLocale(languageStrings, guildLocale, "privacyDescription"),
+        )
 
 def setup(bot):
     global languageStrings
