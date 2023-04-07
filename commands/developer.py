@@ -1,4 +1,5 @@
 # Import
+import contextlib
 import time
 import nextcord
 import re
@@ -129,17 +130,20 @@ class Developer(Cog):
         
         serverlist = ''
         for guild in self.bot.guilds:
-            invite = await guild.invites()
+            with contextlib.suppress(Exception):
+                invite = await guild.invites()
             
-            if invite is None or len(invite) == 0:
-                serverlist += f'{guild.name} | {guild.id} | Invite\n'
-                continue
+                if invite is None or len(invite) == 0:
+                    serverlist += f'{guild.name} | {guild.id} | Invite\n'
+                    continue
                 
-            serverlist += f'{guild.name} | {guild.id} | {invite[0]}\n'
+                serverlist += f'{guild.name} | {guild.id} | {invite[0]}\n'
+                
+            serverlist += f'{guild.name} | {guild.id} | Invite\n'
         
-        if len(serverlist) > 2000:
-            for i in range(0, len(serverlist), 2000):
-                await ctx.send(f"```{serverlist[i:i+2000]}```")
+        if len(serverlist) > 1900:
+            for i in range(0, len(serverlist), 1994):
+                await ctx.send(f"```{serverlist[i:i+1994]}```")
                 
         else:
             await ctx.send(f"```{serverlist}\n```")
