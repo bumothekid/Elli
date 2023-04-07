@@ -10,7 +10,18 @@ from nextcord.ext.commands.errors import NotOwner
 from commands.utils.embeds import successEmbed, errorEmbed, devLogging
 from commands.utils.other import getPrefixFromDatabase, devCheck, capString
 
-bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=nextcord.Intents.all(), help_command=None, case_insensitive=True)
+intents = nextcord.Intents.default()
+intents.guilds = True
+intents.members = True
+intents.moderation = True
+intents.emojis_and_stickers = True
+intents.invites = True
+intents.voice_states = True
+intents.guild_messages = True
+intents.message_content = True
+intents.guild_reactions = True
+
+bot = commands.Bot(command_prefix=getPrefixFromDatabase, intents=intents, help_command=None, case_insensitive=True)
 
 extensions = [
     'commands.events',
