@@ -41,7 +41,8 @@ extensions = [
     'commands.ticket',
     'commands.afk',
     'commands.automod',
-    'commands.autoroles'
+    'commands.autoroles',
+    'commands.topgg'
 ]
 
 @bot.event
