@@ -56,7 +56,7 @@ class EventsCog(Cog):
 
                 return
             
-            await infoEmbed(self, message, f"**<:Elli:1087732423074259106> {self.bot.user.name}**\n\n> **Server Prefix:** `{getPrefixFromDatabase(self, message)[0]}`\n> **[`🔗`Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)**\n> **[`🔗` Support](https://discord.gg/FWPExbfCTa)**\n> **Vote:** *Soon!*", thumbnail=self.bot.user.display_avatar.url, color=nextcord.Color.from_rgb(255, 255, 255))
+            await infoEmbed(self, message, f"**<:Elli:1087732423074259106> {self.bot.user.name}**\n\n> **Server Prefix:** `{getPrefixFromDatabase(self, message)[0]}`\n> **[`🔗`Invite](https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=279138790647)**\n> **[`🔗` Support](https://discord.gg/FWPExbfCTa)**\n> **[`🔗` Vote](https://top.gg/bot/763778168825053254/vote)**", thumbnail=self.bot.user.display_avatar.url, color=nextcord.Color.from_rgb(255, 255, 255))
     
 
 
