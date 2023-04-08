@@ -50,10 +50,10 @@ class Giveaways(Cog):
                     color=nextcord.Color.blurple()
             )
 
-            if message != None:
-                await message.edit(embed=embed)
-            else:
+            if message is None:
                 message = await ctx.reply(embed=embed)
+            else:
+                await message.edit(embed=embed)
 
             while True:
                 try:
@@ -420,12 +420,9 @@ class Giveaways(Cog):
 
     @Cog.listener()
     async def on_ready(self):
-        for i in self.bot.guilds:
-            running = readAll(columns="message_id, channel_id", table="giveaways", where="guild_id", values=[i.id])
-
-            if running:
-                for giveaway in running:
-                    asyncio.ensure_future(self.giveawayTimer(guild_id=i.id, message_id=giveaway[0]))
+        if giveaways := readAll(columns="guild_id, message_id", table="giveaways"):
+            for giveaway in giveaways:
+                asyncio.ensure_future(self.giveawayTimer(guild_id=giveaway[0], message_id=giveaway[1]))
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -447,9 +444,7 @@ class Giveaways(Cog):
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
-        giveaways = readAll(columns="message_id", table="giveaways", where="guild_id")
-        
-        if giveaways:
+        if giveaways := readAll(columns="message_id", table="giveaways", where="guild_id", values=[guild.id]):
             for giveaway in giveaways:
                 delete(table="giveaways", where="guild_id message_id", values=[guild.id, giveaway[0]])
 
