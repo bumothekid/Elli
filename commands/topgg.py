@@ -2,6 +2,8 @@ import requests
 from nextcord.ext.commands import Cog
 from nextcord.ext import tasks
 
+# Todo*: Add statcord to elli
+
 class topgg(Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -12,17 +14,21 @@ class topgg(Cog):
     @tasks.loop(hours=1)
     async def update_stats(self):
         await self.bot.wait_until_ready()
-        
+
         if self.bot.user.id == 1086789440044806174:
             return
-        
+
         try:
             server_count = len(self.bot.guilds)
             payload = {"server_count": server_count}
             r = self.sendPostRequest(f"bots/{self.bot.user.id}/stats", payload)
-            
+
+            if r.status_code in [504, 408]:
+                return
+
             if r.status_code != 200:
                 print(f"Failed to post server count\nStatus Code: {r.status_code}\nResponse: {r.text}")
+
         except Exception as e:
             print(f'Failed to post server count\n{type(e).__name__}: {e}')
             
