@@ -21,7 +21,7 @@ class Developer(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
+        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-dev getInvite <ServerID>` | Versucht einen bereits bestehenden Invite zu getten\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
 
     @_dev.command(name="add")
     async def _add(self, ctx, user: nextcord.User):
@@ -147,6 +147,20 @@ class Developer(Cog):
                 
         else:
             await ctx.send(f"```{serverlist}\n```")
+            
+    @_dev.command(name="getInvite")
+    async def getInvite(self, ctx, guildID: int):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
+        
+        guild = self.bot.get_guild(guildID)
+        invite = await guild.invites()
+        
+        if invite is None or len(invite) == 0:
+            await infoEmbed(self, ctx, f"Der Server `{guild.name}` hat keine aktiven Invites.")
+            return
+        
+        await infoEmbed(self, ctx, f"Der Server `{guild.name}` hat den Invite: `{invite[0]}`")
 
     @tasks.loop(minutes=5)
     async def updateStatsLoop(self):
