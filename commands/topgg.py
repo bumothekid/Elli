@@ -7,7 +7,7 @@ from nextcord.ext import tasks
 class topgg(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2Mzc3ODE2ODgyNTA1MzI1NCIsImJvdCI6dHJ1ZSwiaWF0IjoxNjAzNjM1NjU3fQ.1L9h7Tgj4-TPnEYKM00YCn6kK658koLujQG9Wi0RgFY'
+        self.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc2Mzc3ODE2ODgyNTA1MzI1NCIsImJvdCI6dHJ1ZSwiaWF0IjoxNjgxMjI3OTk5fQ.5T0K0DCdmfWmsfUgZ-ICG3OPPn8WOrUl80KgVOMrbK4'
         self.update_stats.start()
         self.baseURL = "https://top.gg/api/"
 
