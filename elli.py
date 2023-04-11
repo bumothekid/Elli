@@ -147,5 +147,5 @@ if __name__ == '__main__':
     test = os.getenv("TEST")
 
     statusTask.start()
-    bot.run(test_token if test == "True" else bot_token)
     update(table="elli", columns="uptime", values=[time()])
+    bot.run(test_token if test == "True" else bot_token)
