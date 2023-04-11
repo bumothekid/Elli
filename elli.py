@@ -47,8 +47,6 @@ extensions = [
 
 @bot.event
 async def on_ready():
-    update(table="elli", columns="uptime", values=[time()])
-
     print('═════◢◤◈◥◣═════')
     print('Bot ist Online.')
     print(bot.user.name)
@@ -150,3 +148,4 @@ if __name__ == '__main__':
 
     statusTask.start()
     bot.run(test_token if test == "True" else bot_token)
+    update(table="elli", columns="uptime", values=[time()])
