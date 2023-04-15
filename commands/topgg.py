@@ -1,5 +1,6 @@
 import requests
 import json
+import string
 from nextcord.ext.commands import Cog
 from nextcord.ext import tasks
 
@@ -15,7 +16,7 @@ class topgg(Cog):
     @tasks.loop(hours=1)
     async def update_stats(self):
         await self.bot.wait_until_ready()
-
+        
         if self.bot.user.id == 1086789440044806174:
             return
 
@@ -43,7 +44,13 @@ class topgg(Cog):
         
         data = json.dumps(data)
         
-        return requests.post(url, json=data, headers=headers)
+        try:
+            json.loads(data)
+        except json.decoder.JSONDecodeError:
+            print(f"Data is not valid json\n{data}")
+            return
+        
+        return requests.post(url, data=data, headers=headers)
 
 def setup(bot):
 	bot.add_cog(topgg(bot))
