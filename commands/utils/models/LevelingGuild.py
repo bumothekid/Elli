@@ -7,3 +7,4 @@ class LevelingGuild:
     cooldown: float
     mention: bool
     message: str
+    channel_id: int
