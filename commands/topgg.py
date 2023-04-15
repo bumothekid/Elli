@@ -34,7 +34,11 @@ class topgg(Cog):
             
     def sendPostRequest(self, endpoint, data) -> requests.Response:
         url = f"{self.baseURL}{endpoint}"
-        headers = {"Authorization": self.token}
+        
+        headers = {
+            "Authorization": self.token,
+            "Content-Type": "application/json"
+        }
         
         return requests.post(url, data=data, headers=headers)
 
