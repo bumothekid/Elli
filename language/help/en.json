@@ -24,7 +24,7 @@
     "reactionroles": "Reaction Roles",
     "reactionrolesDescription": "**<:Roles:1087457575257255998> Reactionrole setup**\n\n> `{0}rr create <#channel> <messageid> <emote> <@role>`\n> <:Reply:1087438925632643082> Creates a new reaction role\n> `{0}rr delete <#channel> <messageid> <emote>`\n> <:Reply:1087438925632643082> Delete a reaction role",
     "levelsystem": "Level System",
-    "levelsystemDescription": "**🌟 Level System**\n\n> `{0}level <@user>`\n> <:Reply:1087438925632643082> Shows you the level of a user\n> `{0}leaderboard`\n> <:Reply:1087438925632643082> Shows you the top 10 users\n\n> `{0}level settings`\n> <:Reply:1087438925632643082> Shows you all possible settings for the level system",
+    "levelsystemDescription": "**🌟 Level System**\n\n> `{0}level <@user>`\n> <:Reply:1087438925632643082> Shows you the level of a user\n> `{0}leaderboard`\n> <:Reply:1087438925632643082> Shows you the top 10 users\n\n> `{0}levelsystem settings`\n> <:Reply:1087438925632643082> Shows you all possible settings for the level system",
     "autoroles": "Autoroles",
     "autorolesDescription": "**<:autoroles:1090725070323859506> Autoroles**\n\n> `{0}autorole add <@role>`\n> <:Reply:1087438925632643082> Adds a new autorole\n> `{0}autorole remove <@role>`\n> <:Reply:1087438925632643082> Removes a autorole\n> `{0}autorole show`\n> <:Reply:1087438925632643082> Shows you all autoroles",
     "invitelogger": "Invite-Logger",

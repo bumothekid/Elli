@@ -24,7 +24,7 @@
     "reactionroles": "Reaction Roles",
     "reactionrolesDescription": "**<:Roles:1087457575257255998> Reactionrole einrichtung**\n\n> `{0}rr create <#channel> <messageid> <emote> <@rolle>`\n> <:Reply:1087438925632643082> Erstellt eine neue Reaction Role\n> `{0}rr delete <#channel> <messageid> <emote>`\n> <:Reply:1087438925632643082> Löscht eine bereits vorhandene Reaction Role",
     "levelsystem": "Level System",
-    "levelsystemDescription": "**🌟 Level System**\n\n> `{0}level <@user>`\n> <:Reply:1087438925632643082> Zeigt dir das Level eines Users an\n> `{0}leaderboard`\n> <:Reply:1087438925632643082> Zeigt dir die Top 10 User\n\n> `{0}level settings`\n> <:Reply:1087438925632643082> Zeigt dir alle möglichen Einstellungen für das Level System",
+    "levelsystemDescription": "**🌟 Level System**\n\n> `{0}level <@user>`\n> <:Reply:1087438925632643082> Zeigt dir das Level eines Users an\n> `{0}leaderboard`\n> <:Reply:1087438925632643082> Zeigt dir die Top 10 User\n\n> `{0}levelsystem settings`\n> <:Reply:1087438925632643082> Zeigt dir alle möglichen Einstellungen für das Level System",
     "autoroles": "Autoroles",
     "autorolesDescription": "**<:autoroles:1090725070323859506> Autoroles**\n\n> `{0}autoroles add <@rolle>`\n> <:Reply:1087438925632643082> Fügt eine neue Rolle den Autoroles hinzu\n> `{0}autoroles remove <@rolle>`\n> <:Reply:1087438925632643082> Entfernt eine Rolle von den Autoroles\n> `{0}autoroles show`\n> <:Reply:1087438925632643082> Zeigt dir alle Autoroles an",
     "invitelogger": "Invite-Logger",
