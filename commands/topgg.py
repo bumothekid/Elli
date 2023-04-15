@@ -1,4 +1,5 @@
 import requests
+import json
 from nextcord.ext.commands import Cog
 from nextcord.ext import tasks
 
@@ -40,7 +41,9 @@ class topgg(Cog):
             "Content-Type": "application/json"
         }
         
-        return requests.post(url, data=data, headers=headers)
+        data = json.dumps(data)
+        
+        return requests.post(url, json=data, headers=headers)
 
 def setup(bot):
 	bot.add_cog(topgg(bot))
