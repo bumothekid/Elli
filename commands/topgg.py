@@ -1,6 +1,5 @@
 import requests
 import json
-import string
 from nextcord.ext.commands import Cog
 from nextcord.ext import tasks
 
