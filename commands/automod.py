@@ -159,8 +159,9 @@ class Automod(Cog):
         if message.author.bot:
             return
 
-        if message.author.guild_permissions.administrator:
-            return
+        with contextlib.suppress(Exception):
+            if self.bot.get_guild(payload.guild_id).get_member(payload.user_id).guild_permissions.administrator:
+                return
         
         guildLocale = getGuildLanguage(message.guild.id)
 
