@@ -61,7 +61,7 @@ class Afk(Cog):
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
                 timeUp = getLocale(languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
 
-                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "afkMention", member.mention, timeUp, user[2]), color=nextcord.Color.dark_gold())
+                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "isAfk", member.mention, timeUp, user[2]), color=nextcord.Color.dark_gold())
 
 
 def setup(bot):
