@@ -461,7 +461,7 @@ class LevelSystem(Cog):
             return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAddChannelAlready", channel.mention))
         
         guild.blacklist_channel.append(channel.id)
-        insert("level_blacklist_channels", "guild_id, channel_id", [ctx.guild.id, channel.id])
+        insert("level_blacklist_channel", "guild_id, channel_id", [ctx.guild.id, channel.id])
         return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAdd", channel.mention))
     
     @levelsystem_blacklist_channel.command(name="remove", aliases=["r"])
@@ -479,7 +479,7 @@ class LevelSystem(Cog):
             return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemoveChannel"))
         
         guild.blacklist_channel.remove(channel.id)
-        delete("level_blacklist_channels", "guild_id channel_id", [ctx.guild.id, channel.id])
+        delete("level_blacklist_channel", "guild_id channel_id", [ctx.guild.id, channel.id])
         return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemove", channel.mention))
     
     @levelsystem_blacklist.group(name="role", aliases=["r"], invoke_without_command=True)
