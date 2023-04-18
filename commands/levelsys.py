@@ -537,15 +537,25 @@ class LevelSystem(Cog):
 
         if guild.blacklist_roles is None:
             guild.blacklist_roles = []
-
-        channelFieldDescription = "".join(
-            f"{ctx.guild.get_channel(channel).mention}\n"
-            for channel in guild.blacklist_channel
-        )
-        roleFieldDescription = "".join(
-            f"{ctx.guild.get_role(role).mention}\n"
-            for role in guild.blacklist_roles
-        )
+            
+        channelFieldDescription = ""
+        
+        for channel in guild.blacklist_channel:
+            channel = ctx.guild.get_channel(channel)
+            
+            if channel is None: continue
+            
+            channelFieldDescription += f"{channel.mention},"
+            
+        roleFieldDescription = ""
+        
+        for role in guild.blacklist_roles:
+            role = ctx.guild.get_role(role)
+            
+            if role is None: continue
+            
+            roleFieldDescription += f"{role.mention},"
+        
         if not channelFieldDescription:
             channelFieldDescription = getLocale(languageStrings, guildLocale, "levelsysBlacklistShowChannelNone")
 
@@ -777,6 +787,9 @@ def readGuild(guild: nextcord.Guild) -> Guild:
     databaseLevelRoles = readAll("level, role_id", "level_roles", "guild_id", [guild.id])
     databaseBlacklistedChannels = readAll("channel_id", "level_blacklist_channel", "guild_id", [guild.id])
     databaseBlacklistedRoles = readAll("role_id", "level_blacklist_roles", "guild_id", [guild.id])
+    
+    databaseBlacklistedChannels = [channel[0] for channel in databaseBlacklistedChannels]
+    databaseBlacklistedRoles = [role[0] for role in databaseBlacklistedRoles]
     
     customMessages = {}
     levelRoles = {}
