@@ -8,7 +8,7 @@ class safeDict(dict):
     def __missing__(self, key):
         return "{" + key + "}"
 
-def getPrefixFromDatabase(bot, message):
+def getPrefixFromDatabase(bot, message: nextcord.Message):
     if message.guild is None:
         return "-"
 
