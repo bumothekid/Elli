@@ -1,573 +1,613 @@
 import math
-from time import time
 import nextcord
+import contextlib
 from nextcord.ext import commands
 from nextcord.ext.commands import Cog
+from .utils.database import readOne, readAll, insert, update, delete
+from .utils.language import getGuildLanguage, getLanguageStrings, getLocale
 from .utils.embeds import successEmbed, errorEmbed, infoEmbed
-from .utils.database import readOne, readAll, update, insert, delete
 from .utils.other import getPrefixFromDatabase, safeDict
 from .utils.models.LevelingUser import LevelingUser as User
+from .utils.models.LevelingGuild import LevelingGuild as Guild
 from .utils.models.EmbedField import EmbedField
+from time import time
 
-class LevelSys(Cog):
+cache = []
+languageStrings = {}
+
+class LevelSystem(Cog):
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
-    
-    @commands.group(name="level", aliases=["levelsystem", "levelsys", "r", "rank"], invoke_without_command=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _level(self, ctx, member: nextcord.Member = None):
-        if ctx.invoked_subcommand is not None:
-            return
+        
+    @Cog.listener()
+    async def on_message(self, message: nextcord.Message):
+        if message.author.bot: return
+        if message.content.startswith(getPrefixFromDatabase(self.bot, message)[0]): return
+        if message.guild is None: return
+        if not checkIfLevelSystemIsEnabled(message.guild): return
+        
+        guild: Guild = readGuild(message.guild)
+        
+        if message.channel.id in guild.blacklist_channel: return
+        if any(role.id in guild.blacklist_roles for role in message.author.roles): return
+        
+        user: User = readUser(message.guild, message.author.id)
+        
+        if addUserXP(guild, user):
+            user: User = readUser(message.guild, message.author.id)
             
-        if member is None:
-            member = ctx.author
-
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if member is None:
-            member = ctx.author
-
-        user: User = readUser(ctx.guild.id, member.id)
-
-        level = user.level
-        xp = user.xp
-        xpNeeded = user.xp_needed
-
-        allUsers = readAll("user_id", "level_users", "guild_id", [ctx.guild.id], "xp DESC")
-
+            messageToSend = guild.message
+            mention = f"{message.author.mention}"
+            channel = message.channel
+            
+            if customMessage := guild.custom_messages.get(user.level):
+                messageToSend = customMessage
+                
+            role = None
+                
+            if role := guild.roles.get(user.level):
+                for oldRoles in guild.roles.values():
+                    with contextlib.suppress(Exception):
+                        oldRole = message.guild.get_role(oldRoles)
+                        
+                        if oldRole is None: continue
+                        
+                        if oldRole in message.author.roles:
+                            await message.author.remove_roles(oldRole)
+                
+                await message.author.add_roles(message.guild.get_role(role))
+                role = message.guild.get_role(role)
+                
+            if not messageToSend and not guild.message:
+                return
+                
+            if not guild.mention:
+                mention = ""
+            
+            if guild.channel_id != 0 and guild.channel_id is not None:
+                channel = self.bot.get_channel(guild.channel_id)
+                
+            messageToSend = messageToSend.replace("\\n", "\n").format_map(safeDict(user_name=message.author.name, user_mention=message.author.mention, user_discriminator=message.author.discriminator, level=user.level, xp_needed=user.xp_needed, level_next=user.level + 1, role=role.mention if role is not None else ""))
+                
+            await infoEmbed(self.bot, channel, messageToSend, mention, color=message.author.color, thumbnail=message.author.display_avatar.url)
+        
+    @commands.command(name="level", aliases=["lvl", "rank", "xp", "r"])
+    async def level(self, ctx, member: nextcord.Member = None):
+        if not checkIfLevelSystemIsEnabled(ctx.guild):
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, getGuildLanguage(ctx.guild.id), "levelsysNotEnabled"))
+        
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        if member is None: member = ctx.author
+        
+        
+        user: User = readUser(ctx.guild, member.id)
+        allUsers = readAll("user_id", "level_users", "guild_id", ctx.guild.id, "xp DESC")
+        
         top10 = False
         placing = 1
-        if allUsers:
-            for user in allUsers:
-                if user[0] == member.id:
-                    top10 = True
-                    break
-                placing += 1
-
-        await infoEmbed(self.bot, ctx, f"**Level - {member}**\n\n> **Level:** {level}\n> **XP:** {xp}/{xpNeeded}\n> **Platz:** {placing}/10\n> **Top 10:** {'Ja' if top10 else 'Nein'}", thumbnail=member.display_avatar.url, color=member.color)
-    
-    @commands.command(name="leaderboard", aliases=["lb", "top", "top10"])
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _leaderboard(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist deaktiviert.")
-
-        if allUsers := readAll("user_id", "level_users", "guild_id", [ctx.guild.id], "xp DESC"):
-            fields = []
-
-            for i, user in enumerate(allUsers, 1):
-                member = ctx.guild.get_member(user[0])
-                user = readUser(ctx.guild.id, user[0])
-
-                if member is None or user is None:
-                    continue
-
-                match i:
-                    case 1:
-                        fieldname = f"🥇 {str(member)}"
-                    case 2:
-                        fieldname = f"🥈 {str(member)}"
-                    case 3:
-                        fieldname = f"🥉 {str(member)}"
-                    case _:
-                        fieldname = str(member)
-
-                fields.append(EmbedField(fieldname, f"Level: {user.level}\nXP: {user.xp}", False))
-
-            await successEmbed(self.bot, ctx, "**Level Leaderboard**\n\n", fields=fields)
-        else:
-            await errorEmbed(self.bot, ctx, "Es sind keine noch User in der Datenbank gespeichert.")
-    
-    @_level.command(name="settings", aliases=["options"])
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _settings(self, ctx):
-        await infoEmbed(self.bot, ctx, "** Level System**\n\n"
-                                        "> `-level <@user>`\n"
-                                        "> `-leaderboard`\n\n"
-                                        "> `-level settings`\n"
-                                        "> `-level <on | off>`\n"
-                                        "> `-level xp <anzahl>`\n"
-                                        "> `-level cooldown <sekunden>`\n\n"
-                                        "> `-level message <text>`\n"
-                                        "> `-level message`\n"
-                                        "> `-level ping <on | off>`\n\n"
-                                        "> `-level custom add <level> <text>`\n"
-                                        "> `-level custom remove <level>`\n"
-                                        "> `-level custom show <level>`\n"
-                                        "> `-level custom show`\n\n"
-                                        "> `-level roles add <level> <@rolle>`\n"
-                                        "> `-level roles remove <level>`\n"
-                                        "> `-level roles joinrole add <@rolle>`\n"
-                                        "> `-level roles joinrole remove`\n"
-                                        "> `-level roles`\n\n"
-                                        "> `-level blacklist add <@rolle | #channel>`\n"
-                                        "> `-level blacklist remove <@rolle | #channel>`\n"
-                                        "> `-level blacklist`\n\n"
-                                        "> `-level modifylevel add <level> <@user>`\n"
-                                        "> `-level modifylevel remove <level> <@user>`\n"
-                                        "> `-level modifyxp add <xp> <@user>`\n"
-                                        "> `-level modifyxp remove <xp> <@user>`\n\n"
-                                        "> `-level reset <@user>`\n"
-                                        "> `-level reset level`\n"
-                                        "> `-level reset settings`\n"
-                                        "> `-level reset all`\n\n"
-                                        "> Variablen für die Level Up Nachricht:\n"
-                                        "> `{user_mention}`, `{user_name}`, `{user_discriminator}`, `{level}`, `{xp_needed}`, `{level_next}` und `{role}` für custom Nachrichten\n\n"
-                                        "> Du kannst eine Level Up Nachricht mit mehreren erstellen mit `\\n`\n"
-                                        "> Um die Level Up Nachricht zu entfernen füge `off` als Nachricht ein."
-        )
-    
-    @_level.command(name="on", aliases=["enable", "e"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _on(self, ctx):
-        if checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist bereits aktiviert.")
-
-        update("level_system", "enabled", "guild_id", [1, ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Das Level System wurde aktiviert.")
-    
-    @_level.command(name="off", aliases=["disable", "d"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _off(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist bereits deaktiviert.")
-
-        update("level_system", "enabled", "guild_id", [0, ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Das Level System wurde deaktiviert.")
-
-    @_level.command(name="xp", aliases=["exp", "expirience"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _xp(self, ctx, amount: int):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(amount, int):
-            return await errorEmbed(self.bot, ctx, "Die anzahl an XP pro Nachricht muss eine ganze Zahl sein.")
-
-        if amount < 1:
-            return await errorEmbed(self.bot, ctx, "Die Anzahl der XP pro Nachricht muss größer als `0` sein.")
         
-        if amount > 15:
-            return await errorEmbed(self.bot, ctx, "Die Anzahl der XP pro Nachricht darf nicht größer als `15` sein.")
-
-        update("level_system", "xp", "guild_id", [amount, ctx.guild.id])
-        await successEmbed(self.bot, ctx, f"Die Anzahl der XP pro Nachricht wurde auf `{amount}` gesetzt.")
-
-    @_level.command(name="cooldown", aliases=["cd", "c"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _cooldown(self, ctx, seconds: int):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(seconds, int):
-            return await errorEmbed(self.bot, ctx, "Die Cooldown Zeit muss eine ganze Zahl sein.")
-
-        if seconds <= 3:
-            return await errorEmbed(self.bot, ctx, "Die Cooldown Zeit muss länger als `3` Sekunden sein.")
-
-        if seconds > 500:
-            return await errorEmbed(self.bot, ctx, "Die Cooldown Zeit darf nicht länger als `500` Sekunden sein.")
-
-        update("level_system", "cooldown", "guild_id", [seconds, ctx.guild.id])
-        await successEmbed(self.bot, ctx, f"Die Cooldown Zeit wurde auf `{seconds}` Sekunden gesetzt.")
-
-    @_level.command(name="message", aliases=["msg", "m"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _message(self, ctx, *, text: str = None):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
+        for i, databaseUser in enumerate(allUsers):
+            if databaseUser[0] == user.user_id:
+                if i <= 10: top10 = True
+                placing = i + 1
+                break
         
-        if text is None:
-            message = readOne("message", "level_system", "guild_id", [ctx.guild.id])
-
-            if message is None:
-                return await errorEmbed(self.bot, ctx, "Es wurde keine Level Up Nachricht gesetzt.")
-
-            return await successEmbed(self.bot, ctx, f"Die aktuelle Nachricht ist:\n\n{message[0]}")
-
-        if text == "off":
-            update("level_system", "message", "guild_id", ["null", ctx.guild.id])
-            return await successEmbed(self.bot, ctx, "Die Level Up Nachricht wurde entfernt.")
-
-        text = text.replace("\n", "\\n")
-        update("level_system", "message", "guild_id", [text, ctx.guild.id])
-        await successEmbed(self.bot, ctx, f"Die Level Up Nachricht wurde auf `{text}` gesetzt.")
-
-    @_level.group(name="ping", aliases=["p"], invoke_without_command=True)
-    async def _ping(self, ctx):
-        await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
-
-    @_ping.command(name="on", aliases=["enable", "e"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _on2(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        update("level_system", "mention", "guild_id", [1, ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Die Ping Nachricht wurde aktiviert.")
+        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysUserLevel", member, user.level, user.xp, user.xp_needed, placing, len(allUsers), getLocale(languageStrings, guildLocale, "yes" if top10 else "no")), thumbnail=member.display_avatar.url, color=member.color)
     
-    @_ping.command(name="off", aliases=["disable", "d"])
-    @commands.has_permissions(manage_guild=True)
+    @commands.command(name="leaderboard", aliases=["lb", "top", "levels"])
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _off2(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        update("level_system", "mention", "guild_id", [0, ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Die Ping Nachricht wurde deaktiviert.")
-
-    @_level.group(name="custom", invoke_without_command=True)
-    async def _custom(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if ctx.invoked_subcommand is None:
-            await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
+    async def leaderboard(self, ctx):
+        if not checkIfLevelSystemIsEnabled(ctx.guild):
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, getGuildLanguage(ctx.guild.id), "levelsysNotEnabled"))
         
-    @_custom.command(name="add", aliases=["a", "set"])
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        allUsers = readAll("user_id, level, xp", "level_users", "guild_id", ctx.guild.id, "xp DESC")
+        
+        if len(allUsers) == 0:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysNoUsers"))
+        
+        leaderboard = ""
+        
+        for i, databaseUser in enumerate(allUsers):
+            if i >= 10: break
+            
+            user = self.bot.get_user(databaseUser[0])
+            if user is None: user = await self.bot.fetch_user(databaseUser[0])
+            
+            leaderboard += f"> {i + 1}. {user.mention} - Level {databaseUser[1]} - {databaseUser[2]} XP\n"
+        
+        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysLeaderboard", leaderboard))
+
+    @commands.group(name="levelsystem", aliases=["levelsys", "leveling"], invoke_without_command=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem(self, ctx, option: str = None, value: str = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        if option is None or option.lower() in {"help", "h", "info", "i", "settings", "s"} or not ctx.author.guild_permissions.manage_guild:
+            view = LevelSystemHelpView(self.bot, language=guildLocale)
+            message = await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysHelp", getPrefixFromDatabase(self.bot, ctx.message)[0]), view=view)
+            view.message = message
+            cache.append(f"{message.id}|{ctx.author.id}")
+            return
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if not ctx.author.guild_permissions.manage_guild:
+            raise commands.MissingPermissions(["manage_guild"])
+        
+        if option.lower() in {"enable", "e", "on"}:
+            if guild.enabled:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysAlreadyEnabled"))
+            
+            guild.enabled = True
+            update("level_system", "enabled", "guild_id", [1, ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysEnabled"))
+        
+        if option.lower() in {"disable", "d", "off"}:
+            if not guild.enabled:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysAlreadyDisabled"))
+            
+            guild.enabled = False
+            update("level_system", "enabled", "guild_id", [0, ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysDisabled"))
+            
+        if option.lower() in {"xp", "exp", "experience"}:
+            if value is None or not value.isdigit():
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysXpValue"))
+                
+            if int(value) < 1:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysXpValue"))
+            
+            if int(value) > 12:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysXpValue"))
+            
+            if int(value) == guild.xp:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysXpAlready", value))
+            
+            guild.xp = int(value)
+            update("level_system", "xp", "guild_id", [int(value), ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysXpCustom", value))
+        
+        if option.lower() in {"cooldown", "cd"}:
+            if value is None or not value.isdigit():
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCooldownValue"))
+            
+            if int(value) < 3:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCooldownValue"))
+            
+            if int(value) > 60:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCooldownValue"))
+            
+            if int(value) == guild.cooldown:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCooldownAlready", value))
+            
+            guild.cooldown = int(value)
+            update("level_system", "cooldown", "guild_id", [int(value), ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCooldownCustom", value))
+        
+        if option.lower() in {"mention", "ping"}:
+            if value is None:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionValue"))
+            
+            if value.lower() in {"enable", "e", "on"}:
+                if guild.mention:
+                    return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionAlreadyEnabled"))
+                
+                guild.mention = True
+                update("level_system", "mention", "guild_id", [1, ctx.guild.id])
+                return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionEnabled"))
+            
+            if value.lower() in {"disable", "d", "off"}:
+                if not guild.mention:
+                    return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionAlreadyDisabled"))
+                
+                guild.mention = False
+                update("level_system", "mention", "guild_id", [0, ctx.guild.id])
+                return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionDisabled"))
+            
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMentionValue"))
+        
+        if option.lower() in {"current", "show"}:
+            yes = getLocale(languageStrings, guildLocale, "yes")
+            no = getLocale(languageStrings, guildLocale, "no")
+            none = getLocale(languageStrings, guildLocale, "none")
+            enabled = yes if guild.enabled else no
+            xp = str(guild.xp)
+            cooldown = f"{str(guild.cooldown)} {getLocale(languageStrings, guildLocale, 'seconds')}"
+            mention = yes if guild.mention else no
+            channel = f"<#{guild.channel_id}>" if guild.channel_id is not None else none
+            keysFromCustom_messages = ", ".join([f"Level `{key}`" for key in guild.custom_messages.keys()]) if guild.custom_messages else none
+            roles = ", ".join([f"<@&{role}>" for role in guild.roles.values()]) if guild.roles else none
+            blacklist_channel = ", ".join([f"<#{channel}>" for channel in guild.blacklist_channel]) if guild.blacklist_channel else none
+            blacklist_roles = ", ".join([f"<@&{role}>" for role in guild.blacklist_roles]) if guild.blacklist_roles else none
+            iconURL = ctx.guild.icon.url if ctx.guild.icon is not None else ""
+            return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCurrent", enabled, xp, cooldown, getPrefixFromDatabase(self.bot, ctx.message)[0], mention, channel, keysFromCustom_messages, roles, blacklist_channel, blacklist_roles), thumbnail=iconURL)
+            
+        view = LevelSystemHelpView(self.bot, language=guildLocale)
+        message = await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysHelp", getPrefixFromDatabase(self.bot, ctx.message)[0]), view=view)
+        view.message = message
+        cache.append(f"{message.id}|{ctx.author.id}")
+        return
+        
+    @levelsystem.command(name="message", aliases=["m"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _set2(self, ctx, level: int, *, text: str):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(level, int):
-            return await errorEmbed(self.bot, ctx, "Du musst ein Level angeben wofür die Nachricht sein soll.")
-
-        if level <= 1:
-            return await errorEmbed(self.bot, ctx, "Das Level muss größer als `1` sein.")
-
-        message = readOne("message", "level_custommessages", "guild_id level", [ctx.guild.id, level])
-
-        if message is not None:
-            return await errorEmbed(self.bot, ctx, f"Level `{level}` hat bereits eine eigene Nachricht.")
-
-        text = text.replace("\n", "\\n")
-        insert("level_custommessages", "guild_id level text", [ctx.guild.id, level, text])
-        await successEmbed(self.bot, ctx, f"Die Rank Up Nachricht wurde auf `{text}` gesetzt.")
-    
-    @_custom.command(name="remove", aliases=["r", "del", "delete"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove2(self, ctx, level: int):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(level, int):
-            return await errorEmbed(self.bot, ctx, "Du musst ein Level angeben welche gelöscht werden soll.")
-
-        if level <= 1:
-            return await errorEmbed(self.bot, ctx, "Das Level muss größer als `1` sein.")
-
-        message = readOne("message", "level_custommessages", "guild_id level", [ctx.guild.id, level])
-
+    async def levelsystem_message(self, ctx, *, message: str = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
         if message is None:
-            return await errorEmbed(self.bot, ctx, f"Level `{level}` hat keine eigene Nachricht.")
-
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageValue"))
+        
+        if message.lower() in {"current", "show"}:
+            if guild.message == "none":
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageNone"))
+            
+            user: User = readUser(ctx.guild, ctx.author.id)
+            
+            return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageCurrent", guild.message.replace("\\n", "\n").format_map(safeDict(user_name=ctx.message.author.name, user_mention=ctx.message.author.mention, user_discriminator=ctx.message.author.discriminator, level=user.level, xp_needed=user.xp_needed, level_next=user.level + 1, role="{role}"))))
+        
+        if message.lower() in {"none", "off"}:
+            guild.message = "none"
+            update("level_system", "message", "guild_id", ["none", ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageNone"))
+        
+        if message.lower() in {"default", "standard"}:
+            guild.message = "default"
+            update("level_system", "message", "guild_id", ["default", ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageDefault", getLocale(languageStrings, guildLocale, "levelsysDefaultMessage")))
+        
+        if len(message) > 1000:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageTooLong"))
+        
+        guild.message = message
+        update("level_system", "message", "guild_id", [message, ctx.guild.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageCustom"))
+    
+    @levelsystem.command(name="channel", aliases=["c"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_channel(self, ctx, channel: nextcord.TextChannel = None):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if channel is None:
+            guild.channel_id = None
+            update("level_system", "channel_id", "guild_id", ["null", ctx.guild.id])
+            return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysChannelNone"))
+        
+        guild.channel_id = channel.id
+        update("level_system", "channel_id", "guild_id", [channel.id, ctx.guild.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysChannel", channel.mention))
+    
+    @levelsystem.group(name="custom", invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_custom(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_custom.command(name="add", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_custom_add(self, ctx, level: int, *, message: str):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if level < 2:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomAddLevel"))
+        
+        if len(message) > 1000:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysMessageTooLong"))
+        
+        if guild.custom_messages is None:
+            guild.custom_messages = {}
+        
+        if level in guild.custom_messages:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomAddAlready", level))
+        
+        guild.custom_messages[level] = message
+        insert("level_custommessages", "guild_id, level, message", [ctx.guild.id, level, message])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomAdded", level, message))
+    
+    @levelsystem_custom.command(name="remove", aliases=["r"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_custom_remove(self, ctx, level: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.custom_messages is None:
+            guild.custom_messages = {}
+        
+        if level not in guild.custom_messages:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomRemoveLevel", level))
+        
+        del guild.custom_messages[level]
         delete("level_custommessages", "guild_id level", [ctx.guild.id, level])
-        await successEmbed(self.bot, ctx, f"Die eigene Nachricht für Level `{level}` wurde entfernt.")
-
-    @_custom.command(name="show", aliases=["s"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _show2(self, ctx, level: int = None):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if level is not None:
-            if not isinstance(level, int):
-                return await errorEmbed(self.bot, ctx, "Du musst ein Level angeben welche gelöscht werden soll.")
-
-            if level <= 1:
-                return await errorEmbed(self.bot, ctx, "Das Level muss größer als `1` sein.")
-
-            message = readOne("message", "level_custommessages", "guild_id level", [ctx.guild.id, level])
-
-            if message is None:
-                return await errorEmbed(self.bot, ctx, f"Level `{level}` hat keine eigene Nachricht.")
-
-            mention = readOne("mention", "level_system", "guild_id", [ctx.guild.id])
-            user: User = readUser(ctx.guild.id, ctx.author.id)
-            role_id = readOne("role_id", "level_roles", "guild_id level", [ctx.guild.id, level])
-
-            role = ctx.guild.get_role(role_id) if role_id is not None else None
-            return await infoEmbed(self.bot, ctx, message[0].replace("\\n", "\n").format_map(safeDict(user_name=ctx.author.name, user_mention=ctx.author.mention, user_discriminator=ctx.author.discriminator, level=user.level, xp_needed=user.xp_needed, level_next=user.level + 1, role=role)), content=f"{ctx.author.mention}" if mention[0] else None)
-
-        messages = readAll("message", "level_custommessages", "guild_id", [ctx.guild.id])
-
-        if not messages:
-            return await errorEmbed(self.bot, ctx, "Es wurden keine eigenen Nachrichten gesetzt.")
-
-        message = "".join(f"`{level[0]}`\n" for level in messages)
-
-        await successEmbed(self.bot, ctx, f"**Eigenen Nachrichten:**\n\n{message}")
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomRemoved", level))
     
-    @_level.group(name="roles", aliases=["r"], invoke_without_command=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _roles(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        roles = readAll("role_id, level", "level_roles", "guild_id", [ctx.guild.id])
-
-        if not roles:
-            return await errorEmbed(self.bot, ctx, "Es gibt noch keine Ränge.")
-
-        lb = ""
-
-        for role in roles:
-            if role[1] == 1:
-                continue
-
-            role_mention = f"{ctx.guild.get_role(role[0]).mention}"
-            lb += f"Level `{role[1]}` | {role_mention}\n"
-
-        await infoEmbed(self.bot, ctx, f"**Alle Ränge**\n\n{lb}")
-
-    @_roles.command(name="add", aliases=["a"])
+    @levelsystem_custom.command(name="show", aliases=["s"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _add(self, ctx, level: int, role: nextcord.Role):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(level, int):
-            return await errorEmbed(self.bot, ctx, "Du musst ein Level für diesen Rang angeben.")
-
-        if level <= 1:
-            return await errorEmbed(self.bot, ctx, "Du kannst eine joinrole mit `-level roles joinrole` festlegen.") # Das Level muss größer als `1` sein.
-
-        if not isinstance(role, nextcord.Role):
-            return await errorEmbed(self.bot, ctx, "Du musst einen Rang angeben.")
-
-        if readOne("role_id", "level_roles", "guild_id level", [ctx.guild.id, level]) is not None:
-            return await errorEmbed(self.bot, ctx, "Es gibt bereits einen Rang für dieses Level.")
-
-        if readOne("role_id", "level_roles", "guild_id role_id", [ctx.guild.id, role.id]) is not None:
-            return await errorEmbed(self.bot, ctx, f"Dieser Rang ist bereits für das Level `{(readOne('level', 'level_roles', 'guild_id role_id', [ctx.guild.id, role.id]))[0]}` gesetzt.")
-
-        insert("level_roles", "guild_id, role_id, level", [ctx.guild.id, role.id, level])
-        await successEmbed(self.bot, ctx, f"Der Rang {role.mention} wurde für Level `{level}` eingetragen.")
-
-    @_roles.command(name="remove", aliases=["r"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove(self, ctx, level: int):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if not isinstance(level, int):
-            return await errorEmbed(self.bot, ctx, "Du musst eine ganze Zahl als Level angeben.")
+    async def levelsystem_custom_show(self, ctx, level):
+        if level.lower() in {"all", "a"}:
+            guildLocale = getGuildLanguage(ctx.guild.id)
+            
+            guild: Guild = readGuild(ctx.guild)
+            
+            if guild.custom_messages is None:
+                guild.custom_messages = {}
+            
+            if len(guild.custom_messages) == 0:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomShowNone"))
+            
+            custom_messages = ""
+            
+            for level in guild.custom_messages.keys():
+                custom_messages += f"> **{level}**\n"
+            
+            return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomShowAll", custom_messages))
         
-        if level <= 1:
-            return await errorEmbed(self.bot, ctx, "# Das Level muss größer als `1` sein.")
-
-        if readOne("role_id", "level_roles", "guild_id level", [ctx.guild.id, level]) is None:
-            return await errorEmbed(self.bot, ctx, "Es gibt noch keinen Rang für diese Level.")
-
+        custom_message = readOne("message", "level_custommessages", "guild_id level", [ctx.guild.id, level])
+        
+        if custom_message is None:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomShowLevel", level))
+        
+        return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysCustomShow", level, custom_message[0]))
+        
+    @levelsystem.group(name="roles", aliases=["r", "role"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_roles(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_roles.command(name="add", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_roles_add(self, ctx, level: int, *, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if level < 2:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesAddLevel"))
+        
+        if guild.roles is None:
+            guild.roles = {}
+        
+        if level in guild.roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesAddAlready", level))
+        
+        guild.roles[level] = role.id
+        insert("level_roles", "guild_id, level, role_id", [ctx.guild.id, level, role.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesAdd", level, role.mention))
+    
+    @levelsystem_roles.command(name="remove", aliases=["r"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_roles_remove(self, ctx, level: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.roles is None:
+            guild.roles = {}
+        
+        if level not in guild.roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesRemoveLevel", level))
+        
+        del guild.roles[level]
         delete("level_roles", "guild_id level", [ctx.guild.id, level])
-        await successEmbed(self.bot, ctx, f"Der Rang für das Level `{level}` wurde entfernt.")
-
-    @_roles.group(name="joinrole", aliases=["jr"], invoke_without_command=True)
-    async def _joinrole(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if ctx.invoked_subcommand is None:
-            await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
-
-    @_joinrole.command(name="set", aliases=["s", "add"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _set9(self, ctx, role: nextcord.Role):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        role_id = readOne("role_id", "level_roles", "guild_id level", [ctx.guild.id, 1])
-
-        if role_id is not None:
-            return await errorEmbed(self.bot, ctx, "Es wurde bereits eine joinrole festgelegt.")
-
-        insert("level_roles", "guild_id, role_id, level", [ctx.guild.id, role.id, 1])
-        await successEmbed(self.bot, ctx, f"Die joinrole wurde auf {role.mention} gesetzt.")
-
-    @_joinrole.command(name="remove", aliases=["r"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove9(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        role_id = readOne("role_id", "level_roles", "guild_id level", [ctx.guild.id, 1])
-
-        if role_id is None:
-            return await errorEmbed(self.bot, ctx, "Es gibt noch keine joinrole.")
-
-        delete("level_roles", "guild_id level", [ctx.guild.id, 1])
-        await successEmbed(self.bot, ctx, "Die joinrole wurde entfernt.")
-
-    @_level.group(name="blacklist", aliases=["b"], invoke_without_command=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _blacklist(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        blacklistChannel = readAll("channel_id", "level_blacklist_channel", "guild_id", [ctx.guild.id])
-        blacklistRoles = readAll("role_id", "level_blacklist_roles", "guild_id", [ctx.guild.id])
-
-
-        if not blacklistChannel and not blacklistRoles:
-            return await errorEmbed(self.bot, ctx, "Es gibt noch keine Blacklist.")
-
-
-        channel = ""
-        if blacklistChannel:
-            for channel_id in blacklistChannel:
-                channel += f"{ctx.guild.get_channel(channel_id[0]).mention}\n"
-
-        role = ""
-        if blacklistRoles:
-            for role_id in blacklistRoles:
-                role += f"{ctx.guild.get_role(role_id[0]).mention}\n"
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesRemoved", level))
     
-
-        channelField = EmbedField("Kanäle", channel if channel != "" else "Keine Kanäle auf der Blacklist", inline=True)
-        roleField = EmbedField("Rollen", role if role != "" else "Keine Rollen auf der Blacklist", inline=True)
-
-        await infoEmbed(self.bot, ctx, "**Blacklist**", fields=[channelField, roleField])
-
-    @_blacklist.command(name="add", aliases=["a"])
+    @levelsystem_roles.command(name="show", aliases=["s"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _add2(self, ctx, id: nextcord.TextChannel | nextcord.Role):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if isinstance(id, nextcord.TextChannel):
-            if readOne("channel_id", "level_blacklist_channel", "guild_id channel_id", [ctx.guild.id, id.id]) is not None:
-                return await errorEmbed(self.bot, ctx, "Dieser Kanal ist bereits in der Blacklist.")
-
-            insert("level_blacklist_channel", "guild_id, channel_id", [ctx.guild.id, id.id])
-            await successEmbed(self.bot, ctx, f"Der Kanal {id.mention} wurde zur Blacklist hinzugefügt.")
+    async def levelsystem_roles_show(self, ctx, level):
+        guildLocale = getGuildLanguage(ctx.guild.id)
         
-        elif isinstance(id, nextcord.Role):
-            if readOne("role_id", "level_blacklist_roles", "guild_id role_id", [ctx.guild.id, id.id]) is not None:
-                return await errorEmbed(self.bot, ctx, "Diese Rolle ist bereits in der Blacklist.")
-
-            insert("level_blacklist_roles", "guild_id, role_id", [ctx.guild.id, id.id])
-            await successEmbed(self.bot, ctx, f"Die Rolle {id.mention} wurde zur Blacklist hinzugefügt.")
-
-    @_blacklist.command(name="remove", aliases=["r"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove2(self, ctx, id: nextcord.TextChannel | nextcord.Role):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        if isinstance(id, nextcord.TextChannel):
-            if readOne("channel_id", "level_blacklist_channel", "guild_id channel_id", [ctx.guild.id, id.id]) is None:
-                return await errorEmbed(self.bot, ctx, "Dieser Kanal ist nicht in der Blacklist.")
-
-            delete("level_blacklist_channel", "guild_id channel_id", [ctx.guild.id, id.id])
-            await successEmbed(self.bot, ctx, f"Der Kanal {id.mention} wurde aus der Blacklist entfernt.")
-
-        elif isinstance(id, nextcord.Role):
-            if readOne("role_id", "level_blacklist_roles", "guild_id role_id", [ctx.guild.id, id.id]) is None:
-                return await errorEmbed(self.bot, ctx, "Diese Rolle ist nicht in der Blacklist.")
-
-            delete("level_blacklist_roles", "guild_id role_id", [ctx.guild.id, id.id])
-            await successEmbed(self.bot, ctx, f"Die Rolle {id.mention} wurde aus der Blacklist entfernt.")
-
-    @_level.group(name="modifylevel", invoke_without_command=True)
-    @commands.has_permissions(manage_guild=True)
-    async def _level2(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.roles is None:
+            guild.roles = {}
+        
+        if level.lower() in {"all", "a"}:
+            if len(guild.roles) == 0:
+                return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesShowNone"))
+            
+            roles = ""
+            
+            for level in guild.roles.keys():
+                roles += f"> **{level}**\n"
+            
+            return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesShowAll", roles))
+        
+        if level not in guild.roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesShowLevel", level))
+        
+        return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysRolesShow", level, ctx.guild.get_role(guild.roles[level]).mention))
     
-    @_level2.command(name="add", aliases=["a"])
+    @levelsystem.group(name="blacklist", aliases=["b"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _add3(self, ctx, level: int, member: nextcord.Member):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        user = readUser(ctx.guild.id, member.id)
-
-        user.level += level
-        user.xp = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
-
-        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
-
-        await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
+    async def levelsystem_blacklist(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
     
-    @_level2.command(name="remove", aliases=["r"])
+    @levelsystem_blacklist.group(name="channel", aliases=["c"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove3(self, ctx, level: int, member: nextcord.Member):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        user = readUser(ctx.guild.id, member.id)
-
-        user.level -= level
-        user.xp = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
-
-        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
-
-        await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
-
-    @_level.group(name="modifyxp", invoke_without_command=True)
+    async def levelsystem_blacklist_channel(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_blacklist_channel.command(name="add", aliases=["a"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _xp2(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
-
-    @_xp2.command(name="add", aliases=["a"])
+    async def levelsystem_blacklist_channel_add(self, ctx, channel: nextcord.TextChannel):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.blacklist_channel is None:
+            guild.blacklist_channel = []
+        
+        if channel.id in guild.blacklist_channel:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAddChannelAlready", channel.mention))
+        
+        guild.blacklist_channel.append(channel.id)
+        insert("level_blacklist_channels", "guild_id, channel_id", [ctx.guild.id, channel.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAdd", channel.mention))
+    
+    @levelsystem_blacklist_channel.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _add4(self, ctx, xp: int, member: nextcord.Member):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
+    async def levelsystem_blacklist_channel_remove(self, ctx, channel: nextcord.TextChannel):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.blacklist_channel is None:
+            guild.blacklist_channel = []
+        
+        if channel.id not in guild.blacklist_channel:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemoveChannel"))
+        
+        guild.blacklist_channel.remove(channel.id)
+        delete("level_blacklist_channels", "guild_id channel_id", [ctx.guild.id, channel.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemove", channel.mention))
+    
+    @levelsystem_blacklist.group(name="role", aliases=["r"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_blacklist_role(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_blacklist_role.command(name="add", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_blacklist_role_add(self, ctx, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.blacklist_roles is None:
+            guild.blacklist_roles = []
+        
+        if role.id in guild.blacklist_roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAddRoleAlready"))
+        
+        guild.blacklist_roles.append(role.id)
+        insert("level_blacklist_roles", "guild_id, role_id", [ctx.guild.id, role.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistAdd", role.mention))
+    
+    @levelsystem_blacklist_role.command(name="remove", aliases=["r"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_blacklist_role_remove(self, ctx, role: nextcord.Role):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        guild: Guild = readGuild(ctx.guild)
+        
+        if guild.blacklist_roles is None:
+            guild.blacklist_roles = []
+        
+        if role.id not in guild.blacklist_roles:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemoveRole"))
+        
+        guild.blacklist_roles.remove(role.id)
+        delete("level_blacklist_roles", "guild_id role_id", [ctx.guild.id, role.id])
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistRemove", role.mention))
+    
+    @levelsystem_blacklist.command(name="show", aliases=["s"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_blacklist_show(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
 
-        user = readUser(ctx.guild.id, member.id)
+        guild: Guild = readGuild(ctx.guild)
 
-        user.xp += xp
-        while user.xp_needed < user.xp:
+        if guild.blacklist_channel is None:
+            guild.blacklist_channel = []
+
+        if guild.blacklist_roles is None:
+            guild.blacklist_roles = []
+
+        channelFieldDescription = "".join(
+            f"{ctx.guild.get_channel(channel).mention}\n"
+            for channel in guild.blacklist_channel
+        )
+        roleFieldDescription = "".join(
+            f"{ctx.guild.get_role(role).mention}\n"
+            for role in guild.blacklist_roles
+        )
+        if not channelFieldDescription:
+            channelFieldDescription = getLocale(languageStrings, guildLocale, "levelsysBlacklistShowChannelNone")
+
+        if not roleFieldDescription:
+            roleFieldDescription = getLocale(languageStrings, guildLocale, "levelsysBlacklistShowRoleNone")
+
+        channelField = EmbedField(getLocale(languageStrings, guildLocale, "levelsysBlacklistShowChannel"), channelFieldDescription, True)
+        roleField = EmbedField(getLocale(languageStrings, guildLocale, "levelsysBlacklistShowRoles"), roleFieldDescription, True)
+
+        return await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysBlacklistShowAll"), fields=[channelField, roleField])
+    
+    @levelsystem.group(name="modify", invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_modify.group(name="xp", aliases=["x", "exp"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_xp(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_modify_xp.command(name="add", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_xp_add(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpAddAmount"))
+        
+        user: User = readUser(ctx.guild, user.id)
+        
+        user.xp += amount
+        
+        if amount >= math.ceil(10 * ((1000) ** 1.5) + 20):
+            user.xp = math.ceil(10 * ((1000) ** 1.5) + 20)
+            
+        while user.xp_needed < user.xp and user.level < 1000:
             user.level += 1
             user.xp_needed = math.ceil(10 * ((user.level) ** 1.5) + 20)
-
-        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
-
-        await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
+            
+        
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, user.user_id])
+        
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpAdd", user.user_id, amount))
     
-    @_xp2.command(name="remove", aliases=["r"])
+    @levelsystem_modify_xp.command(name="remove", aliases=["r"])
     @commands.has_permissions(manage_guild=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _remove4(self, ctx, xp: int, member: nextcord.Member):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
+    async def levelsystem_modify_xp_remove(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
 
-        user = readUser(ctx.guild.id, member.id)
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpRemoveAmount"))
 
-        user.xp -= xp
+        user: User = readUser(ctx.guild, user.id)
 
-        if user.xp <= 0:
-            user.xp = 0
-            user.level = 1
-            user.xp_needed = 27
+        user.xp -= amount
 
+        user.xp = max(user.xp, 0) # Prevents negative xp values (max function returns the highest value)
         user.level = 1
         user.xp_needed = 27
 
@@ -575,163 +615,313 @@ class LevelSys(Cog):
             user.level += 1
             user.xp_needed = math.ceil(10 * ((user.level) ** 1.5) + 20)
 
-        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, member.id])
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, user.user_id])
 
-        await successEmbed(self.bot, ctx, f"{member.mention} ist nun Level {user.level} und hat {user.xp} XP.")
-
-    @_level.group(name="reset", invoke_without_command=True)
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _reset(self, ctx, user: nextcord.Member = None):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-        
-        if user is None and ctx.invoked_subcommand is None:
-            return await errorEmbed(self.bot, ctx, "Es fehlt ein benötigtes Argument.")
-        
-        if user is not None:
-            delete("level_users", "guild_id user_id", [ctx.guild.id, user.id])
-            await successEmbed(self.bot, ctx, f"{user} wurde auf Level 1 zurückgesetzt.")
-
-    @_reset.command(name="all", aliases=["a"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _reset2(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        message = "Glückwunsch **{user_name}#{user_discriminator}**!\\n\\nDu bist ein Level aufgestiegen!\\nDu bist nun Level `{level}`"
-        
-        delete("level_users", "guild_id", [ctx.guild.id])
-        delete("level_blacklist_channel", "guild_id", [ctx.guild.id])
-        delete("level_blacklist_roles", "guild_id", [ctx.guild.id])
-        delete("level_custommessages", "guild_id", [ctx.guild.id])
-        delete("level_roles", "guild_id", [ctx.guild.id])
-        update("level_system", "xp cooldown mention message", "guild_id", [3, 6, 1, message, ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Alle Level und alle Einstellungen wurden zurückgesetzt.")
-
-    @_reset.command(name="level", aliases=["l"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _reset3(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        delete("level_users", "guild_id", [ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Alle Level wurden zurückgesetzt.")
-
-    @_reset.command(name="settings", aliases=["s"])
-    @commands.has_permissions(manage_guild=True)
-    @commands.cooldown(2, 10, commands.BucketType.user)
-    async def _reset4(self, ctx):
-        if not checkLevelOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, "Das Level System ist nicht aktiviert.")
-
-        delete("level_blacklist_channel", "guild_id", [ctx.guild.id])
-        delete("level_blacklist_roles", "guild_id", [ctx.guild.id])
-        delete("level_custommessages", "guild_id", [ctx.guild.id])
-        delete("level_roles", "guild_id", [ctx.guild.id])
-        update("level_system", "xp cooldown mention message", "guild_id", [3, 6, 1, 1, "", ctx.guild.id])
-        await successEmbed(self.bot, ctx, "Alle Einstellungen wurden zurückgesetzt.")
-
-    @Cog.listener()
-    async def on_member_join(self, member):
-        if role_id := readOne("role_id", "level_roles", "guild_id level", [member.guild.id, 1]):
-            if role := member.guild.get_role(role_id[0]):
-                await member.add_roles(role)
-
-    @Cog.listener()
-    async def on_message(self, message):
-        if message.author.bot or not checkLevelOn(message.guild.id) or message.content.startswith(getPrefixFromDatabase(self.bot, message)):
-            return
-
-        if readOne("channel_id", "level_blacklist_channel", "guild_id channel_id", [message.guild.id, message.channel.id]) is not None:
-            return
-        
-        for role in readAll("role_id", "level_blacklist_roles", "guild_id", [message.guild.id]):
-            if role in message.author.roles:
-                return
-
-        xp, cooldown, mention, lvlmessage = readOne("xp, cooldown, mention, message", "level_system", "guild_id", [message.guild.id])
-
-        levelup = addUserXP(message.guild.id, message.author.id, xp, cooldown)
-
-        if levelup:
-            user = readUser(message.guild.id, message.author.id)
-            customMessage = readOne("message", "level_custommessages", "guild_id level", [message.guild.id, user.level])
-
-            if lvlmessage is None and customMessage is None:
-                return
-
-            allLevelRoles = readAll("role_id", "level_roles", "guild_id", [message.guild.id])
-            levelRole = readOne("role_id", "level_roles", "guild_id level", [message.guild.id, user.level])
-
-            role = message.guild.get_role(levelRole) if levelRole is not None else None
-            
-            if levelRole is not None:
-                for role_id in allLevelRoles:
-                    role = message.guild.get_role(role_id[0])
-
-                    if role is None:
-                        continue
-
-                    if role in message.author.roles:
-                        await message.author.remove_roles(role)
-
-                await message.author.add_roles(message.guild.get_role(levelRole))
-
-            match mention:
-                case 1:
-                    mention = message.author.mention
-                case 0:
-                    mention = ""
-                
-            if customMessage is not None:
-                lvlmessage = customMessage
-
-            await infoEmbed(self.bot, message.channel, lvlmessage.replace("\\n", "\n").format_map(safeDict(user_name=message.author.name, user_mention=message.author.mention, user_discriminator=message.author.discriminator, level=user.level, xp_needed=user.xp_needed, level_next=user.level + 1, role=role)), content=mention, thumbnail=message.author.display_avatar.url, color=message.author.color)
-
-
-def checkLevelOn(guildid: int) -> bool:
-    enabled = readOne("enabled", "level_system", "guild_id", guildid)
-
-    if enabled is None:
-        levelupmessage = "Glückwunsch **{user_name}#{user_discriminator}**!\\n\\nDu bist ein Level aufgestiegen!\\nDu bist nun Level `{level}`"
-        insert("level_system", "guild_id, enabled, xp, cooldown, mention, message", [guildid, 0, 3, 6, 1, levelupmessage])
-        return False
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpRemove", user.user_id, amount))
     
-    return enabled[0] == 1
+    @levelsystem_modify_xp.command(name="set", aliases=["s"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_xp_set(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
 
-def readUser(guildid: int, userid: int) -> User:
-    level = readOne("messages, level, xp, cooldown", "level_users", "guild_id user_id", [guildid, userid])
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpSetAmount"))
+        
+        if amount > math.ceil(10 * ((1000) ** 1.5) + 20):
+            amount = math.ceil(10 * ((1000) ** 1.5) + 20)
 
-    if level is None:
-        xp_needed = 27
+        user: User = readUser(ctx.guild, user.id)
 
-        insert("level_users", "guild_id, user_id, messages, level, xp, cooldown", [guildid, userid, 0, 1, 0, time()])
-        return User(userid, 0, 1, 0, time(), xp_needed)
+        user.xp = amount
+        user.level = 1
+        user.xp_needed = 27
 
-    xp_needed = 27 if level[1] == 1 else math.ceil(10 * (level[1] ** 1.5) + 20)
-    return User(userid, level[0], level[1], level[2], level[3], xp_needed)
+        while user.xp_needed < user.xp and user.level < 1000:
+            user.level += 1
+            user.xp_needed = math.ceil(10 * ((user.level) ** 1.5) + 20)
 
-def addUserXP(guildid: int, userid: int, xp: int, cooldown: int) -> bool:
-    user: User = readUser(guildid, userid)
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, user.user_id])
 
-    if time() - user.cooldown < cooldown:
-        return False
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyXpSet", user.user_id, amount))
+    
+    @levelsystem_modify.group(name="level", aliases=["l"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_level(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_modify_level.command(name="add", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_level_add(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
 
-    user.xp += xp
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelAddAmount"))
+
+        user: User = readUser(ctx.guild, user.id)
+
+        user.level += amount
+
+        user.level = min(user.level, 1000)
+        user.xp_needed = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
+
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp_needed, ctx.guild.id, user.user_id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelAdd", user.user_id, amount))
+    
+    @levelsystem_modify_level.command(name="remove", aliases=["r"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_level_remove(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelRemoveAmount"))
+
+        user: User = readUser(ctx.guild, user.id)
+
+        user.level -= amount
+
+        user.level = max(user.level, 1)
+        user.xp_needed = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
+
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp_needed, ctx.guild.id, user.user_id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelRemove", user.user_id, amount))
+    
+    @levelsystem_modify_level.command(name="set", aliases=["s"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_modify_level_set(self, ctx, user: nextcord.Member, amount: int):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        if amount < 1:
+            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelSetAmount"))
+
+        user: User = readUser(ctx.guild, user.id)
+
+        user.level = amount
+        user.xp_needed = math.ceil(10 * ((user.level - 1) ** 1.5) + 20)
+
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp_needed, ctx.guild.id, user.user_id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysModifyLevelSet", user.user_id, amount))
+        
+        
+    @levelsystem.group(name="reset", aliases=["re"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_reset(self, ctx):
+        raise commands.MissingRequiredArgument(ctx.command)
+    
+    @levelsystem_reset.command(name="user", aliases=["u"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_reset_user(self, ctx, user: nextcord.Member):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        user: User = readUser(ctx.guild, user.id)
+
+        user.xp = 0
+        user.level = 1
+        user.xp_needed = 27
+
+        update("level_users", "level xp", "guild_id user_id", [user.level, user.xp, ctx.guild.id, user.user_id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysResetUser", user.user_id))
+    
+    @levelsystem_reset.command(name="all", aliases=["a"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_reset_all(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        update("level_users", "level xp", "guild_id", [1, 0, ctx.guild.id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysResetAll"))
+    
+    @levelsystem_reset.command(name="settings", aliases=["s"])
+    @commands.has_permissions(manage_guild=True)
+    @commands.cooldown(2, 10, commands.BucketType.user)
+    async def levelsystem_reset_settings(self, ctx):
+        guildLocale = getGuildLanguage(ctx.guild.id)
+
+        update("level_system", "xp cooldown mention message channel_id", "guild_id", [3, 6, 1, getLocale(languageStrings, guildLocale, "levelsysDefaultMessage"), "null", ctx.guild.id])
+
+        return await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "levelsysResetSettings"))
+        
+def checkIfLevelSystemIsEnabled(guild: nextcord.Guild) -> bool:
+    """Checks if the level system is enabled in the guild and returns True if it is enabled."""
+    enabled = readOne("enabled", "level_system", "guild_id", [guild.id])
+
+    return False if enabled is None else enabled[0] == 1
+
+def readUser(guild: nextcord.Guild, userID: int) -> User:
+    """Reads the user from the database and returns a User object."""
+    databaseUser = readOne("messages, level, xp, cooldown", "level_users", "guild_id user_id", [guild.id, userID])
+    
+    if databaseUser is None:
+        insert("level_users", "guild_id, user_id, messages, level, xp, cooldown", [guild.id, userID, 0, 1, 0, time()])
+        return User(userID, 0, 1, 0, time(), 27)
+    
+    xpNeeded = 27 if databaseUser[1] == 1 else math.ceil(10 * (databaseUser[1] ** 1.5) + 20)
+    
+    return User(userID, databaseUser[0], databaseUser[1], databaseUser[2], databaseUser[3], xpNeeded)
+
+def readGuild(guild: nextcord.Guild) -> Guild:
+    """Reads the guild from the database and returns a Guild object."""
+    databaseGuild = readOne("enabled, xp, cooldown, mention, message, channel_id", "level_system", "guild_id", [guild.id])
+    databaseCustomMessages = readAll("level, message", "level_custommessages", "guild_id", [guild.id])
+    databaseLevelRoles = readAll("level, role_id", "level_roles", "guild_id", [guild.id])
+    databaseBlacklistedChannels = readAll("channel_id", "level_blacklist_channel", "guild_id", [guild.id])
+    databaseBlacklistedRoles = readAll("role_id", "level_blacklist_roles", "guild_id", [guild.id])
+    
+    customMessages = {}
+    levelRoles = {}
+    
+    if databaseCustomMessages is not None:
+        for message in databaseCustomMessages:
+            customMessages[message[0]] = message[1]
+            
+    if databaseLevelRoles is not None:
+        for role in databaseLevelRoles:
+            levelRoles[role[0]] = role[1]
+    
+    if databaseGuild is None:
+        insert("level_system", "guild_id, enabled, xp, cooldown, mention, message, channel_id", [guild.id, 0, 3, 6, 1, getLocale(languageStrings, getGuildLanguage(guild.id), "levelsysDefaultMessage"), "null"])
+        return Guild(guild.id, False, 3, 6, True, getLocale(languageStrings, getGuildLanguage(guild), "levelsysDefaultMessage"), None, {}, {}, [], [])
+    
+    if databaseBlacklistedChannels is None:
+        databaseBlacklistedChannels = []
+    
+    if databaseBlacklistedRoles is None:
+        databaseBlacklistedRoles = []
+    
+    return Guild(guild.id, databaseGuild[0] == 1, databaseGuild[1], databaseGuild[2], databaseGuild[3] == 1, databaseGuild[4], databaseGuild[5], customMessages, levelRoles, databaseBlacklistedChannels, databaseBlacklistedRoles)
+
+def addUserXP(guild: Guild, user: User) -> bool:
+    """Adds the xp to the user and returns True if the user leveled up."""
+    if time() - user.cooldown < guild.cooldown: return
+    if user.level == 1000: return
+    
+    user.xp += guild.xp
     user.messages += 1
+    user.cooldown = time()
     
     if user.xp >= user.xp_needed:
         user.level += 1
         user.xp_needed = 27 if user.level == 1 else math.ceil(10 * (user.level ** 1.5) + 20)
-        update("level_users", "level xp messages", "guild_id user_id", [user.level, user.xp, user.messages, guildid, userid])
+        
+        update("level_users", "messages level xp cooldown", "guild_id user_id", [user.messages, user.level, user.xp, user.cooldown, guild.guild_id, user.user_id])
         return True
     
-    update("level_users", "xp messages cooldown", "guild_id user_id", [user.xp, user.messages, time(), guildid, userid])
+    update("level_users", "messages xp cooldown", "guild_id user_id", [user.messages, user.xp, user.cooldown, guild.guild_id, user.user_id])
     return False
 
-    
+class LevelSystemHelpView(nextcord.ui.View):
+    def __init__(self, bot, language: str, disabled: bool = False, category: str = "general"):
+        super().__init__(timeout=300)
+        self.add_item(SelectorButton(bot, disabled, category, language=language))
+        self.bot = bot
+        self.disabled = disabled
+        
+    async def on_timeout(self) -> None:
+        if self.disabled:
+            return
+            
+        await self.calltimeout(self.bot, self.message)
+        
+    async def calltimeout(self, bot, message):
+        guildLocale = getGuildLanguage(message.guild.id)
+
+        view = LevelSystemHelpView(bot, guildLocale, True)
+        embed = nextcord.Embed(
+                description=getLocale(languageStrings, guildLocale, "levelsysHelp"),
+                color=nextcord.Color.blurple()
+        )
+        message = await message.edit(embed=embed, view=view)
+        view.message = message
+        
+class SelectorButton(nextcord.ui.Select):
+    def __init__(self, bot, disabled: bool, category: str = "general", language: str = "en"):
+        general = getLocale(languageStrings, language, "general")
+        message = getLocale(languageStrings, language, "message")
+        roles = getLocale(languageStrings, language, "roles")
+        blacklist = getLocale(languageStrings, language, "blacklist")
+        reset = getLocale(languageStrings, language, "reset")
+
+        options = [
+            nextcord.SelectOption(label=general, emoji="<:Commands:1087442278118871140>", default=category == "general"),
+            nextcord.SelectOption(label=message, emoji="<a:Typing:1097514996562395278>", default=category == "message"),
+            nextcord.SelectOption(label=roles, emoji="<:autoroles:1090725070323859506>", default=category == "roles"),
+            nextcord.SelectOption(label=blacklist, emoji="<:Cross:1097515321365110835>", default=category == "blacklist"),
+            nextcord.SelectOption(label=reset, emoji="<:Error:1087445963280486430>", default=category == "reset")
+        ]
+
+        super().__init__(placeholder=getLocale(languageStrings, language, "categoriesPlaceholder"), options=options, disabled=disabled)
+        self.bot = bot
+
+    async def callback(self, interaction):
+        global languageStrings
+        if f"{interaction.message.id}|{interaction.user.id}" not in cache:
+            return
+        
+
+        guildLocale = getGuildLanguage(interaction.guild.id)
+
+        category = self.values[0].lower()
+        if category == getLocale(languageStrings, guildLocale, "general").lower():
+            category = "general"
+        elif category == getLocale(languageStrings, guildLocale, "message").lower():
+            category = "message"
+        elif category == getLocale(languageStrings, guildLocale, "roles").lower():
+            category = "roles"
+        elif category == getLocale(languageStrings, guildLocale, "blacklist").lower():
+            category = "blacklist"
+        elif category == getLocale(languageStrings, guildLocale, "reset").lower():
+            category = "reset"
+
+        view = LevelSystemHelpView(self.bot, guildLocale, False, category)
+        prefix = getPrefixFromDatabase(self.bot, interaction.message)[0]
+
+        with contextlib.suppress(Exception):
+            match category:
+                case "general":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "levelsysHelp", prefix),
+                        color=nextcord.Color.blurple()
+                        )
+
+                case "message":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "messageDescription", prefix),
+                        color=nextcord.Color.blurple()
+                    )
+
+                case "roles":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "rolesDescription", prefix),
+                        color=nextcord.Color.blurple()
+                    )
+
+                case "blacklist":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "blacklistDescription", prefix),
+                        color=nextcord.Color.blurple()
+                    )
+
+                case "reset":
+                    embed = nextcord.Embed(
+                        description=getLocale(languageStrings, guildLocale, "resetDescription", prefix),
+                        color=nextcord.Color.blurple()
+                    )
+            
+            message = await interaction.message.edit(embed=embed, view=view)
+            view.message = message
+
 def setup(bot):
-    bot.add_cog(LevelSys(bot))
+    global languageStrings
+    languageStrings = getLanguageStrings("levelsys")
+    bot.add_cog(LevelSystem(bot))
