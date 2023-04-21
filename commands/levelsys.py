@@ -851,7 +851,7 @@ class LevelSystemHelpView(nextcord.ui.View):
 
         view = LevelSystemHelpView(bot, guildLocale, True)
         embed = nextcord.Embed(
-                description=getLocale(languageStrings, guildLocale, "levelsysHelp"),
+                description=getLocale(languageStrings, guildLocale, "levelsysHelp", getPrefixFromDatabase(self.bot, message)[0]),
                 color=nextcord.Color.blurple()
         )
         message = await message.edit(embed=embed, view=view)
