@@ -266,7 +266,8 @@ class LevelSystem(Cog):
         
         guild.message = message
         update("level_system", "message", "guild_id", [message, ctx.guild.id])
-        return await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "levelsysMessageCustom"))
+        user: User = readUser(ctx.guild, ctx.author.id)
+        return await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "levelsysMessageCustom", message.replace("\\n", "\n").format_map(safeDict(user_name=ctx.message.author.name, user_mention=ctx.message.author.mention, user_discriminator=ctx.message.author.discriminator, level=user.level, xp_needed=user.xp_needed, level_next=user.level + 1, role="{role}"))))
     
     @levelsystem.command(name="channel", aliases=["c"])
     @commands.has_permissions(manage_guild=True)
