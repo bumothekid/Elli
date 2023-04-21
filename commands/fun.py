@@ -19,12 +19,12 @@ class Fun(Cog):
     async def _ssp(self, ctx, choice: str = None):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
-        stone = getLocale(languageStrings, guildLocale, "stone")
-        scissors = getLocale(languageStrings, guildLocale, "scissors")
-        paper = getLocale(languageStrings, guildLocale, "paper")
+        stone = getLocale(self.bot, languageStrings, guildLocale, "stone")
+        scissors = getLocale(self.bot, languageStrings, guildLocale, "scissors")
+        paper = getLocale(self.bot, languageStrings, guildLocale, "paper")
 
         if choice is not None and choice.lower() not in [stone, scissors, paper]:
-            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
+            await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWrongChoice"))
             return
 
         botchoice = random.choice([stone, scissors, paper])
@@ -32,21 +32,21 @@ class Fun(Cog):
         if choice is None:
             i = 0
 
-            await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
+            await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWrongChoice"))
 
             while i < 3:
                 try:
                     anwser = await self.bot.wait_for('message', timeout=60.0, check=lambda m: m.author == ctx.author and m.channel == ctx.channel)
                 except asyncio.TimeoutError:
-                    await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspTimeout"))
+                    await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspTimeout"))
                     break
                 
                 if anwser.content.lower() not in [stone.lower(), scissors.lower(), paper.lower()]:
                     if i == 3:
-                        await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspThreeTries"))
+                        await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspThreeTries"))
                         break
 
-                    await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWrongChoice"))
+                    await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWrongChoice"))
                     continue
             
                 choice = anwser.content
@@ -55,41 +55,41 @@ class Fun(Cog):
         choice = capString(choice)
         
         if choice == botchoice:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspDraw", choice, botchoice), color=nextcord.Color.light_gray())
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspDraw", choice, botchoice), color=nextcord.Color.light_gray())
         
         elif choice == stone and botchoice == scissors:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWin", choice, botchoice))
         
         elif choice == stone and botchoice == paper:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
         elif choice == scissors and botchoice == stone:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
         elif choice == scissors and botchoice == paper:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWin", choice, botchoice))
         
         elif choice == paper and botchoice == stone:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspWin", choice, botchoice))
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspWin", choice, botchoice))
 
         elif choice == paper and botchoice == scissors:
-            await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
+            await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspLose", choice, botchoice), color=nextcord.Color.red())
         
         else:
-            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "sspUnexpectedOutcome"))
+            await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "sspUnexpectedOutcome"))
     
     @commands.command(name="8ball", aliases=["8b", "ask"])
     @commands.cooldown(5, 20, commands.BucketType.user)
     async def _8ball(self, ctx, *, question: str):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
-        anwsers = [getLocale(languageStrings, guildLocale, "yes"), getLocale(languageStrings, guildLocale, "safe"), "100%", getLocale(languageStrings, guildLocale, "maybe"), getLocale(languageStrings, guildLocale, "notReally"), getLocale(languageStrings, guildLocale, "yeah"), getLocale(languageStrings, guildLocale, "betterNot"), getLocale(languageStrings, guildLocale, "no"), getLocale(languageStrings, guildLocale, "nope"), getLocale(languageStrings, guildLocale, "never"), getLocale(languageStrings, guildLocale, "notAtAll"), getLocale(languageStrings, guildLocale, "notSure"), getLocale(languageStrings, guildLocale, "noWay")]
+        anwsers = [getLocale(self.bot, languageStrings, guildLocale, "yes"), getLocale(self.bot, languageStrings, guildLocale, "safe"), "100%", getLocale(self.bot, languageStrings, guildLocale, "maybe"), getLocale(self.bot, languageStrings, guildLocale, "notReally"), getLocale(self.bot, languageStrings, guildLocale, "yeah"), getLocale(self.bot, languageStrings, guildLocale, "betterNot"), getLocale(self.bot, languageStrings, guildLocale, "no"), getLocale(self.bot, languageStrings, guildLocale, "nope"), getLocale(self.bot, languageStrings, guildLocale, "never"), getLocale(self.bot, languageStrings, guildLocale, "notAtAll"), getLocale(self.bot, languageStrings, guildLocale, "notSure"), getLocale(self.bot, languageStrings, guildLocale, "noWay")]
 
         if checkLink(ctx.message.content):
-            await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "noLinksQuestion"))
+            await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "noLinksQuestion"))
             return
         
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "8ballSuccess", random.choice(anwsers), question))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "8ballSuccess", random.choice(anwsers), question))
                 
     @commands.command(name="cat", aliases=["kitty", "kitten"])
     @commands.cooldown(5, 30, commands.BucketType.user)
@@ -158,9 +158,9 @@ class Fun(Cog):
         reverse = text[::-1]
 
         if checkLink(text) or checkLink(reverse):
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "noLinksText"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "noLinksText"))
         
-        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "reverseSuccess", ctx.author, reverse))
+        await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "reverseSuccess", ctx.author, reverse))
 
     
 

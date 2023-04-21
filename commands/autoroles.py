@@ -19,7 +19,7 @@ class Autoroles(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne("prefix", "guilds", "guild_id", ctx.guild.id)[0]
         
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "autorolesHelp", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "autorolesHelp", prefix))
 
     @autoroles.command(name="add")
     @commands.has_permissions(manage_roles=True)
@@ -28,11 +28,11 @@ class Autoroles(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if role.position >= ctx.author.top_role.position:
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "userRoleHigher"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "userRoleHigher"))
             return
 
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "botRoleHigher"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "botRoleHigher"))
             return
 
         if (
@@ -40,15 +40,15 @@ class Autoroles(Cog):
             and len(readAll("role_id", "autoroles", "guild_id", ctx.guild.id))
             >= 10
         ):
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "maxAutoroles"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "maxAutoroles"))
             return
 
         if readOne("role_id", "autoroles", "role_id", role.id) is not None:
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "roleAlreadyAdded"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "roleAlreadyAdded"))
             return
 
         insert("autoroles", "guild_id, role_id", [ctx.guild.id, role.id])
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "roleAdded", role.name))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "roleAdded", role.name))
 
     @autoroles.command(name="remove")
     @commands.has_permissions(manage_roles=True)
@@ -57,19 +57,19 @@ class Autoroles(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if role.position >= ctx.author.top_role.position:
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "userRoleHigher"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "userRoleHigher"))
             return
         
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "botRoleHigher"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "botRoleHigher"))
             return
 
         if readOne("role_id", "autoroles", "role_id", role.id) is None:
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "roleNotAdded"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "roleNotAdded"))
             return
         
         delete("autoroles", "role_id", role.id)
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "roleRemoved", role.name))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "roleRemoved", role.name))
 
     @autoroles.command(name="list", aliases=["show"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -78,12 +78,12 @@ class Autoroles(Cog):
         roles = readAll("role_id", "autoroles", "guild_id", ctx.guild.id)
 
         if len(roles) == 0:
-            await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noAutoroles"))
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "noAutoroles"))
             return
         
         roleList = "".join([f"> {ctx.guild.get_role(role[0]).mention}\n" for role in roles])
 
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "roleList", roleList))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "roleList", roleList))
 
     @Cog.listener()
     async def on_member_join(self, member):

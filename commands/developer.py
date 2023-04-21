@@ -41,7 +41,7 @@ class Developer(Cog):
         update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer regestriert.")
-        await devLogging(self, ctx, f"{user} wurde von {ctx.author} als developer registriert")
+        devLogging(self, ctx, f"{user} wurde von {ctx.author} als developer registriert")
 
     @_dev.command(name="remove")
     async def _remove(self, ctx, user: nextcord.User):
@@ -58,7 +58,7 @@ class Developer(Cog):
         update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer entfernt.")
-        await devLogging(self, ctx, f"{user} wurde von {ctx.author} als Developer entfernt.")
+        devLogging(self, ctx, f"{user} wurde von {ctx.author} als Developer entfernt.")
     
     @_dev.command(name="show", aliases=["list"])
     async def show(self, ctx):
@@ -86,7 +86,7 @@ class Developer(Cog):
 
 
         await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{version}` Version gesetzt.\n> **Alte Version:** `{vers[0]}`")
-        await devLogging(self, ctx, f"{ctx.author} hat die Bot Version von {vers[0]} auf {version} gesetzt.")
+        devLogging(self, ctx, f"{ctx.author} hat die Bot Version von {vers[0]} auf {version} gesetzt.")
 
 
     @_dev.command(name="setStatsChannel")

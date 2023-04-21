@@ -49,7 +49,7 @@ class EventsCog(Cog):
                 prefixArgument = message.content.split(" ")[2] if len(message.content.split(" ")) > 2 else None
                 if argument == "prefix":
                     if prefixArgument is None:
-                        await errorEmbed(self, message, getLocale(languageStrings, guildLocale, "prefixArgumentMissing", self.bot.user.id))
+                        await errorEmbed(self, message, getLocale(self.bot, languageStrings, guildLocale, "prefixArgumentMissing", self.bot.user.id))
                         return
 
                     await self.bot.get_command("prefix").callback(self, message, prefixArgument)

@@ -21,7 +21,7 @@ class Giveaways(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
 
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayDescription", prefix))
 
     @_giveaway.command(name="create", aliases=["start"])
     @commands.max_concurrency(1, commands.BucketType.user)
@@ -31,13 +31,13 @@ class Giveaways(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayLimit"))
 
         questions = [
-            getLocale(languageStrings, guildLocale, "giveawayQuestionChannel", ctx.channel.mention),
-            getLocale(languageStrings, guildLocale, "giveawayQuestionTime"),
-            getLocale(languageStrings, guildLocale, "giveawayQuestionPrize"),
-            getLocale(languageStrings, guildLocale, "giveawayQuestionWinner")
+            getLocale(self.bot, languageStrings, guildLocale, "giveawayQuestionChannel", ctx.channel.mention),
+            getLocale(self.bot, languageStrings, guildLocale, "giveawayQuestionTime"),
+            getLocale(self.bot, languageStrings, guildLocale, "giveawayQuestionPrize"),
+            getLocale(self.bot, languageStrings, guildLocale, "giveawayQuestionWinner")
         ]
 
         anwsers = {}
@@ -62,7 +62,7 @@ class Giveaways(Cog):
                     return await errorEmbed(self, ctx, "giveawayTimeout")
                 
                 if trys == 3:
-                    return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayFails"))
+                    return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayFails"))
 
                 match i:
                     case 0:
@@ -73,7 +73,7 @@ class Giveaways(Cog):
 
                             if anwser == None:
                                 embed = nextcord.Embed(
-                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayChannelNotFound"),
+                                    description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayChannelNotFound"),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -84,7 +84,7 @@ class Giveaways(Cog):
                             trys = 0
                         except:
                             embed = nextcord.Embed(
-                                description=question + "\n\n> " + getLocale(languageStrings, guildLocale, "giveawayChannelNotFound"),
+                                description=question + "\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayChannelNotFound"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -103,7 +103,7 @@ class Giveaways(Cog):
 
                         if not matches:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeInvalid"),
+                                description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeInvalid"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -115,7 +115,7 @@ class Giveaways(Cog):
                                 anwser += timeDict[value] * float(key)
                             except KeyError:
                                 embed = nextcord.Embed(
-                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeValueInvalid", value),
+                                    description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeValueInvalid", value),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -124,7 +124,7 @@ class Giveaways(Cog):
                                 continue
                             except ValueError:
                                 embed = nextcord.Embed(
-                                    description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeKeyInvalid", key),
+                                    description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeKeyInvalid", key),
                                     color=nextcord.Color.blurple()
                                 )
 
@@ -134,7 +134,7 @@ class Giveaways(Cog):
                         
                         if round(anwser) < 120 or round(anwser) > 1555200:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayTimeBetween"),
+                                description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeBetween"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -148,10 +148,10 @@ class Giveaways(Cog):
                         await userAnwser.delete()
 
                         if userAnwser.content == '':
-                            anwser = getLocale(languageStrings, guildLocale, "giveawayNoPrize")
+                            anwser = getLocale(self.bot, languageStrings, guildLocale, "giveawayNoPrize")
                         elif len(userAnwser.content) > 150:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayCharLimit"),
+                                description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayCharLimit"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -166,7 +166,7 @@ class Giveaways(Cog):
 
                         if not userAnwser.content.isdigit():
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayWholeNumber"),
+                                description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayWholeNumber"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -176,7 +176,7 @@ class Giveaways(Cog):
 
                         elif int(userAnwser.content) >= 100 or int(userAnwser.content) <= 0:
                             embed = nextcord.Embed(
-                                description=question + f"\n\n> " + getLocale(languageStrings, guildLocale, "giveawayWinnerLimit"),
+                                description=question + f"\n\n> " + getLocale(self.bot, languageStrings, guildLocale, "giveawayWinnerLimit"),
                                 color=nextcord.Color.blurple()
                             )
 
@@ -198,11 +198,11 @@ class Giveaways(Cog):
 
         embed = nextcord.Embed(
             title=anwsers[2],
-            description=getLocale(languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
+            description=getLocale(self.bot, languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=anwsers[1])
         )
-        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayFooter", anwsers[3]))
+        embed.set_footer(text=getLocale(self.bot, languageStrings, guildLocale, "giveawayFooter", anwsers[3]))
 
         message = await anwsers[0].send(embed=embed)
 
@@ -212,7 +212,7 @@ class Giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, anwsers[0].id, message.id, anwsers[2], anwsers[3], unix))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, anwsers[0].id, message.id, anwsers[2], anwsers[3], unix))
 
     @_giveaway.command(name="quick", aliases=["q", "quickstart"])
     @commands.has_permissions(manage_guild=True)
@@ -220,25 +220,25 @@ class Giveaways(Cog):
     async def _quick(self, ctx, channel: nextcord.TextChannel, minutes, winner, *, prize):
         guildLocale = getGuildLanguage(ctx.guild.id)
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayLimit"))
 
         if len(prize) > 150:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayCharLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayCharLimit"))
 
         if not minutes.isdigit():
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayTimeInMinutes"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeInMinutes"))
         
         elif int(minutes) < 2 or int(minutes) > 1555200:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayTimeBetween"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayTimeBetween"))
         
         if not winner.isdigit():
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWholeNumber"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayWholeNumber"))
 
         elif int(winner) >= 100:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWinnerLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayWinnerLimit"))
 
         if prize == "":
-            prize = getLocale(languageStrings, guildLocale, "giveawayNoPrize")
+            prize = getLocale(self.bot, languageStrings, guildLocale, "giveawayNoPrize")
 
         seconds = int(minutes) * 60
         now = datetime.now()
@@ -246,11 +246,11 @@ class Giveaways(Cog):
 
         embed = nextcord.Embed(
             title=prize,
-            description=getLocale(languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
+            description=getLocale(self.bot, languageStrings, guildLocale, "giveaway", unix, ctx.author.mention),
             color=ctx.author.color,
             timestamp=now + timedelta(seconds=seconds)
         )
-        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayFooter", winner))
+        embed.set_footer(text=getLocale(self.bot, languageStrings, guildLocale, "giveawayFooter", winner))
 
         message = await channel.send(embed=embed)
 
@@ -260,7 +260,7 @@ class Giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, channel.id, message.id, prize, winner, unix))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, channel.id, message.id, prize, winner, unix))
 
     @_giveaway.command(name="drop")
     @commands.has_permissions(manage_guild=True)
@@ -269,18 +269,18 @@ class Giveaways(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if len(readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])) >= 9:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayLimit"))
 
         if len(prize) > 150:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayCharLimit"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayCharLimit"))
 
         embed = nextcord.Embed(
             title=prize,
-            description=getLocale(languageStrings, guildLocale, "giveawayDrop"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "giveawayDrop"),
             color=ctx.author.color,
             timestamp=datetime.now()
         )
-        embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayDrop", ctx.author.name))
+        embed.set_footer(text=getLocale(self.bot, languageStrings, guildLocale, "giveawayDrop", ctx.author.name))
 
         message = await channel.send(embed=embed)
 
@@ -291,11 +291,11 @@ class Giveaways(Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", check=lambda r, u: u.bot == False and r.message.id == message.id and r.emoji == emote, timeout=300)
         except asyncio.TimeoutError:
-            return await errorEmbed(self, channel, getLocale(languageStrings, guildLocale, "giveawayDropTimeout"))
+            return await errorEmbed(self, channel, getLocale(self.bot, languageStrings, guildLocale, "giveawayDropTimeout"))
         
         embed = nextcord.Embed(
             title=prize,
-            description=getLocale(languageStrings, guildLocale, "giveawayDropEnd", user.mention, prize),
+            description=getLocale(self.bot, languageStrings, guildLocale, "giveawayDropEnd", user.mention, prize),
             color=ctx.author.color
         )
 
@@ -303,7 +303,7 @@ class Giveaways(Cog):
 
         await successEmbed(self,
                             channel,
-                            getLocale(languageStrings, guildLocale, "giveawayDropSuccess", user.mention, prize, sum(member.status!=nextcord.Status.offline and not member.bot for member in ctx.guild.members)),
+                            getLocale(self.bot, languageStrings, guildLocale, "giveawayDropSuccess", user.mention, prize, sum(member.status!=nextcord.Status.offline and not member.bot for member in ctx.guild.members)),
                             color=ctx.author.color
         )
         
@@ -321,9 +321,9 @@ class Giveaways(Cog):
         giveaway = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[ctx.guild.id, message.id])
 
         if giveaway is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayNotFound"))
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayEnd", ctx.guild.id, channel.id, message.id, giveaway[6]))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayEnd", ctx.guild.id, channel.id, message.id, giveaway[6]))
         
         update(table="giveaways", columns="duration", where="guild_id message_id", values=["0", ctx.guild.id, message.id])
 
@@ -338,18 +338,18 @@ class Giveaways(Cog):
             raise commands.MessageNotFound(argument=message)
 
         if not winners.isdigit():
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayWholeNumber"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayWholeNumber"))
 
         giveaway = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[ctx.guild.id, message.id])
 
         if giveaway is not None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayStillRunning"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayStillRunning"))
 
         emote = self.bot.get_emoji(1087437215648456794)
         is_giveaway = any(reaction.emoji == emote for reaction in message.reactions)
 
         if not is_giveaway:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayNotFound"))
 
         guild = self.bot.get_guild(ctx.guild.id)
         winner_list = []
@@ -374,14 +374,14 @@ class Giveaways(Cog):
             entries.pop(entries.index(winner))
 
         if not winner_list:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNoWinnerSmall"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayNoWinnerSmall"))
 
         winners = ', '.join(winner_list)
 
         if len(winner_list) > 1:
-            string = getLocale(languageStrings, guildLocale, "giveawayWinner", winners, message.embeds[0].title, len(backupEntries))
+            string = getLocale(self.bot, languageStrings, guildLocale, "giveawayWinner", winners, message.embeds[0].title, len(backupEntries))
         else:
-            string = getLocale(languageStrings, guildLocale, "giveawayWinners", winners, message.embeds[0].title, len(backupEntries))
+            string = getLocale(self.bot, languageStrings, guildLocale, "giveawayWinners", winners, message.embeds[0].title, len(backupEntries))
 
         embed = nextcord.Embed(
             description=string,
@@ -398,7 +398,7 @@ class Giveaways(Cog):
         giveaways = readAll(columns="*", table="giveaways", where="guild_id", values=[ctx.guild.id])
 
         if not giveaways:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayNoActive"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayNoActive"))
 
         fields = []
 
@@ -412,11 +412,11 @@ class Giveaways(Cog):
             start = datetime.fromtimestamp(giveaway[3])
             unix = int(mktime((start + timedelta(seconds=giveaway[4])).timetuple()))
 
-            value = getLocale(languageStrings, guildLocale, "giveawayField", giveaway_channel_link, giveaway_message_link, giveaway_hoster.mention, giveaway_winner, unix)
+            value = getLocale(self.bot, languageStrings, guildLocale, "giveawayField", giveaway_channel_link, giveaway_message_link, giveaway_hoster.mention, giveaway_winner, unix)
             fields.append({"name": f"**{giveaway_price}**", "value": value, "inline": True})
         
         
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "giveawayList"), fields=fields)
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawayList"), fields=fields)
 
     @Cog.listener()
     async def on_ready(self):
@@ -492,16 +492,16 @@ class Giveaways(Cog):
                 
                 embed = nextcord.Embed(
                     title=giveaway[3],
-                    description=getLocale(languageStrings, guildLocale, "giveawayNoWinnerBig", unix, host.mention),
+                    description=getLocale(self.bot, languageStrings, guildLocale, "giveawayNoWinnerBig", unix, host.mention),
                     color=host.color,
                     timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
                 )
 
-                embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
+                embed.set_footer(text=getLocale(self.bot, languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
 
                 await message.edit(embed=embed)
 
-                await errorEmbed(self, channel, getLocale(languageStrings, guildLocale, "giveawayNoWinnerSmall"))
+                await errorEmbed(self, channel, getLocale(self.bot, languageStrings, guildLocale, "giveawayNoWinnerSmall"))
 
                 return delete(table="giveaways", where="guild_id message_id", values=[guild_id, message_id])
 
@@ -509,18 +509,18 @@ class Giveaways(Cog):
 
             embed = nextcord.Embed(
                 title=giveaway[3],
-                description=getLocale(languageStrings, guildLocale, "giveawayEnded", winners, unix, host.mention),
+                description=getLocale(self.bot, languageStrings, guildLocale, "giveawayEnded", winners, unix, host.mention),
                 color=host.color,
                 timestamp=datetime.fromtimestamp(giveaway[4]) + timedelta(seconds=giveaway[5])
             )
-            embed.set_footer(text=getLocale(languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
+            embed.set_footer(text=getLocale(self.bot, languageStrings, guildLocale, "giveawayEndFooter", giveaway[1]))
 
             await message.edit(embed=embed)
 
             if len(winner_list) > 1:
-                string = getLocale(languageStrings, guildLocale, "giveawayWinners", winners, giveaway[3], len(backupEntries))
+                string = getLocale(self.bot, languageStrings, guildLocale, "giveawayWinners", winners, giveaway[3], len(backupEntries))
             else:
-                string = getLocale(languageStrings, guildLocale, "giveawayWinner", winners, giveaway[3], len(backupEntries))
+                string = getLocale(self.bot, languageStrings, guildLocale, "giveawayWinner", winners, giveaway[3], len(backupEntries))
 
             await successEmbed(self, channel, string, color=host.color)
 

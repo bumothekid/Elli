@@ -27,8 +27,8 @@ class General(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "botinfoDescription", self.bot.user.name, len(self.bot.guilds), sum(len(s.members) for s in self.bot.guilds), round(self.bot.latency * 1000), psutil.cpu_percent(), round(psutil.virtual_memory().percent), round(days), round(hours), round(minutes), version, nextcord.__version__, platform.python_version(), platform.system(), platform.release(), platform.machine(), platform.processor(), platform.version(), platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release, platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release),
-            footer={"text": getLocale(languageStrings, guildLocale, "botinfoFooter", self.bot.user.name), "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"},
+            getLocale(self.bot, languageStrings, guildLocale, "botinfoDescription", self.bot.user.name, len(self.bot.guilds), sum(len(s.members) for s in self.bot.guilds), round(self.bot.latency * 1000), psutil.cpu_percent(), round(psutil.virtual_memory().percent), round(days), round(hours), round(minutes), version, nextcord.__version__, platform.python_version(), platform.system(), platform.release(), platform.machine(), platform.processor(), platform.version(), platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release, platform.uname().node, platform.uname().machine, platform.uname().processor, platform.uname().system, platform.uname().version, platform.uname().release),
+            footer={"text": getLocale(self.bot, languageStrings, guildLocale, "botinfoFooter", self.bot.user.name), "icon_url":"https://avatars.githubusercontent.com/u/89693200?s=280&v=4"},
             thumbnail=self.bot.user.display_avatar.url)
         
     @commands.command(name="prefix", aliases=['setprefix'])
@@ -38,52 +38,52 @@ class General(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if "<:" in prefix or "<a:" in prefix or "<@" in prefix or "<#" in prefix:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noMentionsOrEmotesInPrefix"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "noMentionsOrEmotesInPrefix"))
         
         if len(prefix) > 4:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixTooLong"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "prefixTooLong"))
         
         if "`" in prefix:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "noBackticksInPrefix"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "noBackticksInPrefix"))
 
         oldPrefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])
 
         if oldPrefix is None:
             insert(table="guilds", columns="guild_id, prefix", values=[ctx.guild.id, prefix])
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSet", prefix, "-"))
+            return await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "prefixSet", prefix, "-"))
 
         if prefix == oldPrefix[0]:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSameAsOld", oldPrefix[0]))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "prefixSameAsOld", oldPrefix[0]))
 
         update(table="guilds", columns="prefix", where="guild_id", values=[prefix, ctx.guild.id])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
         
     @nextcord.slash_command(name="prefix", description="Set the prefix for this guild.", description_localizations={nextcord.Locale.de: "Setze die Prefix für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True))
     async def _prefixSlash(self, interaction, prefix: str):
         guildLocale = getGuildLanguage(interaction.guild.id)
 
         if "<:" in prefix or "<a:" in prefix or "<@" in prefix or "<#" in prefix:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "noMentionsOrEmotesInPrefix"))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "noMentionsOrEmotesInPrefix"))
         
         if len(prefix) > 4:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "prefixTooLong"))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "prefixTooLong"))
         
         if "`" in prefix:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "noBackticksInPrefix"))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "noBackticksInPrefix"))
 
         oldPrefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])
 
         if oldPrefix is None:
             insert(table="guilds", columns="guild_id, prefix", values=[interaction.guild.id, prefix])
-            return await successEmbed(self, interaction, getLocale(languageStrings, guildLocale, "prefixSet", prefix, "-"))
+            return await successEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "prefixSet", prefix, "-"))
 
         if prefix == oldPrefix[0]:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "prefixSameAsOld", oldPrefix[0]))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "prefixSameAsOld", oldPrefix[0]))
 
         update(table="guilds", columns="prefix", where="guild_id", values=[prefix, interaction.guild.id])
 
-        await successEmbed(self, interaction, getLocale(languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
+        await successEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
 
     @commands.command(name="language", aliases=['setlanguage', 'lang', 'setlang'])
     @commands.cooldown(2, 20, commands.BucketType.user)
@@ -92,16 +92,16 @@ class General(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if language not in ["de", "en"]:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "onlyAvailableLanguages", language, "de (german), en (english)"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "onlyAvailableLanguages", language, "de (german), en (english)"))
 
         oldLanguage = getGuildLanguage(ctx.guild.id)
 
         if language == oldLanguage:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "languageSameAsOld", oldLanguage))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "languageSameAsOld", oldLanguage))
 
         updateGuildLanguage(ctx.guild.id, language)
 
-        await successEmbed(self, ctx, getLocale(languageStrings, language, "languageSet", language, oldLanguage))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, language, "languageSet", language, oldLanguage))
         
     @nextcord.slash_command(name="language", description="Set the language for this guild.", description_localizations={nextcord.Locale.de: "Setze die Sprache für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True))
     async def _languageSlash(self, interaction,
@@ -112,16 +112,16 @@ class General(Cog):
         guildLocale = getGuildLanguage(interaction.guild.id)
 
         if language not in ["de", "en"]:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "onlyAvailableLanguages", language, "de (german), en (english)"))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "onlyAvailableLanguages", language, "de (german), en (english)"))
 
         oldLanguage = getGuildLanguage(interaction.guild.id)
 
         if language == oldLanguage:
-            return await errorEmbed(self, interaction, getLocale(languageStrings, guildLocale, "languageSameAsOld", oldLanguage))
+            return await errorEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "languageSameAsOld", oldLanguage))
 
         updateGuildLanguage(interaction.guild.id, language)
 
-        await successEmbed(self, interaction, getLocale(languageStrings, language, "languageSet", language, oldLanguage))
+        await successEmbed(self, interaction, getLocale(self.bot, languageStrings, language, "languageSet", language, oldLanguage))
         
 
     @commands.command(name="invite")
@@ -132,7 +132,7 @@ class General(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "inviteDescription", self.bot.user.id),
+            getLocale(self.bot, languageStrings, guildLocale, "inviteDescription", self.bot.user.id),
         )
         
     @nextcord.slash_command(name="invite", description="Get the invite link for this bot.", description_localizations={nextcord.Locale.de: "Erhalte den Einladungslink für diesen Bot."})
@@ -142,7 +142,7 @@ class General(Cog):
         await infoEmbed(
             self,
             interaction,
-            getLocale(languageStrings, guildLocale, "inviteDescription", self.bot.user.id),
+            getLocale(self.bot, languageStrings, guildLocale, "inviteDescription", self.bot.user.id),
         )
     
     @commands.command(name="support")
@@ -187,7 +187,7 @@ class General(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "privacyDescription"),
+            getLocale(self.bot, languageStrings, guildLocale, "privacyDescription"),
         )
     
     @nextcord.slash_command(name="privacy", description="Get the privacy policy for this bot.", description_localizations={nextcord.Locale.de: "Erhalte die Datenschutzerklärung für diesen Bot."})
@@ -197,7 +197,7 @@ class General(Cog):
         await infoEmbed(
             self,
             interaction,
-            getLocale(languageStrings, guildLocale, "privacyDescription"),
+            getLocale(self.bot, languageStrings, guildLocale, "privacyDescription"),
         )
 
 def setup(bot):

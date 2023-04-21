@@ -17,7 +17,7 @@ class Tempchannel(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
         
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelDescription", prefix))
 
     @_tempchannel.command(name="add", aliases=['create', 'set'])
     @commands.has_permissions(manage_guild=True)
@@ -33,11 +33,11 @@ class Tempchannel(Cog):
         if tempchannel is not None:
             update(table="tempchannels", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
             
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelSet", channel.name, tempchannel[2]))
+            return await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelSet", channel.name, tempchannel[2]))
 
         insert(table="tempchannels", columns="guild_id, channel_id, name", values=[ctx.guild.id, channel.id, "⏳ {name}"])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelSet", channel.name, "⏳ {name}"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelSet", channel.name, "⏳ {name}"))
 
     @_tempchannel.command(name="remove", aliases=['delete', 'del'])
     @commands.has_permissions(manage_guild=True)
@@ -47,11 +47,11 @@ class Tempchannel(Cog):
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNotSet"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelNotSet"))
 
         update(table="tempchannels", columns="channel_id", where="guild_id", values=["NULL", ctx.guild.id])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelRemoved", tempchannel[1], tempchannel[2]))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelRemoved", tempchannel[1], tempchannel[2]))
 
     @_tempchannel.command(name="name", aliases=['setname'])
     @commands.has_permissions(manage_guild=True)
@@ -61,11 +61,11 @@ class Tempchannel(Cog):
         tempchannel = readOne(columns="*", table="tempchannels", where="guild_id", values=[ctx.guild.id])
 
         if tempchannel is None or tempchannel[1] is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNotSet"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelNotSet"))
 
         update(table="tempchannels", columns="name", where="guild_id", values=[name, ctx.guild.id])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "tempchannelNameSet", tempchannel[1], name))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "tempchannelNameSet", tempchannel[1], name))
 
     @Cog.listener()
     async def on_ready(self):

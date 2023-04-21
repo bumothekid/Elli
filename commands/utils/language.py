@@ -1,6 +1,8 @@
 import os
 import json
+from .embeds import localizationError
 from .database import readOne, insert, update
+from nextcord.ext.commands import Bot
 
 def getGuildLanguage(guild_id) -> str:
     result = readOne("language", "guilds", "guild_id", guild_id)
@@ -34,11 +36,19 @@ def getLanguageStrings(cog: str):
             
     return languageStrings
 
-def getLocale(languageStrings: dict, language: str, string: str, *args):
+def getLocale(bot: Bot, languageStrings: dict, language: str, string: str, *args):
     if language not in languageStrings:
         return f"Missing language {language}"
 
     if string not in languageStrings[language]:
+        localizationError(bot, f"Missing string {string} in language {language}")
+        
         return f"Missing string {string} in language {language}"
-
-    return languageStrings[language][string].format(*args)
+    
+    try:
+        return languageStrings[language][string].format(*args)
+    except IndexError as e:
+        missingArgs = e.args[0].split("index ")[1].split(" out of range")[0]
+        
+        localizationError(bot, f"Missing argument {missingArgs} in string {string} for language {language}.")
+        return languageStrings[language][string]

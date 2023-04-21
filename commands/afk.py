@@ -29,7 +29,7 @@ class Afk(Cog):
         else:
             insert(table="afk", columns="guild_id, user_id, time, reason", values=[ctx.guild.id, ctx.author.id, time(), reason])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "afkSet", reason), color=nextcord.Color.dark_gold())
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "afkSet", reason), color=nextcord.Color.dark_gold())
 
     @Cog.listener()
     async def on_message(self, message):
@@ -47,11 +47,11 @@ class Afk(Cog):
                 
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = getLocale(languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
+                timeUp = getLocale(self.bot, languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(self.bot, languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
 
                 delete(table="afk", where="guild_id user_id", values=[message.guild.id, message.author.id])
 
-                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "afkRemoved", timeUp, user[2]))
+                return await successEmbed(self, message, getLocale(self.bot, languageStrings, guildLocale, "afkRemoved", timeUp, user[2]))
     
             if user[0] in [member.id for member in message.mentions]:
                 guildLocale = getGuildLanguage(message.guild.id)
@@ -59,9 +59,9 @@ class Afk(Cog):
 
                 _time = time() - float(user[1])
                 hours, minutes, seconds = _time / 3600, (_time / 60) % 60, _time % 60
-                timeUp = getLocale(languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
+                timeUp = getLocale(self.bot, languageStrings, guildLocale, "timeUpHours", int(hours), int(minutes), int(seconds)) if hours >= 1 else getLocale(self.bot, languageStrings, guildLocale, "timeUp", int(minutes), int(seconds))
 
-                return await successEmbed(self, message, getLocale(languageStrings, guildLocale, "isAfk", member.mention, timeUp, user[2]), color=nextcord.Color.dark_gold())
+                return await successEmbed(self, message, getLocale(self.bot, languageStrings, guildLocale, "isAfk", member.mention, timeUp, user[2]), color=nextcord.Color.dark_gold())
 
 
 def setup(bot):

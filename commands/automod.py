@@ -19,7 +19,7 @@ class Automod(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne("prefix", "guilds", "guild_id", [ctx.guild.id])[0]
         
-        await infoEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordDescription", prefix))
+        await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordDescription", prefix))
 
     @_badword.command(name="add", aliases=["a"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -29,11 +29,11 @@ class Automod(Cog):
         exists = readOne("word", "badwords", "guild_id word", [ctx.guild.id, word.lower()])
 
         if exists is not None:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordAlreadyExists", word))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordAlreadyExists", word))
         
         insert("badwords", "guild_id, word", [ctx.guild.id, word.lower()])
         
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordAdded", word))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordAdded", word))
 
     @_badword.command(name="remove", aliases=["del", "delete"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -44,10 +44,10 @@ class Automod(Cog):
 
         if exists is None:
             
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordDoesntExist", word))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordDoesntExist", word))
         
         delete("badwords", "guild_id word", [ctx.guild.id, word.lower()])
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordRemoved", word))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordRemoved", word))
 
     @_badword.command(name="list", aliases=["show"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -57,11 +57,11 @@ class Automod(Cog):
         words = readAll("word", "badwords", "guild_id", [ctx.guild.id])
 
         if not words:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordNoWords"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordNoWords"))
 
         string = "".join(f"{word[0]}\n" for word in words)
 
-        await infoEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "badwordList", string))
+        await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordList", string))
 
     @commands.group(name="ghostping", aliases=["ghost-ping", "ghost_ping"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -75,10 +75,10 @@ class Automod(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         
         if checkGhostOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "ghostpingAlreadyOn"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "ghostpingAlreadyOn"))
 
         update("ghostping", "enabled", "guild_id", [1, ctx.guild.id])
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "ghostpingOn"))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "ghostpingOn"))
 
     @_ghostping.command(name="off", aliases=["deactivate"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -86,10 +86,10 @@ class Automod(Cog):
     async def _off(self, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
         if not checkGhostOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "ghostpingAlreadyOff"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "ghostpingAlreadyOff"))
 
         update("ghostping", "enabled", "guild_id", [0, ctx.guild.id])
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "ghostpingOff"))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "ghostpingOff"))
 
     @commands.group(name="linkblocker", aliases=["antilink", "anti-link", "link"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -103,10 +103,10 @@ class Automod(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         
         if checkLinkOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "linkblockerAlreadyOn"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "linkblockerAlreadyOn"))
 
         update("linkblocker", "enabled", "guild_id", [1, ctx.guild.id])
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "linkblockerOn"))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "linkblockerOn"))
 
     @_linkblocker.command(name="off", aliases=["deactivate"])
     @commands.cooldown(2, 10, commands.BucketType.user)
@@ -115,10 +115,10 @@ class Automod(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         
         if not checkLinkOn(ctx.guild.id):
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "linkblockerAlreadyOff"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "linkblockerAlreadyOff"))
 
         update("linkblocker", "enabled", "guild_id", [0, ctx.guild.id])
-        await successEmbed(self.bot, ctx, getLocale(languageStrings ,guildLocale, "linkblockerOff"))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "linkblockerOff"))
 
     @Cog.listener()
     async def on_message(self, message):
@@ -134,7 +134,7 @@ class Automod(Cog):
             if not checkLinkOn(message.guild.id):
                 return
 
-            await infoEmbed(self.bot, message.channel, getLocale(languageStrings , guildLocale, "linkblockerMessage"), delete_after=10)
+            await infoEmbed(self.bot, message.channel, getLocale(self.bot, languageStrings , guildLocale, "linkblockerMessage"), delete_after=10)
 
             with contextlib.suppress(Exception):
                 return await message.delete()
@@ -147,7 +147,7 @@ class Automod(Cog):
         if all(word[0].lower() not in message.content.lower() for word in words):
             return
         
-        await infoEmbed(self.bot, message.channel, getLocale(languageStrings , guildLocale, "badwordMessage"), delete_after=10)
+        await infoEmbed(self.bot, message.channel, getLocale(self.bot, languageStrings , guildLocale, "badwordMessage"), delete_after=10)
         with contextlib.suppress(Exception):
             await message.delete()
 
@@ -169,7 +169,7 @@ class Automod(Cog):
             if not checkLinkOn(message.guild.id):
                 return
 
-            await infoEmbed(self.bot, message.channel, getLocale(languageStrings , guildLocale, "linkblockerMessage"), delete_after=10)
+            await infoEmbed(self.bot, message.channel, getLocale(self.bot, languageStrings , guildLocale, "linkblockerMessage"), delete_after=10)
 
             with contextlib.suppress(Exception):
                 return await message.delete()
@@ -177,7 +177,7 @@ class Automod(Cog):
         words = readAll("word", "badwords", "guild_id", [message.guild.id])
         
         if any(word[0].lower() in message.content.lower() for word in words):
-            await infoEmbed(self.bot, message.channel, getLocale(languageStrings , guildLocale, "badwordMessage"), delete_after=10)
+            await infoEmbed(self.bot, message.channel, getLocale(self.bot, languageStrings , guildLocale, "badwordMessage"), delete_after=10)
             with contextlib.suppress(Exception):
                 await message.delete()
 
@@ -196,7 +196,7 @@ class Automod(Cog):
             if i == 0: users += f"{member}"; continue
             users += f", {member}"
         
-        await infoEmbed(self.bot, message.channel, getLocale(languageStrings , guildLocale, "ghostpingMessage", message.author.mention, users))
+        await infoEmbed(self.bot, message.channel, getLocale(self.bot, languageStrings , guildLocale, "ghostpingMessage", message.author.mention, users))
 
 def checkGhostOn(guildid: int) -> bool:
     enabled = readOne("enabled", "ghostping", "guild_id", [guildid])

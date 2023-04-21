@@ -20,7 +20,7 @@ class ClassHelp(commands.Cog):
         guildID = ctx.guild.id
         guildLocale = getGuildLanguage(guildID)
         view = HelpButtonView(self.bot, language=guildLocale)
-        message = await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "defaultMenu", self.bot.user.name), view=view)
+        message = await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "defaultMenu", self.bot.user.name), view=view)
         global prefix
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[guildID])[0]
         view.message = message
@@ -30,7 +30,7 @@ class ClassHelp(commands.Cog):
     async def _help(self, interaction):
         guildLocale = getGuildLanguage(interaction.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])[0]
-        await infoEmbed(self, interaction, getLocale(languageStrings, guildLocale, "slashHelp", self.bot.user.name, prefix), ephemeral=True)
+        await infoEmbed(self, interaction, getLocale(self.bot, languageStrings, guildLocale, "slashHelp", self.bot.user.name, prefix), ephemeral=True)
 
 
 async def calltimeout(bot, message):
@@ -38,7 +38,7 @@ async def calltimeout(bot, message):
 
     view = HelpButtonView(bot, guildLocale, True)
     embed = nextcord.Embed(
-                description=getLocale(languageStrings, guildLocale, "defaultMenu", bot.user.name),
+                description=getLocale(self.bot, languageStrings, guildLocale, "defaultMenu", bot.user.name),
                 color=nextcord.Color.blurple()
     )
     message = await message.edit(embed=embed, view=view)
@@ -59,23 +59,25 @@ class HelpButtonView(nextcord.ui.View):
 
 class HelpButton(nextcord.ui.Select):
     def __init__(self, bot, disabled: bool, category: str = "categories", language: str = "en"):
-        categories = getLocale(languageStrings, language, "categories")
-        general = getLocale(languageStrings, language, "general")
-        useful = getLocale(languageStrings, language, "useful")
-        moderation = getLocale(languageStrings, language, "moderation")
-        fun = getLocale(languageStrings, language, "fun")
-        welcome = getLocale(languageStrings, language, "welcome")
-        leave = getLocale(languageStrings, language, "leave")
-        giveaway = getLocale(languageStrings, language, "giveaway")
-        ticketsystem = getLocale(languageStrings, language, "ticketsystem")
-        tempchannel = getLocale(languageStrings, language, "tempchannel")
-        reactionroles = getLocale(languageStrings, language, "reactionroles")
-        levelsystem = getLocale(languageStrings, language, "levelsystem")
-        autoroles = getLocale(languageStrings, language, "autoroles")
-        invitelogger = getLocale(languageStrings, language, "invitelogger")
-        badwords = getLocale(languageStrings, language, "badwords")
-        antighostping = getLocale(languageStrings, language, "antighostping")
-        linkblocker = getLocale(languageStrings, language, "linkblocker")
+        self.bot = bot
+        
+        categories = getLocale(self.bot, languageStrings, language, "categories")
+        general = getLocale(self.bot, languageStrings, language, "general")
+        useful = getLocale(self.bot, languageStrings, language, "useful")
+        moderation = getLocale(self.bot, languageStrings, language, "moderation")
+        fun = getLocale(self.bot, languageStrings, language, "fun")
+        welcome = getLocale(self.bot, languageStrings, language, "welcome")
+        leave = getLocale(self.bot, languageStrings, language, "leave")
+        giveaway = getLocale(self.bot, languageStrings, language, "giveaway")
+        ticketsystem = getLocale(self.bot, languageStrings, language, "ticketsystem")
+        tempchannel = getLocale(self.bot, languageStrings, language, "tempchannel")
+        reactionroles = getLocale(self.bot, languageStrings, language, "reactionroles")
+        levelsystem = getLocale(self.bot, languageStrings, language, "levelsystem")
+        autoroles = getLocale(self.bot, languageStrings, language, "autoroles")
+        invitelogger = getLocale(self.bot, languageStrings, language, "invitelogger")
+        badwords = getLocale(self.bot, languageStrings, language, "badwords")
+        antighostping = getLocale(self.bot, languageStrings, language, "antighostping")
+        linkblocker = getLocale(self.bot, languageStrings, language, "linkblocker")
 
         options = [
             nextcord.SelectOption(label=categories, emoji="<:Commands:1087442278118871140>", default=category == "categories"),
@@ -97,8 +99,7 @@ class HelpButton(nextcord.ui.Select):
             nextcord.SelectOption(label=linkblocker, emoji="<:Automod:1087440612430717068>", default=category == "linkblocker")
         ]
 
-        super().__init__(placeholder=getLocale(languageStrings, language, "categoriesPlaceholder"), options=options, disabled=disabled)
-        self.bot = bot
+        super().__init__(placeholder=getLocale(self.bot, languageStrings, language, "categoriesPlaceholder"), options=options, disabled=disabled)
 
     async def callback(self, interaction):
         global languageStrings
@@ -109,39 +110,39 @@ class HelpButton(nextcord.ui.Select):
         guildLocale = getGuildLanguage(interaction.guild.id)
 
         category = self.values[0].lower()
-        if category == getLocale(languageStrings, guildLocale, "categories").lower():
+        if category == getLocale(self.bot, languageStrings, guildLocale, "categories").lower():
             category = "categories"
-        elif category == getLocale(languageStrings, guildLocale, "general").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "general").lower():
             category = "general"
-        elif category == getLocale(languageStrings, guildLocale, "useful").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "useful").lower():
             category = "useful"
-        elif category == getLocale(languageStrings, guildLocale, "moderation").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "moderation").lower():
             category = "moderation"
-        elif category == getLocale(languageStrings, guildLocale, "fun").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "fun").lower():
             category = "fun"
-        elif category == getLocale(languageStrings, guildLocale, "welcome").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "welcome").lower():
             category = "welcome"
-        elif category == getLocale(languageStrings, guildLocale, "leave").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "leave").lower():
             category = "leave"
-        elif category == getLocale(languageStrings, guildLocale, "giveaway").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "giveaway").lower():
             category = "giveaway"
-        elif category == getLocale(languageStrings, guildLocale, "ticketsystem").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "ticketsystem").lower():
             category = "ticketsystem"
-        elif category == getLocale(languageStrings, guildLocale, "tempchannel").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "tempchannel").lower():
             category = "tempchannel"
-        elif category == getLocale(languageStrings, guildLocale, "reactionroles").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "reactionroles").lower():
             category = "reactionroles"
-        elif category == getLocale(languageStrings, guildLocale, "levelsystem").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "levelsystem").lower():
             category = "levelsystem"
-        elif category == getLocale(languageStrings, guildLocale, "autoroles").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "autoroles").lower():
             category = "autoroles"
-        elif category == getLocale(languageStrings, guildLocale, "invitelogger").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "invitelogger").lower():
             category = "invitelogger"
-        elif category == getLocale(languageStrings, guildLocale, "badwords").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "badwords").lower():
             category = "badwords"
-        elif category == getLocale(languageStrings, guildLocale, "antighostping").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "antighostping").lower():
             category = "antighostping"
-        elif category == getLocale(languageStrings, guildLocale, "linkblocker").lower():
+        elif category == getLocale(self.bot, languageStrings, guildLocale, "linkblocker").lower():
             category = "linkblocker"
 
         view = HelpButtonView(self.bot, guildLocale, False, category)
@@ -150,103 +151,103 @@ class HelpButton(nextcord.ui.Select):
             match category:
                 case "categories":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "defaultMenu", self.bot.user.name),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "defaultMenu", self.bot.user.name),
                         color=nextcord.Color.blurple()
                     )
 
                 case "general":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "generalDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "generalDescription", prefix),
                         color=nextcord.Color.blurple()
                         )
 
                 case "useful":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "usefulDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "usefulDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "moderation":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "moderationDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "moderationDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "fun":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "funDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "funDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "welcome":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "welcomeDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "welcomeDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "leave":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "leaveDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "leaveDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "giveaway":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "giveawayDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "giveawayDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "ticketsystem":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "ticketsystemDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "ticketsystemDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "tempchannel":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "tempchannelDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "tempchannelDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "reactionroles":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "reactionrolesDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "reactionrolesDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "levelsystem":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "levelsystemDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "levelsystemDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "autoroles":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "autorolesDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "autorolesDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "invitelogger":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "inviteloggerDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "inviteloggerDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "badwords":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "badwordsDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "badwordsDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "antighostping":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "antighostpingDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "antighostpingDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
 
                 case "linkblocker":
                     embed = nextcord.Embed(
-                        description=getLocale(languageStrings, guildLocale, "linkblockerDescription", prefix),
+                        description=getLocale(self.bot, languageStrings, guildLocale, "linkblockerDescription", prefix),
                         color=nextcord.Color.blurple()
                     )
             

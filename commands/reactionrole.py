@@ -18,7 +18,7 @@ class ReactionRole(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne("prefix", "guilds", "guild_id", ctx.guild.id)[0]
         
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "reactionroleDescription", prefix))
 
     @_rr.command(name="create", aliases=["add"])
     @commands.has_permissions(manage_guild=True)
@@ -28,7 +28,7 @@ class ReactionRole(Cog):
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
         if exists is not None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleAlreadyExists"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "reactionroleAlreadyExists"))
 
         if "<:" in reaction:
             reaction_id = re.findall(r"[0-9]+", reaction)[0]
@@ -55,7 +55,7 @@ class ReactionRole(Cog):
                 raise commands.EmojiNotFound(argument=reaction)
 
         insert(table="reactionroles", columns="guild_id, channel_id, message_id, reaction, role_id", values=[ctx.guild.id, channel.id, message.id, reaction, role.id])
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleCreated", ctx.guild.id, channel.id, message.id, reaction, role.mention))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "reactionroleCreated", ctx.guild.id, channel.id, message.id, reaction, role.mention))
 
     @_rr.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -65,7 +65,7 @@ class ReactionRole(Cog):
         exists = readOne(columns="*", table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id, message, reaction])
 
         if exists is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDoesntExist"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "reactionroleDoesntExist"))
         
         try:
             message = await self.bot.get_channel(channel.id).fetch_message(message)
@@ -85,7 +85,7 @@ class ReactionRole(Cog):
         
         delete(table="reactionroles", where="guild_id message_id reaction", values=[ctx.guild.id,message.id, str(reaction)])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "reactionroleDeleted", ctx.guild.id, channel.id, message.id, reaction, role.mention))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "reactionroleDeleted", ctx.guild.id, channel.id, message.id, reaction, role.mention))
 
 
     @Cog.listener()

@@ -22,7 +22,7 @@ class Leave(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
 
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leaveDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveDescription", prefix))
 
     @_leave.group(name="channel", invoke_without_command=True)
     async def _channel(self, ctx):
@@ -36,15 +36,15 @@ class Leave(Cog):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
         if leave is not None:
-            message = leave[2] if leave[2] is not None else getLocale(languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"),
+            message = leave[2] if leave[2] is not None else getLocale(self.bot, languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"),
             picture = leave[3] if leave[3] is not None else "None"
             update(table="leave", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
 
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leaveChannelSet", ctx.guild.id, channel.id, message, picture))
+            return await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelSet", ctx.guild.id, channel.id, message, picture))
 
-        insert(table="leave", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"), "null"])
+        insert(table="leave", columns="guild_id, channel_id, message, picture", values=[ctx.guild.id, channel.id, getLocale(self.bot, languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"), "null"])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leaveChannelSet", ctx.guild.id, channel.id, getLocale(languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"), "None"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelSet", ctx.guild.id, channel.id, getLocale(self.bot, languageStrings, guildLocale, "leaveDefaultMessage", "{user_name}", "{user_discriminator}"), "None"))
     
     @_channel.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
@@ -54,11 +54,11 @@ class Leave(Cog):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
         if leave is None or leave[1] is None:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "leaveChannelNotSet"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelNotSet"))
 
         update(table="leave", columns="channel_id", where="guild_id", values=["null", ctx.guild.id])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leaveChannelRemoved"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelRemoved"))
 
     @_leave.command(name="message", aliases=["msg"])
     @commands.has_permissions(manage_guild=True)
@@ -68,11 +68,11 @@ class Leave(Cog):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
         if leave is None or leave[1] is None:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "leaveChannelNotSet"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelNotSet"))
 
         picture = leave[3] if leave[3] is not None else "None"
         update(table="leave", columns="message", where="guild_id", values=[message, ctx.guild.id])
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leaveMessageSet", ctx.guild.id, leave[1], message, picture))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveMessageSet", ctx.guild.id, leave[1], message, picture))
 
     @_leave.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -85,16 +85,16 @@ class Leave(Cog):
     async def _set2(self, ctx, picture):
         guildLocale = getGuildLanguage(ctx.guild.id)
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "leavePictureNotValid"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureNotValid"))
 
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
         if leave is None or leave[1] is None:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "leaveChannelNotSet"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelNotSet"))
 
         message = leave[2] if leave[2] is not None else "Tschüss {user_name}#{user_discriminator} hoffentlich kommst du bald wieder!"
         update(table="leave", columns="picture", where="guild_id", values=[picture, ctx.guild.id])
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leavePictureSet", ctx.guild.id, leave[1], message, picture))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureSet", ctx.guild.id, leave[1], message, picture))
 
     @_picture.command(name="remove", aliases=["delete", "del"])
     @commands.has_permissions(manage_guild=True)
@@ -104,10 +104,10 @@ class Leave(Cog):
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
         if leave is None or leave[1] is None:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "leaveChannelNotSet"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelNotSet"))
 
         update(table="leave", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leavePictureRemoved"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureRemoved"))
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
@@ -115,7 +115,7 @@ class Leave(Cog):
     async def _show(self, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "leavePictureShow"), view=ButtonView())
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow"), view=ButtonView())
 
     @Cog.listener()
     async def on_member_remove(self, member):
@@ -131,7 +131,7 @@ class Leave(Cog):
 
         if leave[3] is not None:
             guildLocale = getGuildLanguage(member.guild.id)
-            img = await memberCardImageProcessing(member, Image.open(f"assets/leave/card{leave[3]}.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+            img = await memberCardImageProcessing(member, Image.open(f"assets/leave/card{leave[3]}.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
             img.save(f"assets/leave/user_card{leave[3]}.png")
 
             card = nextcord.File(f"assets/leave/user_card{leave[3]}.png")
@@ -152,12 +152,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="1", custom_id="leavepic1")
     async def _picture1(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card1.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card1.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card1.png")
         pic = nextcord.File("assets/leave/user_card1.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "1"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "1"),
             color=nextcord.Color.blurple()
         )
 
@@ -168,12 +168,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="2", custom_id="leavepic2")
     async def _picture2(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card2.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card2.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card2.png")
         pic = nextcord.File("assets/leave/user_card2.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "2"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "2"),
             color=nextcord.Color.blurple()
         )
 
@@ -184,12 +184,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="3", custom_id="leavepic3")
     async def _picture3(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card3.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card3.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card3.png")
         pic = nextcord.File("assets/leave/user_card3.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "3"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "3"),
             color=nextcord.Color.blurple()
         )
 
@@ -200,12 +200,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="4", custom_id="leavepic4")
     async def _picture4(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card4.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card4.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card4.png")
         pic = nextcord.File("assets/leave/user_card4.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "4"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "4"),
             color=nextcord.Color.blurple()
         )
 
@@ -216,12 +216,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="5", custom_id="leavepic5")
     async def _picture5(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card5.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card5.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card5.png")
         pic = nextcord.File("assets/leave/user_card5.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "5"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "5"),
             color=nextcord.Color.blurple()
         )
 
@@ -232,12 +232,12 @@ class ButtonView(ui.View):
     @ui.button(style=ButtonStyle.primary, label="6", custom_id="leavepic6")
     async def _picture6(self, _, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
-        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card6.png"), getLocale(languageStrings, guildLocale, "leaveCardTitle"))
+        card = await memberCardImageProcessing(ctx.user, Image.open("assets/leave/card6.png"), getLocale(self.bot, languageStrings, guildLocale, "leaveCardTitle"))
         card.save("assets/leave/user_card6.png")
         pic = nextcord.File("assets/leave/user_card6.png")
 
         embed = nextcord.Embed(
-            description=getLocale(languageStrings, guildLocale, "leavePictureShow", "6"),
+            description=getLocale(self.bot, languageStrings, guildLocale, "leavePictureShow", "6"),
             color=nextcord.Color.blurple()
         )
 

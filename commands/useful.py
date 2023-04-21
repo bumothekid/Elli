@@ -21,7 +21,7 @@ class Useful(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "pingDescription", self.bot.user.name, round(self.bot.latency * 1000))
+            getLocale(self.bot, languageStrings, guildLocale, "pingDescription", self.bot.user.name, round(self.bot.latency * 1000))
         )
 
     @commands.command(name="userinfo", aliases=["user", "ui"])
@@ -35,7 +35,7 @@ class Useful(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "userinfoDescription", member.name, member, member.id, capString(str(member.status)), member.display_avatar.url, int(member.joined_at.timestamp()), int(member.created_at.timestamp())),
+            getLocale(self.bot, languageStrings, guildLocale, "userinfoDescription", member.name, member, member.id, capString(str(member.status)), member.display_avatar.url, int(member.joined_at.timestamp()), int(member.created_at.timestamp())),
             thumbnail=member.display_avatar.url
         )
 
@@ -48,7 +48,7 @@ class Useful(Cog):
         await infoEmbed(
             self,
             ctx,
-            getLocale(languageStrings, guildLocale, "serverinfoDescription", ctx.guild.name, ctx.guild.id, ctx.guild.owner, capString(str(ctx.guild.verification_level)), ctx.guild.premium_tier, ctx.guild.premium_subscription_count, len(ctx.guild.members), iconURL, int(ctx.guild.created_at.timestamp())),
+            getLocale(self.bot, languageStrings, guildLocale, "serverinfoDescription", ctx.guild.name, ctx.guild.id, ctx.guild.owner, capString(str(ctx.guild.verification_level)), ctx.guild.premium_tier, ctx.guild.premium_subscription_count, len(ctx.guild.members), iconURL, int(ctx.guild.created_at.timestamp())),
             thumbnail=iconURL
         )
     
@@ -71,11 +71,11 @@ class Useful(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if len(bug) < 10:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "bugTooShort"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "bugTooShort"))
         
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "bugReported", bug))
-        await devLogging(self, ctx, f"{ctx.author} hat einen Bugreport gemeldet:\n> **{bug}**")
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "bugReported", bug))
+        devLogging(self, ctx, f"{ctx.author} reported a bug: {bug}")
 
 def setup(bot):
     global languageStrings

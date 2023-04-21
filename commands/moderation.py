@@ -22,7 +22,7 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne("prefix", "guilds", "guild_id", ctx.guild.id)[0]
 
-        await infoEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "moderationDescription", prefix))
+        await infoEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "moderationDescription", prefix))
 
     @commands.command(name="clear", aliases=["clr", "clean"])
     @commands.has_permissions(manage_messages=True)
@@ -31,13 +31,13 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if amount < 1:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "clearAtLeastOne"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "clearAtLeastOne"))
         
         if amount > 200:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "clearMax200"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "clearMax200"))
 
         await ctx.channel.purge(limit=amount + 1, check=messagePinned)
-        await successEmbed(self.bot, ctx.channel, getLocale(languageStrings, guildLocale, "clearSuccess", amount), delete_after=10)
+        await successEmbed(self.bot, ctx.channel, getLocale(self.bot, languageStrings, guildLocale, "clearSuccess", amount), delete_after=10)
     
     @commands.command(name="kick", aliases=["k"])
     @commands.has_permissions(kick_members=True)
@@ -47,22 +47,22 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if reason is None:
-            reason = getLocale(languageStrings, guildLocale, "noReason")
+            reason = getLocale(self.bot, languageStrings, guildLocale, "noReason")
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "kickYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "kickBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "kickHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "kickBotHigherRole"))
 
         await member.kick(reason=reason)
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "kickSuccess", member))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "kickSuccess", member))
 
     @commands.command(name="ban", aliases=["b"])
     @commands.has_permissions(ban_members=True)
@@ -72,22 +72,22 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if reason is None:
-            reason = getLocale(languageStrings, guildLocale, "noReason")
+            reason = getLocale(self.bot, languageStrings, guildLocale, "noReason")
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "banYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "banBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "banHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "banBotHigherRole"))
 
         await member.ban(reason=reason)
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "banSuccess", member))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "banSuccess", member))
 
     @commands.command(name="mute", aliases=["timeout"])
     @commands.has_permissions(moderate_members=True)
@@ -97,16 +97,16 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteBot"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteBotHigherRole"))
 
         timeRegex = re.compile(r'(?:(\d{1,5})(d|h|m|s))+?')
         timeDict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -115,32 +115,32 @@ class Moderation(Cog):
         seconds = 0
 
         if not matches:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTime"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteInvalidTime"))
 
         for key, value in matches:    
             try:
                 seconds += timeDict[value] * float(key)
             except KeyError:
-                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTimeUnit"))
+                await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteInvalidTimeUnit"))
                 continue
             except ValueError:
-                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteInvalidTimeValue"))
+                await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteInvalidTimeValue"))
                 continue
             except Exception as e:
                 print(e)
-                await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteUnknownError"))
+                await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteUnknownError"))
                 continue
 
         if seconds < 30:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteMin30"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteMin30"))
 
         if seconds > 28 * 86400:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteMax28"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteMax28"))
 
         now = datetime.utcnow()
         unixnow = datetime.now()
         await member.timeout(timeout=now + timedelta(seconds=seconds), reason=f"Mute | {ctx.author}")
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "muteSuccess", member, int(mktime((unixnow + timedelta(seconds=seconds)).timetuple()))))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "muteSuccess", member, int(mktime((unixnow + timedelta(seconds=seconds)).timetuple()))))
 
     @commands.command(name="unmute", aliases=["untimeout"])
     @commands.has_permissions(moderate_members=True)
@@ -150,22 +150,22 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteBot"))
         
         if not member.is_timed_out:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteNotMuted"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteNotMuted"))
         
         if member.top_role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteHigherRole"))
         
         if member.top_role.position >= ctx.me.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteBotHigherRole"))
 
         await member.timeout(timeout=None, reason=f"Unmute | {ctx.author}")
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "unmuteSuccess", member))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "unmuteSuccess", member))
 
     @commands.command(name="addrole", aliases=["addr"])
     @commands.has_permissions(manage_roles=True)
@@ -175,22 +175,22 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleBot"))
 
         if role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleHigherRole"))
 
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleBotHigherRole"))
         
         if role in member.roles:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleAlreadyHasRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleAlreadyHasRole"))
 
         await member.add_roles(role)
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "addroleSuccess", member, role))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "addroleSuccess", member, role))
     
     @commands.command(name="removerole", aliases=["remr"])
     @commands.has_permissions(manage_roles=True)
@@ -200,19 +200,19 @@ class Moderation(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if member == ctx.author:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleYourself"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "removeroleYourself"))
         
         if member == self.bot.user:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleBot"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "removeroleBot"))
         
         if role.position >= ctx.author.top_role.position:
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "removeroleHigherRole"))
 
         if role.position >= ctx.guild.me.top_role.position or not role.is_assignable():
-            return await errorEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleBotHigherRole"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "removeroleBotHigherRole"))
 
         await member.remove_roles(role)
-        await successEmbed(self.bot, ctx, getLocale(languageStrings, guildLocale, "removeroleSuccess", member, role))
+        await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "removeroleSuccess", member, role))
 
 def setup(bot):
     global languageStrings

@@ -1,4 +1,4 @@
-import contextlib
+import asyncio
 import nextcord
 from nextcord import ui
 from nextcord.ext.commands.bot import Bot
@@ -339,48 +339,55 @@ async def errorEmbed(bot, ctx: nextcord.Interaction | nextcord.message.Message |
     except Exception:
         await permissionError(bot, ctx)
 
-async def errorLogging(bot, ctx: nextcord.Interaction, error: str):
+def errorLogging(bot, ctx: nextcord.Interaction, error: str):
     """
     Creates and sends an error embed for critical errors into the bot logging channel
-    This is called when an error occurs
-
-    Parameters
-    -----------
-    bot: :class:`nextcord.ext.commands.bot.Bot`
-        The bot instance
-    ctx: :class:`nextcord.Interaction`
-        The interaction where the error occurred
-    error: :class:`str`
-        The error message that occurred
+    This is called when an error occurs and the bot can't handle it
     """
-    if type(bot) is not Bot:
-        try:
-            bot = bot.bot
-        except Exception:
-            return print("Error: Bot is not a bot or self")
+    
+    if type(bot) is not Bot: return print("Type error: Bot is not a bot")
 
     channel = bot.get_channel(botLoggingChannelID)
     errorEmbed = nextcord.Embed(
-        description=f"> **An error occurred**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Error:1087445963280486430> Error:**\n```py{error}```",
+        description=f"> **An error occurred while executing a command**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Error:1087445963280486430> Error:**\n```py\n{error}```",
         color=nextcord.Color.red()
     )
 
-    await channel.send(embed=errorEmbed)
+    asyncio.run_coroutine_threadsafe(channel.send(embed=errorEmbed), bot.loop)
+    
+def localizationError(bot, error: str, *args):
+    """
+    Creates and sends an error embed for language errors into the bot logging channel
+    This is called when an error occurs while translating or formatting the text
+    """
+    
+    if type(bot) is not Bot: return print("Type error: Bot is not a bot")
+    
+    args = [str(arg.__class__.__name__) for arg in args]
 
-async def devLogging(bot, ctx: nextcord.Interaction, text: str):
-    if type(bot) is not Bot:
-        try:
-            bot = bot.bot
-        except Exception:
-            return print("Error: Bot is not a bot or self")
+    channel = bot.get_channel(botLoggingChannelID)
+    errorEmbed = nextcord.Embed(
+        description=f"> **An error occoured while trying to localize string**\n\n> <:Clyde:1087435842785640448> Passed Arguments:\n> <:Reply:1087438925632643082> `{', '.join(args) if args else 'None'}`\n> **<:LanguageError:1099004614361219113> Error:**\n> <:Reply:1087438925632643082> `{error}`",
+        color=nextcord.Color.from_rgb(234, 145, 53),
+    )
+
+    asyncio.run_coroutine_threadsafe(channel.send(embed=errorEmbed), bot.loop)
+
+def devLogging(bot, ctx: nextcord.Interaction, text: str):
+    """
+    Creates and sends an embed into the bot logging channel
+    This is called when a developer command is used
+    """
+    
+    if type(bot) is not Bot: return print("Type error: Bot is not a bot")
         
     channel = bot.get_channel(botLoggingChannelID)
     embed = nextcord.Embed(
-        description=f"> **A developer command was used**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Tick:1087458362410684476> Action:**\n```css\n{text}```",
+        description=f"> **A developer command was used**\n\n> **<:Globe:1087448923834163342> Guild:** `{ctx.guild}`\n> **<:Reply:1087438925632643082> Guild ID:** `{ctx.guild.id}`\n> **<:Clyde:1087435842785640448> Command:** `{ctx.message.content}`\n> **<:Reply:1087438925632643082> Command Executer:** `{ctx.author}`\n> **<:Tick:1087458362410684476> Action:**\n> <:Reply:1087438925632643082> `{text}`",
         color=nextcord.Color.blurple()
     )
 
-    await channel.send(embed=embed)
+    asyncio.run_coroutine_threadsafe(channel.send(embed=embed), bot.loop)
 
 async def permissionError(bot, ctx: nextcord.Interaction):
     # with contextlib.suppress(Exception):

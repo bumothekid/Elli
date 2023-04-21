@@ -19,7 +19,7 @@ class Ticket(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[ctx.guild.id])[0]
 
-        await infoEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketsystemDescription", prefix))
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketsystemDescription", prefix))
 
     @_ticket.command(name="create", aliases=["new"])
     @commands.has_permissions(manage_guild=True)
@@ -39,10 +39,10 @@ class Ticket(Cog):
         messages = readOne(columns="*", table="ticket_messages", where="guild_id", values=[ctx.guild.id])
 
         if messages is None:
-            message = getLocale(languageStrings, guildLocale, "ticketMessage", "{user_name}", "{user_name}", "{user_discriminator}")
+            message = getLocale(self.bot, languageStrings, guildLocale, "ticketMessage", "{user_name}", "{user_name}", "{user_discriminator}")
             insert(table="ticket_messages", columns="guild_id, text", values=[ctx.guild.id, message])
 
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketCreated", ctx.guild.id, channel.id, ticket.id, role.mention))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketCreated", ctx.guild.id, channel.id, ticket.id, role.mention))
 
     @_ticket.command(name="update", aliases=["edit"])
     @commands.has_permissions(manage_guild=True)
@@ -52,7 +52,7 @@ class Ticket(Cog):
         ticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
         
         if ticket is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketNotFound"))
         
         embed = nextcord.Embed(
             description="**<:Ticket:1087437978873376798> Ticketsystem**\n\n" + text.replace("\\n", "\n"),
@@ -64,7 +64,7 @@ class Ticket(Cog):
         
         update(table="tickets", columns="text role_id", where="guild_id channel_id message_id", values=[text, role.id, ctx.guild.id, channel.id, message_id])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketUpdated", ctx.guild.id, channel.id, ticket.id, role.mention))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketUpdated", ctx.guild.id, channel.id, ticket.id, role.mention))
 
     @_ticket.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -74,7 +74,7 @@ class Ticket(Cog):
         dbticket = readOne(columns="*", table="tickets", where="guild_id channel_id message_id", values=[ctx.guild.id, channel.id, message_id])
         
         if dbticket is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketNotFound"))
         
         ticket = await channel.fetch_message(message_id)
         await ticket.delete()
@@ -83,7 +83,7 @@ class Ticket(Cog):
         
         role = ctx.guild.get_role(dbticket[3])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketDeleted", ctx.guild.id, channel.id, role.mention, dbticket[4]))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketDeleted", ctx.guild.id, channel.id, role.mention, dbticket[4]))
 
     @_ticket.command(name="message", aliases=["setmessage"])
     @commands.has_permissions(manage_guild=True)
@@ -99,7 +99,7 @@ class Ticket(Cog):
 
         text = text.replace("\\n", "\n")
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketMessageUpdated", text))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketMessageUpdated", text))
 
     @_ticket.command(name="list")
     @commands.has_permissions(manage_guild=True)
@@ -109,7 +109,7 @@ class Ticket(Cog):
         tickets = readAll(columns="*", table="tickets", where="guild_id", values=[ctx.guild.id])
 
         if not tickets:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketNotFound"))
 
         fields = []
 
@@ -118,7 +118,7 @@ class Ticket(Cog):
             message = await channel.fetch_message(ticket[2])
             role = ctx.guild.get_role(ticket[3])
             
-            value = getLocale(languageStrings, guildLocale, "ticketList", ctx.guild.id, channel.id, message.id, role.mention)
+            value = getLocale(self.bot, languageStrings, guildLocale, "ticketList", ctx.guild.id, channel.id, message.id, role.mention)
             fields.append({"name": f"Ticket {i}", "value": value, "inline": True})
 
         await infoEmbed(self, ctx, "**<:Ticket:1087437978873376798> Tickets**\n\n", fields=fields)
@@ -138,11 +138,11 @@ class Ticket(Cog):
         if log is not None:
             update(table="ticket_logs", columns="channel_id", where="guild_id", values=[channel.id, ctx.guild.id])
             
-            return await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketLogSet", ctx.guild.id, channel.id))
+            return await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketLogSet", ctx.guild.id, channel.id))
 
         insert(table="ticket_logs", columns="guild_id, channel_id", values=[ctx.guild.id, channel.id])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketLogSet", ctx.guild.id, channel.id))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketLogSet", ctx.guild.id, channel.id))
 
     @_log.command(name="delete", aliases=["remove"])
     @commands.has_permissions(manage_guild=True)
@@ -152,11 +152,11 @@ class Ticket(Cog):
         log = readOne(columns="channel_id", table="ticket_logs", where="guild_id", values=[ctx.guild.id])
 
         if log is None:
-            return await errorEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketLogNotFound"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketLogNotFound"))
 
         delete(table="ticket_logs", where="guild_id", values=[ctx.guild.id])
         
-        await successEmbed(self, ctx, getLocale(languageStrings, guildLocale, "ticketLogRemoved", ctx.guild.id))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "ticketLogRemoved", ctx.guild.id))
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -190,7 +190,7 @@ class Ticket(Cog):
             if user_open_ticket is not None:
                 await message.remove_reaction(emote, payload.member)
                 
-                return await errorEmbed(self, payload.member, getLocale(languageStrings, guildLocale, "ticketAlreadyOpen", guild.name))
+                return await errorEmbed(self, payload.member, getLocale(self.bot, languageStrings, guildLocale, "ticketAlreadyOpen", guild.name))
 
             role = guild.get_role(db_ticket[3])
             await message.remove_reaction(emote, payload.member)
@@ -221,7 +221,7 @@ class Ticket(Cog):
             if log is None:
                 return
             
-            await infoEmbed(self, guild.get_channel(log[0]), getLocale(languageStrings, guildLocale, "userTicketCreated", payload.guild_id, ticket.id, message.id, payload.member.mention, role.mention), color=nextcord.Color.green())
+            await infoEmbed(self, guild.get_channel(log[0]), getLocale(self.bot, languageStrings, guildLocale, "userTicketCreated", payload.guild_id, ticket.id, message.id, payload.member.mention, role.mention), color=nextcord.Color.green())
 
         elif payload.emoji.name == "🔒":
             user = guild.get_member(open_ticket[4])
@@ -233,7 +233,7 @@ class Ticket(Cog):
 
             await channel.set_permissions(user, overwrite=memberPerms)
             
-            ticketClosed = getLocale(languageStrings, guildLocale, "userTicketClosed", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
+            ticketClosed = getLocale(self.bot, languageStrings, guildLocale, "userTicketClosed", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
 
             embed = nextcord.Embed(
                 description=ticketClosed,
@@ -261,7 +261,7 @@ class Ticket(Cog):
 
             await channel.set_permissions(user, overwrite=memberPerms)
             
-            ticketReopened = getLocale(languageStrings, guildLocale, "userTicketReopened", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
+            ticketReopened = getLocale(self.bot, languageStrings, guildLocale, "userTicketReopened", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
 
             embed = nextcord.Embed(
                 description=ticketReopened,
@@ -285,9 +285,9 @@ class Ticket(Cog):
             await message.remove_reaction("❌", payload.member)
 
             if role not in payload.member.roles:
-                return await errorEmbed(self, channel, getLocale(languageStrings, guildLocale, "userTicketCloseNoPermission", payload.member.mention, role.mention))
+                return await errorEmbed(self, channel, getLocale(self.bot, languageStrings, guildLocale, "userTicketCloseNoPermission", payload.member.mention, role.mention))
             
-            ticketDeleted = getLocale(languageStrings, guildLocale, "userTicketDeleted", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
+            ticketDeleted = getLocale(self.bot, languageStrings, guildLocale, "userTicketDeleted", payload.guild_id, open_ticket[1], open_ticket[2], user.mention, role.mention)
             
             await infoEmbed(self, channel, ticketDeleted, color=nextcord.Color.red())
 
