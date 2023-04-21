@@ -7,7 +7,7 @@
     "ticketDeleted": "**<:Ticket:1087437978873376798> Ticket deleted**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Support Role:** {2}\n> **Text:** {3}",
     "ticketMessageUpdated": "** <:Ticket:1087437978873376798> Message updated**\n\n> **Message:**\n{0}",
     "ticketList": "> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Message:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Support Role:** {3}",
-    "ticketLogSet": "**<:Ticket:1087437978873376798> Log channel set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{ctx.guild.id}/{channel.id}/)",
+    "ticketLogSet": "**<:Ticket:1087437978873376798> Log channel set**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)",
     "ticketLogNotFound": "No log channel has been set yet.",
     "ticketLogRemoved": "**<:Ticket:1087437978873376798> Log channel removed**",
     "ticketAlreadyOpen": "You already have a ticket open on {0}.",
