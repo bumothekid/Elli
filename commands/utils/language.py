@@ -52,3 +52,8 @@ def getLocale(bot: Bot, languageStrings: dict, language: str, string: str, *args
         
         localizationError(bot, f"Missing argument {missingArgs} in string {string} for language {language}.")
         return languageStrings[language][string]
+    except KeyError as e:
+        missingArgs = e.args[0]
+        
+        localizationError(bot, f"Missing argument {missingArgs} in string {string} for language {language}.")
+        return languageStrings[language][string]
