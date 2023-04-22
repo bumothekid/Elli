@@ -38,7 +38,7 @@ async def calltimeout(bot, message):
 
     view = HelpButtonView(bot, guildLocale, True)
     embed = nextcord.Embed(
-                description=getLocale(self.bot, languageStrings, guildLocale, "defaultMenu", bot.user.name),
+                description=getLocale(bot, languageStrings, guildLocale, "defaultMenu", bot.user.name),
                 color=nextcord.Color.blurple()
     )
     message = await message.edit(embed=embed, view=view)
