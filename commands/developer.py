@@ -1,5 +1,6 @@
 # Import
 import contextlib
+import os
 import time
 import nextcord
 import re
@@ -21,7 +22,7 @@ class Developer(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-dev getInvite <ServerID>` | Versucht einen bereits bestehenden Invite zu getten\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
+        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-dev getInvite <ServerID>` | Versucht einen bereits bestehenden Invite zu getten\n> `-dev clear` | Cleared die Console\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
 
     @_dev.command(name="add")
     async def _add(self, ctx, user: nextcord.User):
@@ -161,6 +162,14 @@ class Developer(Cog):
             return
         
         await infoEmbed(self, ctx, f"Der Server `{guild.name}` hat den Invite: `{invite[0]}`")
+        
+    @_dev.command(name="clear")
+    async def clearConsole(self, ctx):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
+        
+        os.system("cls||clear")
+        await infoEmbed(self, ctx, "Die Konsole wurde geleert.")
 
     @tasks.loop(minutes=5)
     async def updateStatsLoop(self):
