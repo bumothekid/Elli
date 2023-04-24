@@ -12,7 +12,7 @@ class Automod(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name="badword", aliases=["bad-word", "bad_word", "wordblacklist", "word_blacklist", "word-blacklist"], invoke_without_command=True)
+    @commands.group(name="badword", aliases=["bad-word", "bad_word", "wordblacklist", "word_blacklist", "word-blacklist", "badwords"], invoke_without_command=True)
     @commands.cooldown(2, 10, commands.BucketType.user)
     @commands.has_guild_permissions(manage_guild=True)
     async def _badword(self, ctx):
@@ -43,7 +43,6 @@ class Automod(Cog):
         exists = readOne("word", "badwords", "guild_id word", [ctx.guild.id, word.lower()])
 
         if exists is None:
-            
             return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings ,guildLocale, "badwordDoesntExist", word))
         
         delete("badwords", "guild_id word", [ctx.guild.id, word.lower()])
