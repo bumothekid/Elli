@@ -12,7 +12,7 @@ class ErrorHandler(Cog):
         languageStrings = getLanguageStrings("error")
         
         if ctx.guild is None:
-            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, "en", "noPrivateMessage"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, "en", "noPrivateMessage"))
             
         guildLocale = getGuildLanguage(ctx.guild.id)
         
