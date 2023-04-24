@@ -121,7 +121,7 @@ class Automod(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if message.author.bot:
+        if message.author.bot or not message.guild:
             return
 
         if message.author.guild_permissions.administrator:
@@ -152,6 +152,9 @@ class Automod(Cog):
 
     @Cog.listener()
     async def on_raw_message_edit(self, payload):
+        if not payload.guild_id:
+            return
+        
         channel = self.bot.get_channel(payload.channel_id)
         try:
             message = await channel.fetch_message(payload.message_id)
@@ -185,6 +188,9 @@ class Automod(Cog):
 
     @Cog.listener()
     async def on_message_delete(self, message):
+        if not message.guild:
+            return
+        
         if not message.mentions:
             return
 

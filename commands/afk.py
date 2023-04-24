@@ -33,7 +33,7 @@ class Afk(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or message.content.startswith(getPrefixFromDatabase(self.bot, message)):
+        if message.author.bot or not message.guild or message.content.startswith(getPrefixFromDatabase(self.bot, message)):
             return
 
         users = readAll(columns="user_id, time, reason", table="afk", where="guild_id", values=[message.guild.id])

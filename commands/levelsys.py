@@ -23,6 +23,7 @@ class LevelSystem(Cog):
     @Cog.listener()
     async def on_message(self, message: nextcord.Message):
         if message.author.bot: return
+        if not message.guild: return
         if message.content.startswith(getPrefixFromDatabase(self.bot, message)[0]): return
         if message.guild is None: return
         if not checkIfLevelSystemIsEnabled(message.guild): return

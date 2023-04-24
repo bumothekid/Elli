@@ -9,9 +9,13 @@ class ErrorHandler(Cog):
 
     @Cog.listener()
     async def on_command_error(self, ctx, error):
-        guildLocale = getGuildLanguage(ctx.guild.id)
         languageStrings = getLanguageStrings("error")
-
+        
+        if ctx.guild is None:
+            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, "en", "noPrivateMessage"))
+            
+        guildLocale = getGuildLanguage(ctx.guild.id)
+        
         if isinstance(error, (commands.CommandNotFound, commands.DisabledCommand)):
             await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "commandNotFound"))
 
@@ -46,9 +50,6 @@ class ErrorHandler(Cog):
 
         elif isinstance(error, commands.CommandOnCooldown):
             await errorEmbed(self, ctx,  getLocale(self.bot, languageStrings, guildLocale, "commandOnCooldown", f"{error.retry_after:,.2f}"))
-
-        elif isinstance(error, commands.NoPrivateMessage):
-            await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "noPrivateMessage"))
 
         elif isinstance(error, commands.UserInputError):
             await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "userInputError"))

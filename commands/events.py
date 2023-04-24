@@ -38,7 +38,7 @@ class EventsCog(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if message.author.bot:
+        if message.author.bot or not message.guild:
             return
 
         if self.bot.user in message.mentions and len(message.mentions) == 1 and message.content.startswith("<@"):

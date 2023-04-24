@@ -59,7 +59,7 @@ class General(Cog):
 
         await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "prefixSet", prefix, oldPrefix[0]))
         
-    @nextcord.slash_command(name="prefix", description="Set the prefix for this guild.", description_localizations={nextcord.Locale.de: "Setze die Prefix für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True))
+    @nextcord.slash_command(name="prefix", description="Set the prefix for this guild.", description_localizations={nextcord.Locale.de: "Setze die Prefix für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True), dm_permission=False)
     async def _prefixSlash(self, interaction, prefix: str):
         guildLocale = getGuildLanguage(interaction.guild.id)
 
@@ -103,7 +103,7 @@ class General(Cog):
 
         await successEmbed(self, ctx, getLocale(self.bot, languageStrings, language, "languageSet", language, oldLanguage))
         
-    @nextcord.slash_command(name="language", description="Set the language for this guild.", description_localizations={nextcord.Locale.de: "Setze die Sprache für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True))
+    @nextcord.slash_command(name="language", description="Set the language for this guild.", description_localizations={nextcord.Locale.de: "Setze die Sprache für diesen Server."}, default_member_permissions=nextcord.Permissions(manage_guild=True), dm_permission=False)
     async def _languageSlash(self, interaction,
         
         language: str = nextcord.SlashOption(description="The language to set.", description_localizations={nextcord.Locale.de: "Die Sprache, die gesetzt werden soll."},
@@ -137,6 +137,9 @@ class General(Cog):
         
     @nextcord.slash_command(name="invite", description="Get the invite link for this bot.", description_localizations={nextcord.Locale.de: "Erhalte den Einladungslink für diesen Bot."})
     async def _inviteSlash(self, interaction):
+        if not interaction.guild:
+            return await infoEmbed(self.bot, interaction, getLocale(self.bot, languageStrings, "en", "inviteDescription", self.bot.user.id))
+        
         guildLocale = getGuildLanguage(interaction.guild.id)
 
         await infoEmbed(
@@ -192,6 +195,9 @@ class General(Cog):
     
     @nextcord.slash_command(name="privacy", description="Get the privacy policy for this bot.", description_localizations={nextcord.Locale.de: "Erhalte die Datenschutzerklärung für diesen Bot."})
     async def _privacySlash(self, interaction):
+        if not interaction.guild:
+            return await infoEmbed(self.bot, interaction, getLocale(self.bot, languageStrings, "en", "privacyDescription"))
+        
         guildLocale = getGuildLanguage(interaction.guild.id)
         
         await infoEmbed(

@@ -26,7 +26,7 @@ class ClassHelp(commands.Cog):
         view.message = message
         cache.append(f"{message.id}|{ctx.author.id}")
 
-    @nextcord.slash_command(name="help", description="Shows the help menu", description_localizations={nextcord.Locale.de: "Zeigt das Hilfemenü"})
+    @nextcord.slash_command(name="help", description="Shows the help menu", description_localizations={nextcord.Locale.de: "Zeigt das Hilfemenü"}, dm_permission=False)
     async def _help(self, interaction):
         guildLocale = getGuildLanguage(interaction.guild.id)
         prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[interaction.guild.id])[0]

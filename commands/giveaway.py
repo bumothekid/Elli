@@ -437,6 +437,9 @@ class Giveaways(Cog):
 
     @Cog.listener()
     async def on_message_delete(self, message):
+        if not message.guild:
+            return
+        
         exists = readOne(columns="*", table="giveaways", where="guild_id message_id", values=[message.guild.id, message.id])
 
         if exists is not None:
