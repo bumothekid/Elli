@@ -1,5 +1,5 @@
 import nextcord
-from re import I, findall
+from re import findall
 from .database import readOne, insert
 from string import capwords
 from .embeds import errorEmbed
@@ -10,7 +10,7 @@ class safeDict(dict):
 
 def getPrefixFromDatabase(bot, message: nextcord.Message):
     if message.guild is None:
-        return "-"
+        return "ZGV2ZWxvcGVy" # base64 encoded "developer" for DMs cause why not and I'm lazy lol
 
     prefix = readOne(columns="prefix", table="guilds", where="guild_id", values=[message.guild.id])
 
