@@ -1,6 +1,6 @@
 {
     "pingDescription": "**{0}'s Latenz**\n\n> **Latenz:**`{1}`ms",
-    "userinfoDescription": "**{0}'s Userinfo**\n\n> **User Name:** `{1}`\n> **User ID: `{2}`**\n> **Status: `{3}`**\n\n> **Avatar: [`📎` Link](4)**\n> **Gejoint: **<t:{5}:R>\n> **Erstellt: <t:{6}:R>**",
+    "userinfoDescription": "**{0}'s Userinfo**\n\n> **User Name:** `{1}`\n> **User ID: `{2}`**\n> **Status: `{3}`**\n\n> **Avatar: [`📎` Link]({4})**\n> **Gejoint: **<t:{5}:R>\n> **Erstellt: <t:{6}:R>**",
     "serverinfoDescription": "**{0}'s Serverinfo**\n\n> **Server Name:** `{0}`\n> **Server ID: `{1}`**\n> **Server Owner: `{2}`**\n\n> **Verifikations Stufe: `{3}`**\n> **Boost Stufe: `{4}`**\n> **Boost Anzahl: `{5}`**\n\n> **Mitglieder: `{6}`**\n> **Server Icon:** [`📎` Link]({7})\n> **Server Erstellt: <t:{8}:R>**",
     "bugTooShort": "Der Bugreport muss mindestens 10 Zeichen lang sein.",
     "bugReported": "**<:Commands:1087442278118871140> Bugreport**\n\n> **Bugreport:** `{0}`"
