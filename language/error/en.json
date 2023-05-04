@@ -15,5 +15,6 @@
     "noPrivateMessage": "This command cannot be used in private messages.",
     "userInputError": "You made an incorrect input.",
     "maxConcurrencyReached": "You're already using this command.",
+    "forbiddenError": "The bot doesn't have enough permissions to write in this channel.",
     "criticalError": "<:Error:1087445963280486430> A critical error has occurred."
 }

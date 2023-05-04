@@ -15,5 +15,6 @@
     "noPrivateMessage": "Dieser Befehl kann nicht in Privaten Nachrichten verwendet werden.",
     "userInputError": "Du hast eine falsche Eingabe getätigt.",
     "maxConcurrencyReached": "Du benutzt diesen Befehl bereits.",
+    "forbiddenError": "Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.",
     "criticalError": "<:Error:1087445963280486430> Es ist ein kritischer Fehler aufgetreten."
 }

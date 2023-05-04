@@ -1,4 +1,6 @@
+import contextlib
 from nextcord.ext import commands
+from nextcord.errors import Forbidden
 from nextcord.ext.commands import Cog
 from .utils.embeds import errorEmbed, errorLogging
 from .utils.language import getLanguageStrings, getLocale, getGuildLanguage
@@ -10,12 +12,12 @@ class ErrorHandler(Cog):
     @Cog.listener()
     async def on_command_error(self, ctx, error):
         languageStrings = getLanguageStrings("error")
-        
+
         if ctx.guild is None:
             return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, "en", "noPrivateMessage"))
-            
+
         guildLocale = getGuildLanguage(ctx.guild.id)
-        
+
         if isinstance(error, (commands.CommandNotFound, commands.DisabledCommand)):
             await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "commandNotFound"))
 
@@ -57,12 +59,13 @@ class ErrorHandler(Cog):
         elif isinstance(error, commands.MaxConcurrencyReached):
             await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "maxConcurrencyReached"))
 
+        elif isinstance(error.original, Forbidden):
+            with contextlib.suppress(Exception):
+                await errorEmbed(self, ctx.author, getLocale(self.bot, languageStrings, guildLocale, "forbiddenError"))
         else:
             # await interaction.reply("**Es ⚠️ ein kritischer Fehler aufgetreten\naber keine sorge daran bist nicht du schuld.**")
             await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "criticalError"))
             errorLogging(self.bot, ctx, str(error).split("exception: ")[1])
-
-
 
 def setup(bot):
     bot.add_cog(ErrorHandler(bot))
