@@ -212,7 +212,7 @@ class Giveaways(Cog):
 
         await message.add_reaction(emote)
 
-        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, anwsers[0].id, message.id, anwsers[2], anwsers[3], unix))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "giveawaySuccess", ctx.guild.id, anwsers[0].id, message.id, anwsers[2], unix))
 
     @_giveaway.command(name="quick", aliases=["q", "quickstart"])
     @commands.has_permissions(manage_guild=True)
