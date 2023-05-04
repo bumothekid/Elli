@@ -18,7 +18,7 @@
     "giveawayWinnerLimit": "`Die Anzahl der Gewinner muss zwischen 1 und 100 liegen`",
     "giveaway": "Reagiere mit <a:Giveaway:1087437215648456794> um Teilzunehmen\n\n> Endet: <t:{0}:R> (<t:{0}:f>)\n> Host: {1}",
     "giveawayFooter": "{0} Gewinner | Endet",
-    "giveawaySuccess": "**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Gewinner:** {3}\n> **Bis:** <t:{4}:f>",
+    "giveawaySuccess": "**<a:Giveaway:1087437215648456794> Giveaway gestartet**\n\n> **Channel:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Nachricht:** [`📎`Link](https://discord.com/channels/{0}/{1}/{2}/)\n> **Gewinn:** {3}\n> **Bis:** <t:{4}:f>",
     "giveawayTimeInMinutes": "Die Zeitangabe muss in minuten angegeben sein.",
     "giveawayDrop": "Reagiere mit <a:Giveaway:1087437215648456794>, um den Drop einzusammeln \n\n> Host: {0}",
     "giveawayDropFooter": "Drop von {0}",
