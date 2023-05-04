@@ -1,8 +1,12 @@
+import os
+import json
 import asyncio
+import contextlib
 import nextcord
 from nextcord import ui
 from nextcord.ext.commands.bot import Bot
 from .models.EmbedField import EmbedField
+from .database import readOne, insert, update
 
 botLoggingChannelID = 1087069858455375953
 
@@ -390,7 +394,6 @@ def devLogging(bot, ctx: nextcord.Interaction, text: str):
     asyncio.run_coroutine_threadsafe(channel.send(embed=embed), bot.loop)
 
 async def permissionError(bot, ctx: nextcord.Interaction):
-    # with contextlib.suppress(Exception):
     if type(bot) is not Bot:
         try:
             bot = bot.bot
@@ -398,22 +401,82 @@ async def permissionError(bot, ctx: nextcord.Interaction):
             return print("Error: Bot is not a bot or self")
 
     emote = bot.get_emoji(1087445963280486430)
+    
+    languageStrings = getLanguageStrings("error")
+    guildLocale = getGuildLanguage(ctx.guild.id)
 
     permissionEmbed = nextcord.Embed(
-        description="> **Der Bot hat nicht genug Berechtigungen um in diesen Kanal zu schreiben.**",
+        description=f"> **{getLocale(bot, languageStrings, guildLocale, 'forbiddenError')}**",
         color=nextcord.Color.red()
     )
     
-    match type(ctx):
-        case nextcord.Interaction:
-            pass
-        case nextcord.ext.commands.context.Context:
-            await ctx.message.add_reaction(emote)
-        case nextcord.message.Message:
-            await ctx.add_reaction(emote)
-        case _:
-            print(type(ctx))
-            print("Error: Unknown interaction")
+    # Try adding a reaction to the message if possible else ignore
+    with contextlib.suppress(Exception):
+        match type(ctx):
+            case nextcord.Interaction:
+                pass
+            case nextcord.ext.commands.context.Context:
+                await ctx.message.add_reaction(emote)
+            case nextcord.message.Message:
+                await ctx.add_reaction(emote)
+            case _:
+                print(type(ctx))
+                print("Error: Unknown interaction")
+                
+    
+                
+    if isinstance(ctx, nextcord.Interaction):
+        await ctx.user.create_dm()
+        await ctx.user.dm_channel.send(embed=permissionEmbed)
+        return
+    
+    await ctx.author.create_dm()
+    await ctx.author.dm_channel.send(embed=permissionEmbed)
+    
+    
+# Todo: Better solution for this; This is a workaround and terrible
 
-    await ctx.user.create_dm()
-    await ctx.user.dm_channel.send(embed=permissionEmbed)
+def getGuildLanguage(guild_id) -> str:
+    result = readOne("language", "guilds", "guild_id", guild_id)
+
+    if result is None:
+        insert("guilds", "guild_id, prefix, language", [guild_id, "-", "en"])
+        return "en"
+    
+    if result[0] is None:
+        update("guilds", "language", "guild_id", ["en", guild_id])
+        return "en"
+    
+    return result[0]
+
+def getLanguageStrings(cog: str):
+    languageStrings = {}
+
+    for file in os.listdir(f"./language/{cog}"):
+        if file.endswith(".json"):
+            with open(f"./language/{cog}/{file}", "r", encoding="utf-8") as f:
+                languageStrings[file.replace(".json", "")] = json.load(f)
+            
+    return languageStrings
+
+def getLocale(bot: Bot, languageStrings: dict, language: str, string: str, *args):
+    if language not in languageStrings:
+        return f"Missing language {language}"
+
+    if string not in languageStrings[language]:
+        localizationError(bot, f"Missing string {string} in language {language}")
+        
+        return f"Missing string {string} in language {language}"
+    
+    try:
+        return languageStrings[language][string].format(*args)
+    except IndexError as e:
+        missingArgs = e.args[0].split("index ")[1].split(" out of range")[0]
+        
+        localizationError(bot, f"Missing argument {missingArgs} in string {string} for language {language}.")
+        return languageStrings[language][string]
+    except KeyError as e:
+        missingArgs = e.args[0]
+        
+        localizationError(bot, f"Missing argument {missingArgs} in string {string} for language {language}.")
+        return languageStrings[language][string]
