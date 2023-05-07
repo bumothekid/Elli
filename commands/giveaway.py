@@ -525,7 +525,7 @@ class Giveaways(Cog):
             else:
                 string = getLocale(self.bot, languageStrings, guildLocale, "giveawayWinner", winners, giveaway[3], len(backupEntries))
 
-            await successEmbed(self, channel, string, color=host.color)
+            await successEmbed(self, channel, string, color=host.color, content=winners)
 
             delete(table="giveaways", where="guild_id message_id", values=[guild_id, message_id])            
 
