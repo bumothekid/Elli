@@ -118,7 +118,7 @@ class Welcome(Cog):
     async def _show(self, ctx):
         guildLocale = getGuildLanguage(ctx.guild.id)
         
-        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureShow"), view=ButtonView())
+        await infoEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureShow"), view=ButtonView(self.bot))
     
     @Cog.listener()
     async def on_member_join(self, member):
@@ -150,8 +150,9 @@ class Welcome(Cog):
                 os.remove(f"assets/welcome/user_card{welcome[3]}.png")
 
 class ButtonView(ui.View):
-    def __init__(self):
+    def __init__(self, bot: commands.Bot):
         super().__init__(timeout=600)
+        self.bot = bot
 
     @ui.button(style=ButtonStyle.primary, label="1", custom_id="welpic1")
     async def _picture1(self, _, ctx):
