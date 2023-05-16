@@ -8,7 +8,7 @@
     "welcomePictureInvalid": "Das Bild ist ungültig. Bitte versuche es erneut. <1 - 6>",
     "welcomePictureSet": "**<:MemberJoin:1087453129198546964> Willkommensbild gesetzt**\n\n> **Kanal:** [`📎`Link](https://discord.com/channels/{0}/{1}/)\n> **Nachricht:** `{1}`\n> **Bild:** `{2}`",
     "welcomePictureRemove": "**<:MemberJoin:1087453129198546964> Willkommensbild entfernt**",
-    "welcomePictureShow": "**<:MemberJoin:1087453129198546964> Willkommensbilder**\n\n> **Du kannst dir die Bilder ans",
+    "welcomePictureShow": "**<:MemberJoin:1087453129198546964> Willkommensbilder**\n\n> **Du kannst dir die Bilder ansehen.**",
     "welcomeCardTitle": "Willkommen!",
     "welcomePicture": "**Bild {0}**"
 }
