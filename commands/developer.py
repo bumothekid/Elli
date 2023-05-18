@@ -22,7 +22,7 @@ class Developer(Cog):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
-        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <version>` | Setzt die neue Version\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-dev getInvite <ServerID>` | Versucht einen bereits bestehenden Invite zu getten\n> `-dev clear` | Cleared die Console\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
+        await infoEmbed(self, ctx, "**<:Developer:1087444095363989564> Developer Commands**\n\n> `-dev add <user>` | Füge einen Developer hinzu\n> `-dev remove <user>` | Entferne einen Developer\n> `-dev show` | Zeigt dir alle Developer\n> `-dev version <major | minor | patch>` | Steigere die jeweilige Version um 1\n> `-dev setStatsChannel <#channel>` | Setzt einen neuen Stats Channel\n> `-dev getServers` | Zeigt dir alle server an\n> `-dev getInvite <ServerID>` | Versucht einen bereits bestehenden Invite zu getten\n> `-dev clear` | Cleared die Console\n> `-load <file>` | Lädt ein Modul\n> `-unload <file>`| Entlädt ein Modul\n> `-reload <file>` | Lädt ein Modul neu\n")
 
     @_dev.command(name="add")
     async def _add(self, ctx, user: nextcord.User):
@@ -42,7 +42,7 @@ class Developer(Cog):
         update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer regestriert.")
-        devLogging(self, ctx, f"{user} wurde von {ctx.author} als developer registriert")
+        devLogging(self.bot, ctx, f"{user} wurde von {ctx.author} als developer registriert")
 
     @_dev.command(name="remove")
     async def _remove(self, ctx, user: nextcord.User):
@@ -59,7 +59,7 @@ class Developer(Cog):
         update(table="elli", columns="developer", values=[devs_new])
 
         await successEmbed(self, ctx, f"{user.mention} wurde als Developer entfernt.")
-        devLogging(self, ctx, f"{user} wurde von {ctx.author} als Developer entfernt.")
+        devLogging(self.bot, ctx, f"{user} wurde von {ctx.author} als Developer entfernt.")
     
     @_dev.command(name="show", aliases=["list"])
     async def show(self, ctx):
@@ -75,19 +75,63 @@ class Developer(Cog):
             lists += f'<:Developer:1087444095363989564> | {user}\n'
 
         await infoEmbed(self, ctx, lists)
-
-    @_dev.command(name="version")
-    async def version(self, ctx, *, version):
+        
+    @_dev.group(name="version", invoke_without_command=True)
+    async def _version(self, ctx):
         if not devCheck(ctx.author.id):
             raise commands.NotOwner
 
         vers = readOne(columns="version", table="elli")
 
-        update(table="elli", columns="version", values=[version])
+        await infoEmbed(self, ctx, f"Die aktuelle Version ist `{vers[0]}`")
+        
+    @_version.command(name="major")
+    async def major(self, ctx):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
 
+        oldVers = readOne(columns="version", table="elli")
+        vers = oldVers[0].split(".")
+        vers[0] = int(vers[0]) + 1
+        vers[1] = 0
+        vers[2] = 0
+        vers = ".".join(str(x) for x in vers)
 
-        await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{version}` Version gesetzt.\n> **Alte Version:** `{vers[0]}`")
-        devLogging(self, ctx, f"{ctx.author} hat die Bot Version von {vers[0]} auf {version} gesetzt.")
+        update(table="elli", columns="version", values=[vers])
+
+        await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{vers}` Version gesetzt.")
+        devLogging(self.bot, ctx, f"{ctx.author} hat die Bot Version von {oldVers[0]} auf {vers} gesetzt.")
+        
+    @_version.command(name="minor")
+    async def minor(self, ctx):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
+
+        oldVers = readOne(columns="version", table="elli")
+        vers = oldVers[0].split(".")
+        vers[1] = int(vers[1]) + 1
+        vers[2] = 0
+        vers = ".".join(str(x) for x in vers)
+
+        update(table="elli", columns="version", values=[vers])
+        
+        await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{vers}` Version gesetzt.")
+        devLogging(self.bot, ctx, f"{ctx.author} hat die Bot Version von {oldVers[0]} auf {vers} gesetzt.")
+        
+    @_version.command(name="patch")
+    async def patch(self, ctx):
+        if not devCheck(ctx.author.id):
+            raise commands.NotOwner
+
+        oldVers = readOne(columns="version", table="elli")
+        vers = oldVers[0].split(".")
+        vers[2] = int(vers[2]) + 1
+        vers = ".".join(str(x) for x in vers)
+
+        update(table="elli", columns="version", values=[vers])
+        
+        await successEmbed(self, ctx, f"{self.bot.user.name} wurde auf die `{vers}` Version gesetzt.")
+        devLogging(self.bot, ctx, f"{ctx.author} hat die Bot Version von {oldVers[0]} auf {vers} gesetzt.")
 
 
     @_dev.command(name="setStatsChannel")
