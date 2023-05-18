@@ -85,7 +85,7 @@ class Leave(Cog):
     async def _set2(self, ctx, picture):
         guildLocale = getGuildLanguage(ctx.guild.id)
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureNotValid"))
+            return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureInvalid"))
 
         leave = readOne(columns="*", table="leave", where="guild_id", values=[ctx.guild.id])
 
@@ -107,7 +107,7 @@ class Leave(Cog):
             return await errorEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "leaveChannelNotSet"))
 
         update(table="leave", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureRemoved"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "leavePictureRemove"))
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)

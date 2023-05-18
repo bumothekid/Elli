@@ -74,7 +74,7 @@ class Welcome(Cog):
         picture = welcome[3] if welcome[3] is not None else "None"
         update(table="welcome", columns="message", where="guild_id", values=[message, ctx.guild.id])
 
-        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomeDefaultMessageSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomeMessageSet", ctx.guild.id, self.bot.get_channel(welcome[1]).id, message, picture))
 
     @_welcome.group(name="picture", aliases=["pic", "img"], invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
@@ -88,7 +88,7 @@ class Welcome(Cog):
         guildLocale = getGuildLanguage(ctx.guild.id)
 
         if picture not in ["1", "2", "3", "4", "5", "6"]:
-            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureNotValid"))
+            return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureInvalid"))
 
         welcome = readOne(columns="*", table="welcome", where="guild_id", values=[ctx.guild.id])
 
@@ -110,7 +110,7 @@ class Welcome(Cog):
             return await errorEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomeChannelNotSet"))
 
         update(table="welcome", columns="picture", where="guild_id", values=["null", ctx.guild.id])
-        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureRemoved"))
+        await successEmbed(self, ctx, getLocale(self.bot, languageStrings, guildLocale, "welcomePictureRemove"))
 
     @_picture.command(name="show", aliases=["list"])
     @commands.has_permissions(manage_guild=True)
