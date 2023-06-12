@@ -285,7 +285,7 @@ class LevelSystem(Cog):
         
         guild.channel_id = channel.id
         update("level_system", "channel_id", "guild_id", [channel.id, ctx.guild.id])
-        return await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "levelsysChannel", channel.mention))
+        return await successEmbed(self.bot, ctx, getLocale(self.bot, languageStrings, guildLocale, "levelsysChannelCustom", channel.mention))
     
     @levelsystem.group(name="custom", invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
