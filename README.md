@@ -1,4 +1,4 @@
-### Invite Elli to your server [here](https://discord.com/oauth2/authorize?client_id=1086789440044806174&scope=bot&permissions=279138790647).
+### Invite Elli to your server [here](https://discord.com/oauth2/authorize?client_id=763778168825053254&scope=bot&permissions=279138790647).
 ### Join the Support Server [here](https://discord.gg/FWPExbfCTa).
 # 🤖 Elli Discord Bot
 
